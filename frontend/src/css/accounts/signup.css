@@ -14,8 +14,8 @@
 }
 
 .signup > div {
-  width: 25%;
-  margin: 100px auto 0 auto;
+  width: 24%;
+  margin: 50px auto 0 auto;
 }
 
 .signup > div > .ssazip-signup-img {
@@ -28,7 +28,7 @@
   border: none;
   margin: 20px 0;
   padding: 0 20px;
-  height: 70px;
+  height: 60px;
   width: 100%;
   background: #F0E9CC;
   border-radius: 20px;
@@ -38,6 +38,10 @@
 
 .signup > div > .signup-inputs input:focus {
   outline: none;
+}
+
+.signup > div > .signup-inputs input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 100px #F0E9CC inset;
 }
 
 .signup > div > .signup-inputs > .signupId {
