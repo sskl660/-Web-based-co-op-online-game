@@ -10,6 +10,9 @@
     <router-link to="login">
       <button>방 만들기</button>
     </router-link>
+    <router-link to="room/1">
+      <button>대기실</button>
+    </router-link>
   </div>
 </template>
 
