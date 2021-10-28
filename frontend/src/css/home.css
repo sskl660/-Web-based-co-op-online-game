@@ -16,12 +16,12 @@
 .home > div {
   margin-top: 100px;
   width: 33%;
-  margin: 100px auto 0 auto;
+  margin: 4% auto 0 auto;
   padding: 0 10px;
 }
 
 .home > div > .ssazip-home-img {
-  margin: 40px auto;
+  margin: 3% auto;
   width: 100%;
 }
 
@@ -77,6 +77,6 @@
   font-weight: 600;
   height: 70px;
   width: 80%;
-  margin: 20px auto;
+  margin: 15px auto;
   cursor: pointer;
 }

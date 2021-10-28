@@ -48,7 +48,7 @@
 
 .room-create > .create-form {
   width: 100%;
-  margin: 50px auto;
+  margin: 40px auto 0 auto;
 }
 
 .room-create > .create-form > .ssazip-create-img {
