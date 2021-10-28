@@ -1,0 +1,82 @@
+.background-img {
+  position: absolute;
+  left: 0;
+  height: 0;
+  z-index: -1;
+  height: 100%;
+  width: 100%;
+}
+
+.home {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+}
+
+.home > div {
+  margin-top: 100px;
+  width: 33%;
+  margin: 100px auto 0 auto;
+  padding: 0 10px;
+}
+
+.home > div > .ssazip-home-img {
+  margin: 40px auto;
+  width: 100%;
+}
+
+.home .enter {
+  display: flex;
+  justify-content: space-between;
+  width: 80%;
+  margin: 0 auto;
+}
+
+.home .enter > .enter-inputs {
+  width: calc(70% - 50px);
+}
+
+.home .enter > .enter-inputs > input {
+  display: block;
+  border: none;
+  margin: 20px 0;
+  padding: 0 20px;
+  height: 50px;
+  width: 100%;
+  background: #F0E9CC;
+  border-radius: 20px;
+  font-size: 25px;
+  color: black;
+}
+
+.home .enter > .enter-inputs > input:focus {
+  outline: none;
+}
+
+.home .enter > .enter-inputs > input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 100px #F0E9CC inset;
+}
+
+.home .button-enter {
+  background: #EAC16F;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 30px;
+  font-weight: 600;
+  margin: 20px 0;
+  width: 30%;
+}
+
+.home .button-create {
+  background: #CD5069;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-size: 30px;
+  font-weight: 600;
+  height: 70px;
+  width: 80%;
+  margin: 20px auto;
+  cursor: pointer;
+}

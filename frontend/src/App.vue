@@ -14,4 +14,8 @@
 body{
   background-color: #66C5CF;
 }
+
+body {
+  margin: 0;
+}
 </style>
