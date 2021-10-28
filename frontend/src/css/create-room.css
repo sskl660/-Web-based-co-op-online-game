@@ -1,0 +1,90 @@
+.background-img {
+  position: absolute;
+  left: 0;
+  height: 0;
+  z-index: -1;
+  height: 100%;
+  width: 100%;
+}
+
+.room-create {
+  display: inline-block;
+  width: 25%;
+  height: 100%;
+  margin: auto;
+}
+
+.room-create > .logout {
+  position: absolute;
+  top: 50px;
+  right: 30px;
+  background: #12749e7c;
+  border: none;
+  border-radius: 15px;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  width: 20%;
+  height: 50px;
+}
+
+.room-create > .logout > .logout-text {
+  color: white;
+  font-size: 23px;
+  font-weight: 600;
+  margin: auto;
+  width: 70%;
+}
+
+.room-create > .logout > .logout-button {
+  border: none;
+  border-radius: 10px;
+  background: #EAC16F;
+  font-size: 23px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 30%;
+}
+
+.room-create > .create-form {
+  width: 100%;
+  margin: 50px auto;
+}
+
+.room-create > .create-form > .ssazip-create-img {
+  width: calc(100% + 40px);
+}
+
+.room-create > .create-form > input {
+  display: block;
+  border: none;
+  margin: 20px 0;
+  padding: 0 20px;
+  height: 60px;
+  width: 100%;
+  background: #F0E9CC;
+  border-radius: 20px;
+  font-size: 25px;
+  color: black;
+}
+
+.room-create > .create-form > input:focus {
+  outline: none;
+}
+
+.room-create > .create-form > input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 100px #F0E9CC inset;
+}
+
+.room-create > .create-form > button {
+  background: #CD5069;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+  font-size: 30px;
+  font-weight: 600;
+  height: 80px;
+  width: calc(100% + 40px);
+  
+}

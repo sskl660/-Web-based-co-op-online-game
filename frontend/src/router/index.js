@@ -4,6 +4,7 @@ import Home from '@/views/Home.vue'
 import Login from '@/views/accounts/Login.vue'
 import SignUp from '@/views/accounts/SignUp.vue'
 import Rank from '@/views/Rank.vue'
+import CreateRoom from '@/views/CreateRoom.vue'
 
 Vue.use(VueRouter)
 
@@ -28,6 +29,11 @@ const routes = [
     name: 'Rank',
     component: Rank
   },
+  {
+    path: '/room',
+    name: 'CreateRoom',
+    component: CreateRoom
+  }
 
 
   // {
