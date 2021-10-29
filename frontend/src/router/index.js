@@ -4,6 +4,7 @@ import Home from '@/views/Home.vue';
 import Login from '@/views/accounts/Login.vue';
 import SignUp from '@/views/accounts/SignUp.vue';
 import Rank from '@/views/Rank.vue';
+import Room from '@/views/Room.vue';
 import CreateRoom from '@/views/CreateRoom.vue';
 import Temp from '@/views/temp/Chat.vue';
 import Chat from '@/views/temp/ChatRoom.vue';
@@ -25,6 +26,11 @@ const routes = [
     path: '/signup',
     name: 'SignUp',
     component: SignUp,
+  },
+  {
+    path: '/room/1',
+    name: 'Room',
+    component: Room,
   },
   {
     path: '/rank',

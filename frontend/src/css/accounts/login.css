@@ -22,7 +22,7 @@
   width: 21%;
 }
 
-.login > div > input, img {
+.login > div > input, .login > div > input > img {
   display: block;
 }
 
@@ -46,7 +46,7 @@
   -webkit-box-shadow: 0 0 0 100px #F0E9CC inset;
 }
 
-.login .button-login, .button-cancel, .button-signup {
+.login .button-login, .login .button-cancel, .login .button-signup {
   border: none;
   border-radius: 20px;
   font-size: 30px;
@@ -62,7 +62,7 @@
   margin: 20px auto;
 }
 
-.login > div > div > .button-login, .button-cancel {
+.login > div > div > .button-login, .login > div > div > .button-cancel {
   width: 45%;
   border-radius: 20px;
 }
