@@ -27,8 +27,14 @@ public class RoomController {
     }
 
     // 3. 채팅방 조회
-    @GetMapping(value = "/room/{name}")
+    @GetMapping(value = "/room/{roomId}")
     public Room getRoom(String roomId) {
         return repository.findRoomById(roomId);
+    }
+
+    // 4. 채팅방 삭제
+    @DeleteMapping(value = "/room/{roomId}")
+    public void deleteRoom(@PathVariable String roomId){
+        repository.deleteRoom(roomId);
     }
 }

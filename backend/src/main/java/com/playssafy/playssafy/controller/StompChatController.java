@@ -20,7 +20,10 @@ public class StompChatController {
     // 1. 입장 메세지를 보내는 메서드.
     public void enter(Message message) {
         message.setMessage(message.getWriter() + "님이 채팅방에 참여하였습니다.");
-        // 해당 채널을 구독한 대상에게 메세지를 Broadcasting 해준다.
+        /**
+         * Client가 Message를 Subscribe하는 경로.
+         * 해당 채널을 구독항 대상에게 메세지를 Broadcasting 해준다.
+         */
         template.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
     }
 

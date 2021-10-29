@@ -41,4 +41,9 @@ public class ChatRoomRepository {
 
         return room;
     }
+
+    // 4. 채팅방을 제거하는 메서드
+    public void deleteRoom(String id){
+        roomMap.remove(id);
+    }
 }
