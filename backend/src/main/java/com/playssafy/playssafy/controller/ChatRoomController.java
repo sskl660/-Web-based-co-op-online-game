@@ -1,6 +1,6 @@
 package com.playssafy.playssafy.controller;
 
-import com.playssafy.playssafy.dto.chat.Room;
+import com.playssafy.playssafy.dto.chat.ChatRoom;
 import com.playssafy.playssafy.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -11,12 +11,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping(value = "/chat")
 // 채팅방 정보를 관리할 컨트롤러
-public class RoomController {
+public class ChatRoomController {
     private final ChatRoomRepository repository;
 
     // 1. 전체 채팅 목록 조회.
     @GetMapping(value = "/rooms")
-    public List<Room> rooms() {
+    public List<ChatRoom> rooms() {
         return repository.findAllRooms();
     }
 
@@ -28,7 +28,7 @@ public class RoomController {
 
     // 3. 채팅방 조회
     @GetMapping(value = "/room/{roomId}")
-    public Room getRoom(String roomId) {
+    public ChatRoom getRoom(String roomId) {
         return repository.findRoomById(roomId);
     }
 

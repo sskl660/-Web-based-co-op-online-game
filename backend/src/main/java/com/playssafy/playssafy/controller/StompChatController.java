@@ -1,6 +1,6 @@
 package com.playssafy.playssafy.controller;
 
-import com.playssafy.playssafy.dto.chat.Message;
+import com.playssafy.playssafy.dto.chat.ChatMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -18,7 +18,7 @@ public class StompChatController {
      */
     @MessageMapping(value = "/chat/enter")
     // 1. 입장 메세지를 보내는 메서드.
-    public void enter(Message message) {
+    public void enter(ChatMessage message) {
         message.setMessage(message.getWriter() + "님이 채팅방에 참여하였습니다.");
         /**
          * Client가 Message를 Subscribe하는 경로.
@@ -29,7 +29,7 @@ public class StompChatController {
 
     // 2. 메세지를 보내는 메서드.
     @MessageMapping(value = "/chat/message")
-    public void message(Message message) {
+    public void message(ChatMessage message) {
         template.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
     }
 }
