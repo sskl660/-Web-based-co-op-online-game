@@ -368,11 +368,8 @@ export default {
     },
     // 입장코드 복사
     copyCode() {
-      const code = document.getElementById('game-code');
-      code.focus();
-      code.select();
-      document.execCommand('copy');
-      alert(code + '를 복사했습니다');
+      this.$copyText(this.getRoomId);
+      alert('입장 코드를 복사했습니다!');
     },
   },
 };
