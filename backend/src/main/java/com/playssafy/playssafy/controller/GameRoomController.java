@@ -3,10 +3,7 @@ package com.playssafy.playssafy.controller;
 import com.playssafy.playssafy.dto.game.GameRoom;
 import com.playssafy.playssafy.repository.GameRoomRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,5 +18,13 @@ public class GameRoomController {
     @PostMapping(value = "/room/{roomName}/{userName}")
     public GameRoom createRoom(@PathVariable String roomName, @PathVariable String userName) {
         return repository.createRoom(roomName, userName);
+    }
+
+    /**
+     * 게임 방 존재 여부 확인(ID로 확인)
+     */
+    @GetMapping(value = "/room/{roomId}")
+    public boolean checkRoom(@PathVariable String roomId) {
+        return repository.findRoomById(roomId);
     }
 }

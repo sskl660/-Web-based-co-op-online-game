@@ -17,10 +17,15 @@ public class GameRoomRepository {
     }
 
     // 1. 게임방 생성 메소드
-    public GameRoom createRoom(String roomName, String userName){
+    public GameRoom createRoom(String roomName, String userName) {
         GameRoom room = GameRoom.create(roomName, userName);
         roomMap.put(room.getRoomId(), room);
 
         return room;
+    }
+
+    // 2. 게임방 조회 메소드
+    public boolean findRoomById(String roomId) {
+        return roomMap.containsKey(roomId);
     }
 }

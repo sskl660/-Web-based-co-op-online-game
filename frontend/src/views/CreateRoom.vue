@@ -20,6 +20,7 @@
 <script>
 import '@/css/create-room.css';
 import axios from '@/util/http-common.js';
+import { mapActions } from 'vuex';
 
 export default {
   name: 'CreateRoom',
@@ -27,7 +28,7 @@ export default {
   data() {
     return {
       roomName: '',
-      userName: '김싸피',
+      userName: '김싸피', // temp
     };
   },
   methods: {
@@ -38,11 +39,16 @@ export default {
         url: `/game/room/${this.roomName}/${this.userName}`,
       })
         .then((res) => {
+          // room 정보 받기
           let room = res.data;
+          // 방장이 참가중인 방 갱신
+          this.joinRoom(room.roomId);
+          // 방으로 이동
           this.$router.push('/room/' + room.roomId);
         })
         .catch(() => {});
     },
+    ...mapActions(['joinRoom']),
   },
 };
 </script>
