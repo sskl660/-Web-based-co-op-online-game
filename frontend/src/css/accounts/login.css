@@ -14,15 +14,15 @@
 }
 
 .login > div {
-  margin-top: 100px;
+  margin-top: 50px;
 }
 
 .login > div > .ssazip-login-img {
   margin: auto;
-  width: 22%;
+  width: 21%;
 }
 
-.login > div > input, img {
+.login > div > input, .login > div > input > img {
   display: block;
 }
 
@@ -30,8 +30,8 @@
   border: none;
   margin: 20px auto;
   padding: 0 20px;
-  height: 65px;
-  width: 18%;
+  height: 50px;
+  width: 20%;
   background: #F0E9CC;
   border-radius: 20px;
   font-size: 25px;
@@ -46,30 +46,29 @@
   -webkit-box-shadow: 0 0 0 100px #F0E9CC inset;
 }
 
-.login .button-login, .button-cancel, .button-signup {
-  padding: 10px 10px;
+.login .button-login, .login .button-cancel, .login .button-signup {
   border: none;
   border-radius: 20px;
   font-size: 30px;
   font-weight: 600;
-  height: 65px;
+  height: 50px;
   cursor: pointer;
 }
 
 .login > div > div {
-  width: calc(18% + 40px);
+  width: calc(20% + 40px);
   display: flex;
   justify-content: space-between;
   margin: 20px auto;
 }
 
-.login > div > div > .button-login, .button-cancel {
+.login > div > div > .button-login, .login > div > div > .button-cancel {
   width: 45%;
   border-radius: 20px;
 }
 
 .login > div > a > .button-signup {
-  width: calc(18% + 40px);
+  width: calc(20% + 40px);
 }
 
 .login > div > div > .button-login {

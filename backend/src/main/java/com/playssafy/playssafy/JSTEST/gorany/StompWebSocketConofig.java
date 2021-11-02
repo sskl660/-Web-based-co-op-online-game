@@ -6,8 +6,8 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-@EnableWebSocketMessageBroker
-@Configuration
+//@EnableWebSocketMessageBroker
+//@Configuration
 public class StompWebSocketConofig implements WebSocketMessageBrokerConfigurer {
     @Override
     // 클라이언트가 메시지를 구독할 endpoint를 정의합니다.
