@@ -83,7 +83,7 @@ export default {
             const clipLabel = document.createElement('p');
             const audio = document.createElement('audio');
             const deleteButton = document.createElement('button');
-
+            
             clipContainer.classList.add('clip');
             audio.setAttribute('controls', '');
             deleteButton.innerHTML = "삭제";
