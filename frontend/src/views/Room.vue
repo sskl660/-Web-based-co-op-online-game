@@ -170,6 +170,7 @@
         <div class="thumbnail">
           <div class="thumbnail-line">
             <div v-if="ssafymind_explain === false && speakgame_explain === false && jumpgame_explain === false">
+              <img id="ssazip-img" src="~@/assets/images/ssazip-create.png" alt="">
               <div id="selectgame-name">게임 선택 버튼을 눌러 게임을 고르세요~!</div>
             </div>
             <div v-if="ssafymind_explain === true">
@@ -187,8 +188,8 @@
           </div>
         </div>
         <div>
-          <button class="select-game" @click="openmodal = true">게임 선택</button>
-          <button class="final-score">최종 결과</button>
+          <button class="waiting-room-btn select-game" @click="openmodal = true">게임 선택</button>
+          <button class="waiting-room-btn final-score">최종 결과</button>
           <i class="fas fa-play-circle play-btn fa-5x"></i>
         </div>
       </div>

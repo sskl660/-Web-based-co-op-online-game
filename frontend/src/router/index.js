@@ -6,6 +6,7 @@ import SignUp from '@/views/accounts/SignUp.vue'
 import Room from '@/views/Room.vue'
 import Rank from '@/views/Rank.vue'
 import CreateRoom from '@/views/CreateRoom.vue'
+import SsafyMind from '@/views/ssafymind/SsafyMind.vue'
 
 Vue.use(VueRouter)
 
@@ -39,6 +40,11 @@ const routes = [
     path: '/room',
     name: 'CreateRoom',
     component: CreateRoom
+  },
+  {
+    path: '/ssafymind',
+    name: 'SsafyMind',
+    component: SsafyMind
   }
 
 
