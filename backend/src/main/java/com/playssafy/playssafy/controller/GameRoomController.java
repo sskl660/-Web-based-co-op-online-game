@@ -21,10 +21,10 @@ public class GameRoomController {
     }
 
     /**
-     * 게임 방 존재 여부 확인(ID로 확인)
+     * 게임 방 조회(ID로 조회)
      */
     @GetMapping(value = "/room/{roomId}")
-    public boolean checkRoom(@PathVariable String roomId) {
+    public GameRoom readRoom(@PathVariable String roomId) {
         return repository.findRoomById(roomId);
     }
 }

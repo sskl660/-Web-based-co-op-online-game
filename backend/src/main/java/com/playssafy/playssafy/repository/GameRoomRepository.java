@@ -24,8 +24,8 @@ public class GameRoomRepository {
         return room;
     }
 
-    // 2. 게임방 조회 메소드
-    public boolean findRoomById(String roomId) {
-        return roomMap.containsKey(roomId);
+    // 2. 게임 방 조회 메소드
+    public GameRoom findRoomById(String roomId) {
+        return roomMap.get(roomId);
     }
 }

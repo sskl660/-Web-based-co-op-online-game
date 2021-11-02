@@ -10,8 +10,7 @@
     />
 
     <div class="room-title">
-      <span id="game-title">서울 3반 모여라!</span>
-      <!-- <span id="game-code">입장코드 : {{ getRoomId }}</span> -->
+      <span id="game-title">{{ roomIdentity.roomName }}</span>
       <span id="game-code"
         >입장코드
         <button @click="copyCode">복사</button>
@@ -216,6 +215,7 @@
 import '@/css/room.css';
 import SelectGameModal from '@/components/room/SelectGameModal';
 import { mapGetters } from 'vuex';
+import axios from '@/util/http-common.js';
 
 export default {
   name: 'Room',
@@ -238,7 +238,15 @@ export default {
       ssafymind_explain: false,
       speakgame_explain: false,
       jumpgame_explain: false,
+      // 방 정보
+      roomIdentity: {
+        roomName: '',
+        roomMembers: [],
+      },
     };
+  },
+  created() {
+    this.readRoom();
   },
   computed: {
     ...mapGetters(['getRoomId']),
@@ -370,6 +378,21 @@ export default {
     copyCode() {
       this.$copyText(this.getRoomId);
       alert('입장 코드를 복사했습니다!');
+    },
+    // 방 정보 불러오기
+    readRoom() {
+      axios({
+        method: 'get',
+        url: `/game/room/${this.getRoomId}`,
+      })
+        .then((res) => {
+          // 방 정보 초기화
+          let room = res.data;
+          this.roomIdentity.roomName = room.roomName;
+          this.roomIdentity.roomMembers = room.users;
+          console.log(this.roomIdentity);
+        })
+        .catch(() => {});
     },
   },
 };
