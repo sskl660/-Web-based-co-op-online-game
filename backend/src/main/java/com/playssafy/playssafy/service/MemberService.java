@@ -41,8 +41,8 @@ public interface MemberService {
     /**
      * 사용자 삭제
      *
-     * @param member 삭제대상 사용자정보
+     * @param userId 삭제대상 사용자정보
      */
-    void remove(Long id);
+    void remove(String userId);
 
 }

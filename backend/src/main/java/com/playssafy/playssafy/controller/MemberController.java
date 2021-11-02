@@ -75,7 +75,7 @@ public class MemberController {
      */
     @PostMapping("/{id}/delete")
     public ResponseEntity<String> deleteUser(@PathVariable String id) throws MemberNotFoundException {
-        memberService.remove(Long.parseLong(id));
+        memberService.remove(id);
 
         return new ResponseEntity<>("사용자 정보가 정상적으로 삭제 되었습니다.", HttpStatus.OK);
     }

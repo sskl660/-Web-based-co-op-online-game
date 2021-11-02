@@ -59,8 +59,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public void remove(Long id) {
-        Optional<Member> member = Optional.ofNullable(memberRepository.findById(id)
+    public void remove(String userId) {
+        Optional<Member> member = Optional.ofNullable(memberRepository.findMemberByUserId(userId)
                 .orElseThrow(() -> new MemberNotFoundException("사용자 정보가 존재하지 않습니다.")));
 
         memberRepository.delete(member.get());
