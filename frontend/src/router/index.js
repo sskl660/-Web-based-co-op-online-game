@@ -10,6 +10,7 @@ import Temp from '@/views/temp/Chat.vue';
 import Chat from '@/views/temp/ChatRoom.vue';
 import SSazipJump from '@/views/SSazipJump.vue';
 import SSazipJumpTemp from '@/views/ssazipjump/SSazipJumpTemp.vue';
+import SsafyMind from '@/views/ssafymind/SsafyMind.vue'
 
 Vue.use(VueRouter);
 
@@ -30,7 +31,7 @@ const routes = [
     component: SignUp,
   },
   {
-    path: '/room/1',
+    path: '/room/:roomId',
     name: 'Room',
     component: Room,
   },
@@ -42,8 +43,21 @@ const routes = [
   {
     path: '/room',
     name: 'CreateRoom',
-    component: CreateRoom,
+    component: CreateRoom
   },
+  {
+    path: '/ssafymind',
+    name: 'SsafyMind',
+    component: SsafyMind
+  },
+  // {
+  //   path: '/about',
+  //   name: 'About',
+  //   // route level code-splitting
+  //   // this generates a separate chunk (about.[hash].js) for this route
+  //   // which is lazy-loaded when the route is visited.
+  //   component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+  // }
   // 임시 채팅 예제
   {
     path: '/temp',
