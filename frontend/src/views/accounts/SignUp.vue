@@ -24,7 +24,6 @@
 
 <script>
 import "@/css/accounts/signup.css"
-
 export default {
   name: "SignUp",
 }
