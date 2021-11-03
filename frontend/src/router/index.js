@@ -6,6 +6,7 @@ import SignUp from '@/views/accounts/SignUp.vue';
 import Rank from '@/views/Rank.vue';
 import Room from '@/views/Room.vue';
 import CreateRoom from '@/views/CreateRoom.vue';
+import SpeakGame from '@/views/SpeakGame.vue'
 import Temp from '@/views/temp/Chat.vue';
 import Chat from '@/views/temp/ChatRoom.vue';
 import SSazipJump from '@/views/SSazipJump.vue';
@@ -44,6 +45,11 @@ const routes = [
     path: '/room',
     name: 'CreateRoom',
     component: CreateRoom
+  },
+  {
+    path: '/game-speak',
+    name: 'SpeakGame',
+    component: SpeakGame
   },
   {
     path: '/ssafymind',
