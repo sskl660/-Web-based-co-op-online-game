@@ -6,8 +6,11 @@ import SignUp from '@/views/accounts/SignUp.vue';
 import Rank from '@/views/Rank.vue';
 import Room from '@/views/Room.vue';
 import CreateRoom from '@/views/CreateRoom.vue';
+import SpeakGame from '@/views/SpeakGame.vue'
 import Temp from '@/views/temp/Chat.vue';
 import Chat from '@/views/temp/ChatRoom.vue';
+import SSazipJump from '@/views/SSazipJump.vue';
+import SSazipJumpTemp from '@/views/ssazipjump/SSazipJumpTemp.vue';
 import SsafyMind from '@/views/ssafymind/SsafyMind.vue'
 
 Vue.use(VueRouter);
@@ -44,6 +47,11 @@ const routes = [
     component: CreateRoom
   },
   {
+    path: '/game-speak',
+    name: 'SpeakGame',
+    component: SpeakGame
+  },
+  {
     path: '/ssafymind',
     name: 'SsafyMind',
     component: SsafyMind
@@ -68,6 +76,16 @@ const routes = [
     component: Chat,
     props: true,
   },
+  {
+    path: '/ssazipjump',
+    name: 'SSazipJump',
+    component: SSazipJump,
+  },
+  {
+    path: '/ssazipjumptemp',
+    name: 'SSazipJumpTemp',
+    component: SSazipJumpTemp,
+  }
 ];
 
 const router = new VueRouter({
