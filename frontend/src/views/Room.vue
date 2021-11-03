@@ -11,10 +11,8 @@
 
     <div class="room-title">
       <span id="game-title">서울 3반 모여라!</span>
-      <!-- <span id="game-code">입장코드 : {{ getRoomId }}</span> -->
-      <span id="game-code"
-        >입장코드
-        <button @click="copyCode">복사</button>
+      <span id="game-code">입장코드
+        <button id="game-code-btn" @click="copyCode">복사</button>
       </span>
     </div>
     <div class="d-flex justify-content-center">
