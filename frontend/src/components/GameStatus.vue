@@ -9,7 +9,8 @@
 			<span class="team-members">김태현</span>
 			<span class="team-members myturn">이장섭</span>
 		</div>
-		<ProgressBar />
+		<Timer v-if="game === 'speak'" />
+		<ProgressBar v-else />
 		<div class="next-team-block">
 			<div class="next-team-ready">
 				다음 팀 준비하세요~!
@@ -22,7 +23,7 @@
 				<img class="ssafymind-img" id="" src="~@/assets/twotop.png" alt="" />
 				<img class="ssafymind-img" id="" src="~@/assets/threetop.png" alt="" /> -->
 				<div class="winner-block">
-					<span class="winner winner-onen">1등</span>
+					<span class="winner winner-one">1등</span>
 					<span class="winner-team">2팀</span>
 					<span class="winner-score winner-one">350점</span>
 				</div>
@@ -77,13 +78,22 @@
 </template>
 
 <script>
-import "@/css/ssafymind/ssafymind-left.css";
-import ProgressBar from '@/components/ssafymind/ProgressBar.vue'
+import "@/components/css/game-status.css";
+import ProgressBar from '@/components/ssafymind/ProgressBar.vue';
+import Timer from '@/components/common/Timer.vue';
+
 export default {
-  name: 'SsafymindLeft',
+  name: 'GameStatus',
 	components: {
-    ProgressBar
+    ProgressBar,
+		Timer
   },
+	props: [
+		'game'
+	],
+	mounted: function() {
+		console.log(this.game)
+	}
 }
 </script>
 

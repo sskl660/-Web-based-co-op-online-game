@@ -13,7 +13,7 @@
       <span id="game-title">{{ room.name }}</span>
       <span id="game-code"
         >입장코드
-        <button @click="copyCode">복사</button>
+        <button @click="copyCode" id="game-code-btn">복사</button>
       </span>
     </div>
     <div class="d-flex justify-content-center">

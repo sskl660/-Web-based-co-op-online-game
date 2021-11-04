@@ -1,20 +1,64 @@
 <template>
   <div>
-    <p>녹음하기</p>
-    <input type="checkbox" id="chk-hear-mic"><label for="chk-hear-mic">마이크 소리 듣기</label>
-    <button id="record">녹음</button>
-    <button id="stop">녹음 정지</button>
-    <span id="final_span"></span>
-    <span id="interim_span"></span>
-    <div id="sound-clips"></div>
+    <div class="speak-game">
+		<Header v-bind:gameTitle="'또박또박 말해요'"/>
+      <div class="game-screen">
+        <GameStatus game="speak"/>
+        <div class="game-board">
+          <p class="sentence">"삼성 청년 소프트웨어 아카데미"</p>
+          <div v-for="(member, i) in teamMember" :key="i" class="sentence-board">
+            <div v-if="i%2 != 1" class="member-left">
+              <div class="member-name">
+                <span>{{ member }}</span>
+                <img src="@/assets/images/speak-success.png" alt="">
+              </div>
+              <div class="member-sentence member-sentence-left">
+                <span>
+                  삼성 청년 소프트웨어 아카데미
+                </span>
+              </div>
+            </div>
+            <div v-else class="member-right">
+              <div class="member-sentence member-sentence-right">
+                <span>
+                  삼성 청년 소프트웨어 아카데미
+                </span>
+              </div>
+              <div class="member-name">
+                <span>{{ member }}</span>
+                <img src="@/assets/images/speak-fail.png" alt="">
+              </div>
+            </div>
+          </div>
+          <img src="@/assets/images/mike-on.png" alt="" class="game-mike">
+        </div>
+      </div>
+    </div>
+    
+    <!-- 아래는 나중에 사용할 아이들 -->
+    <div style="display:none;">
+      <p>녹음하기</p>
+      <input type="checkbox" id="chk-hear-mic"><label for="chk-hear-mic">마이크 소리 듣기</label>
+      <button id="record">녹음</button>
+      <button id="stop">녹음 정지</button>
+      <span id="final_span"></span>
+      <span id="interim_span"></span>
+      <div id="sound-clips"></div>
+    </div>
   </div>
 </template>
 
 <script>
 import "@/css/speak-game.css"
+import Header from '@/components/common/Header.vue'
+import GameStatus from '@/components/GameStatus.vue';
 
 export default {
   name: "SpeakGame",
+  components: {
+    Header,
+    GameStatus
+  },
   data: () => {
     return {
       record: {},
@@ -25,13 +69,17 @@ export default {
       analyser: {},
       chunks: [],
       mediaRecorder: {},
+      teamMember: ['김태현', '권희은', '차은채', '안기훈', '이장섭', '오일남'],
     }
   },
   mounted: function() {
-    this.getAudio();
-    this.translate();
+    // this.getAudio();
+    // this.translate();
   },
   methods: {
+    /*  */
+    // 음성 녹음해 blob 파일로 만들기
+    /*  */
     getAudio: function() {
       this.record = document.getElementById("record");
       this.stop = document.getElementById("stop");
@@ -98,11 +146,11 @@ export default {
               type: 'audio/ogg codecs=opus'
               // type: 'audio/wav; codecs=0'
             })
-            console.log(blob)
+            console.log(blob);
             this.chunks = [];
             const audioURL = URL.createObjectURL(blob);
             audio.src = audioURL;
-            console.log(audio)
+            console.log(audio);
             console.log("recorder stopped");
             
             deleteButton.onclick = e => {
@@ -121,6 +169,9 @@ export default {
         })
       }
     },
+    /*  */
+    // 음성을 텍스트로 번역
+    /*  */
     translate: function() {
       if (typeof webkitSpeechRecognition !== 'function') {
         alert('크롬에서만 동작합니다')
