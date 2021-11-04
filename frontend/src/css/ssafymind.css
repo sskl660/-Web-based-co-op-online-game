@@ -15,7 +15,7 @@
   align-items: center;
   background-color: rgb(134, 131, 131);
   padding: 8px;
-  border-radius: 20px;
+  border-radius: 25px;
   position: absolute;
   width: 57.2%;
   height: 5.7vh;
@@ -28,7 +28,7 @@
   align-items: center;
   background-color: #f0e9cc;
   padding: 8px;
-  border-radius: 20px;
+  border-radius: 25px;
 }
 .controls .controls_colors {
   display: flex;
