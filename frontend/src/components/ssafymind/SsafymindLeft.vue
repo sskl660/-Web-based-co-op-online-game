@@ -9,7 +9,8 @@
 			<span class="team-members">김태현</span>
 			<span class="team-members myturn">이장섭</span>
 		</div>
-		<ProgressBar />
+		<div v-if="game === 'speak'">안녕</div>
+		<ProgressBar v-else />
 		<div class="next-team-block">
 			<div class="next-team-ready">
 				다음 팀 준비하세요~!
@@ -78,12 +79,18 @@
 
 <script>
 import "@/css/ssafymind/ssafymind-left.css";
-import ProgressBar from '@/components/ssafymind/ProgressBar.vue'
+import ProgressBar from '@/components/ssafymind/ProgressBar.vue';
+
 export default {
   name: 'SsafymindLeft',
 	components: {
     ProgressBar
   },
+	props: [
+		'game'
+	],
+	mounted: function() {
+	}
 }
 </script>
 
