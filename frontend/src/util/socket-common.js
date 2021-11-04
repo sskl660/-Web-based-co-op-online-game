@@ -2,7 +2,7 @@ import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 // const chatURL = 'http://localhost:8080/playssafy';
-const chatURL = 'https://k5a302.p.ssafy.io/playssafy';
+const chatURL = 'https://k5a302.p.ssafy.io:8080/playssafy';
 
 /**
  *
