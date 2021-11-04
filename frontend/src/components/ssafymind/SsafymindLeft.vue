@@ -22,7 +22,7 @@
 				<img class="ssafymind-img" id="" src="~@/assets/twotop.png" alt="" />
 				<img class="ssafymind-img" id="" src="~@/assets/threetop.png" alt="" /> -->
 				<div class="winner-block">
-					<span class="winner winner-onen">1등</span>
+					<span class="winner winner-one">1등</span>
 					<span class="winner-team">2팀</span>
 					<span class="winner-score winner-one">350점</span>
 				</div>
