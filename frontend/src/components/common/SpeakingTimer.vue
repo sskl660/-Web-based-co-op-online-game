@@ -1,5 +1,5 @@
 <template>
-  <div class="timer">
+  <div class="speaking-timer">
     <p id="countdown">{{this.getMinutes}}:{{this.getSeconds}}</p>
   </div>
 </template>
@@ -46,13 +46,9 @@ export default {
 </script>
 
 <style>
-.timer{
-	position: absolute;
-	margin-left: 49%;
-}
-.timer > p {
-	font-size: 3.5rem;
-	margin-top: -2%;
+.speaking-timer > p{
+	font-size: 2.5rem;
+	margin: -3%;
 	font-weight: 700;
 	color: #CD5069;
 }

@@ -64,6 +64,7 @@ export default {
       })
         .then((res) => {
           let exist = res.data;
+          console.log('hi')
           // 방이 존재하지 않는 경우 존재하지 않음을 표시
           if (!exist) {
             alert('해당 방은 존재하지 않습니다. 입장코드를 확인하세요!');

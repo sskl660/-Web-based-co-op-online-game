@@ -41,7 +41,7 @@
 .game-screen > .game-board > .sentence-board .member-name {
   display: inline-block;
   background: #ffffff80;
-  border: 1px solid #9EACDD;
+  border: 3px solid #9EACDD;
   border-radius: 10px;
   display: flex;
   flex-direction: column;

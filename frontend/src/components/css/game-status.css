@@ -64,14 +64,25 @@
   margin-bottom: 2.4%;
 }
 .ssafymind-left .winner {
-  margin-right: 50px;
+  width: 100%;
+  text-align: start;
+  margin: 0 0 0 10%;
 }
 .ssafymind-left .winner-team {
-  margin-right: 50px;
+  position: absolute;
+  left: 45%;
+  transform: translate(-50%, 0);
   color: #f0e9cc;
 }
+.winner-score {
+  position: absolute;
+  right: 5%;
+}
 .ssafymind-left .winner-block {
+  display: flex;
+  justify-content: space-evenly;
   margin-top: 4.5%;
+  position: relative;
 }
 .ssafymind-left .winner-img {
   width: 15%;

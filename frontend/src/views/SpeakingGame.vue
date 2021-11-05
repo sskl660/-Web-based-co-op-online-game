@@ -49,15 +49,15 @@
 </template>
 
 <script>
-import "@/css/speak-game.css"
-import Header from '@/components/common/Header.vue'
+import "@/css/speaking-game.css";
+import Header from '@/components/common/Header.vue';
 import GameStatus from '@/components/GameStatus.vue';
 
 export default {
   name: "SpeakGame",
   components: {
     Header,
-    GameStatus
+    GameStatus,
   },
   data: () => {
     return {
