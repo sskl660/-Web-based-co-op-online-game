@@ -244,6 +244,7 @@ export default {
       jumpgame_explain: false,
       // 방 정보
       room: {
+        id: '',
         name: '',
         host: '',
         members: [],
@@ -260,6 +261,8 @@ export default {
     // this.readRoom();
     // 소켓 연결
     this.stompClient = socketConnect(this.onConnected, this.onError);
+    // 방정보 초기화
+    this.room.id = this.getRoomId;
   },
   // 방 삭제시
   destroyed() {
@@ -351,6 +354,7 @@ export default {
           roomId: this.getRoomId,
           participantId: this.getUser.id,
           participantName: this.getUser.name,
+          teamNo: 0,
         })
       );
     },
@@ -365,6 +369,7 @@ export default {
         this.$router.push('/room');
         return;
       }
+
       let room = JSON.parse(payload.body);
       this.room.name = room.name;
       this.room.host = room.host;
@@ -383,9 +388,12 @@ export default {
           participantName: this.getUser.name,
         })
       );
-      // this.stompClient.socketDisconnect;
+      this.stompClient.disconnect();
     },
-    // 방장이 퇴장하는 경우
+    // 팀 번호 변경시 소켓 요청
+    changeTeamMessage() {
+      this.stompClient.send('/pub/game/change', {}, JSON.stringify(this.room));
+    },
   },
 };
 </script>
