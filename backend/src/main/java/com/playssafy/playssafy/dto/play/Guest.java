@@ -1,9 +1,6 @@
-package com.playssafy.playssafy.dto.member;
+package com.playssafy.playssafy.dto.play;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
+import lombok.*;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
 
@@ -14,25 +11,27 @@ import java.io.Serializable;
 @Data
 @Builder
 @AllArgsConstructor
-@RedisHash("member")
+@NoArgsConstructor
+@RedisHash("guest")
 //@RedisHash 어노테이션을 통해 설정한 값을 Redis의 key 값 prefix로 사용합니다.
-public class Member implements Serializable {
+public class Guest implements Serializable {
 
     private static final long serialVersionUID = 664865927712847110L;
 
+
     @Id
     //@Id 어노테이션은 JPA와 동일한 역할을 수행합니다. "member:{id}"의 위치에 자동으로 generate 값이 들어갑니다.
-    private Long id;
+    private Long guestId;
 
     @Indexed
-    private String userID;
-    private String userName;
-    private boolean masterflag;
+    private Long roomCode;
+    private String guestName;
+    private int teamNum;
 
 
-    public Member(String userId, String userName, boolean masterflag) {
-        this.userID = userId;
-        this.userName = userName;
-        this.masterflag = masterflag;
+    public Guest(Long roomCode, String guestName,int teamNum) {
+        this.roomCode = roomCode;
+        this.guestName = guestName;
+        this.teamNum = teamNum;
     }
 }
