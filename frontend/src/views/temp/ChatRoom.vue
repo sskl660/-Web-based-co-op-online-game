@@ -126,9 +126,8 @@ export default {
             this.stompClient.send(
               '/pub/chat/message',
               {},
-              JSON.stringify({ roomId: this.id, message: audioURL, writer: '김태현' })
+              JSON.stringify({ roomId: this.id, message: blob.size, writer: '김태현' })
             );
-            console.log('mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm')
             console.log(audio);
             console.log("recorder stopped");
             
@@ -140,7 +139,6 @@ export default {
 
           this.mediaRecorder.ondataavailable = e => {
             this.chunks.push(e.data)
-            console.log(this.chunks)
           }
         })
         .catch(err => {
@@ -235,7 +233,7 @@ export default {
     },
     // 채팅 채널 구독 및 입장 메세지 출력
     onConnected() {
-      this.stompClient.subscribe('/chat/room/' + this.id, this.onMessageReceived);
+      this.stompClient.subscribe('/chat/room/' + this.id, this.onMessageReceived2);
       this.stompClient.send(
         '/pub/chat/message',
         {},
@@ -261,6 +259,11 @@ export default {
     onMessageReceived(payload) {
       let receiveMessage = JSON.parse(payload.body);
       this.receivedMessages.push(receiveMessage);
+    },
+    onMessageReceived2(payload) {
+      // let receiveMessage = JSON.parse(payload.body);
+      // this.receivedMessages.push(receiveMessage);
+      console.log(payload)
     },
     // 에러 수신
     onError() {},
