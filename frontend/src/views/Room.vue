@@ -11,26 +11,27 @@
 
     <div class="room-title">
       <span id="game-title">{{ room.name }}</span>
-      <span id="game-code">입장코드
+      <span id="game-code"
+        >입장코드
         <button @click="copyCode" id="game-code-btn">복사</button>
       </span>
     </div>
     <div class="d-flex justify-content-center">
       <div class="room-left">
         <div class="btn-group">
-          <button id="btn-1" class="btn" @click="showTeam1()">1</button>
-          <button id="btn-2" class="btn" @click="showTeam2()">2</button>
-          <button id="btn-3" class="btn" @click="showTeam3()">3</button>
-          <button id="btn-4" class="btn" @click="showTeam4()">4</button>
-          <button id="btn-5" class="btn" @click="showTeam5()">5</button>
-          <button id="btn-6" class="btn" @click="showTeam6()">6</button>
-          <button id="btn-7" class="btn" @click="showTeam7()">7</button>
-          <button id="btn-8" class="btn" @click="showTeam8()">8</button>
-          <button id="btn-9" class="btn" @click="showTeam9()">9</button>
-          <button id="btn-10" class="btn" @click="showTeam10()">10</button>
+          <button id="btn-1" class="btn" @click="showTeam(1)">1</button>
+          <button id="btn-2" class="btn" @click="showTeam(2)">2</button>
+          <button id="btn-3" class="btn" @click="showTeam(3)">3</button>
+          <button id="btn-4" class="btn" @click="showTeam(4)">4</button>
+          <button id="btn-5" class="btn" @click="showTeam(5)">5</button>
+          <button id="btn-6" class="btn" @click="showTeam(6)">6</button>
+          <button id="btn-7" class="btn" @click="showTeam(7)">7</button>
+          <button id="btn-8" class="btn" @click="showTeam(8)">8</button>
+          <button id="btn-9" class="btn" @click="showTeam(9)">9</button>
+          <button id="btn-10" class="btn" @click="showTeam(10)">10</button>
         </div>
         <div class="team-group">
-          <div class="team-group team-group-1" v-show="teamline1">
+          <div class="team-group team-group-1" v-show="teamline[1]">
             <div id="team-1" class="team">1</div>
             <div id="team-1-name" class="team-name">권희은</div>
             <div id="team-1-name" class="team-name">김태현</div>
@@ -39,7 +40,7 @@
             <div id="team-1-name" class="team-name">차은채</div>
             <div id="team-1-name" class="team-name">싸린이</div>
           </div>
-          <div class="team-group team-group-2" v-show="teamline2">
+          <div class="team-group team-group-2" v-show="teamline[2]">
             <div id="team-2" class="team">2</div>
             <div id="team-2-name" class="team-name">권희은</div>
             <div id="team-2-name" class="team-name">김태현</div>
@@ -48,7 +49,7 @@
             <div id="team-2-name" class="team-name">차은채</div>
             <div id="team-2-name" class="team-name">싸린이</div>
           </div>
-          <div class="team-group team-group-3" v-show="teamline3">
+          <div class="team-group team-group-3" v-show="teamline[3]">
             <div id="team-3" class="team">3</div>
             <div id="team-3-name" class="team-name">권희은</div>
             <div id="team-3-name" class="team-name">김태현</div>
@@ -57,7 +58,7 @@
             <div id="team-3-name" class="team-name">차은채</div>
             <div id="team-3-name" class="team-name">싸린이</div>
           </div>
-          <div class="team-group team-group-4" v-show="teamline4">
+          <div class="team-group team-group-4" v-show="teamline[4]">
             <div id="team-4" class="team">4</div>
             <div id="team-4-name" class="team-name">권희은</div>
             <div id="team-4-name" class="team-name">김태현</div>
@@ -66,7 +67,7 @@
             <div id="team-4-name" class="team-name">차은채</div>
             <div id="team-4-name" class="team-name">싸린이</div>
           </div>
-          <div class="team-group team-group-5" v-show="teamline5">
+          <div class="team-group team-group-5" v-show="teamline[5]">
             <div id="team-5" class="team">5</div>
             <div id="team-5-name" class="team-name">권희은</div>
             <div id="team-5-name" class="team-name">김태현</div>
@@ -75,7 +76,7 @@
             <div id="team-5-name" class="team-name">차은채</div>
             <div id="team-5-name" class="team-name">싸린이</div>
           </div>
-          <div class="team-group team-group-6" v-show="teamline6">
+          <div class="team-group team-group-6" v-show="teamline[6]">
             <div id="team-6" class="team">6</div>
             <div id="team-6-name" class="team-name">권희은</div>
             <div id="team-6-name" class="team-name">김태현</div>
@@ -84,7 +85,7 @@
             <div id="team-6-name" class="team-name">차은채</div>
             <div id="team-6-name" class="team-name">싸린이</div>
           </div>
-          <div class="team-group team-group-7" v-show="teamline7">
+          <div class="team-group team-group-7" v-show="teamline[7]">
             <div id="team-7" class="team">7</div>
             <div id="team-7-name" class="team-name">권희은</div>
             <div id="team-7-name" class="team-name">김태현</div>
@@ -93,7 +94,7 @@
             <div id="team-7-name" class="team-name">차은채</div>
             <div id="team-7-name" class="team-name">싸린이</div>
           </div>
-          <div class="team-group team-group-8" v-show="teamline8">
+          <div class="team-group team-group-8" v-show="teamline[8]">
             <div id="team-8" class="team">8</div>
             <div id="team-8-name" class="team-name">권희은</div>
             <div id="team-8-name" class="team-name">김태현</div>
@@ -102,7 +103,7 @@
             <div id="team-8-name" class="team-name">차은채</div>
             <div id="team-8-name" class="team-name">싸린이</div>
           </div>
-          <div class="team-group team-group-9" v-show="teamline9">
+          <div class="team-group team-group-9" v-show="teamline[9]">
             <div id="team-9" class="team">9</div>
             <div id="team-9-name" class="team-name">권희은</div>
             <div id="team-9-name" class="team-name">김태현</div>
@@ -111,7 +112,7 @@
             <div id="team-9-name" class="team-name">차은채</div>
             <div id="team-9-name" class="team-name">싸린이</div>
           </div>
-          <div class="team-group team-group-10" v-show="teamline10">
+          <div class="team-group team-group-10" v-show="teamline[10]">
             <div id="team-10" class="team">10</div>
             <div id="team-10-name" class="team-name">권희은</div>
             <div id="team-10-name" class="team-name">김태현</div>
@@ -214,8 +215,9 @@
 <script>
 import '@/css/room.css';
 import SelectGameModal from '@/components/room/SelectGameModal';
-import { mapGetters } from 'vuex';
 import axios from '@/util/http-common.js';
+import { mapActions, mapGetters, mapState } from 'vuex';
+import { socketConnect } from '@/util/socket-common.js';
 
 export default {
   name: 'Room',
@@ -224,138 +226,92 @@ export default {
   },
   data: function() {
     return {
-      teamline1: false,
-      teamline2: false,
-      teamline3: false,
-      teamline4: false,
-      teamline5: false,
-      teamline6: false,
-      teamline7: false,
-      teamline8: false,
-      teamline9: false,
-      teamline10: false,
+      teamline: {
+        1: false,
+        2: false,
+        3: false,
+        4: false,
+        5: false,
+        6: false,
+        7: false,
+        8: false,
+        9: false,
+        10: false,
+      },
       openmodal: false,
       ssafymind_explain: false,
       speakgame_explain: false,
       jumpgame_explain: false,
       // 방 정보
       room: {
+        id: '',
         name: '',
         host: '',
         members: [],
       },
+      // socket Client
+      stompClient: null,
     };
   },
   // 방 생성시
   created() {
-    this.readRoom();
+    this.checkRoom();
+    this.checkName();
+    // 방 정보 불러오기
+    // this.readRoom();
+    // 소켓 연결
+    this.stompClient = socketConnect(this.onConnected, this.onError);
+    // 방정보 초기화
+    this.room.id = this.getRoomId;
   },
   // 방 삭제시
   destroyed() {
-    this.exitRoom();
+    this.onDisconnect();
   },
   computed: {
     ...mapGetters(['getRoomId', 'getUser']),
+    ...mapState(['visitedRoomId']),
+    ...mapActions(['joinRoom']),
   },
   methods: {
-    showTeam1: function() {
-      const btn = document.querySelector('#btn-1');
-      if (this.teamline1 == true) {
-        this.teamline1 = false;
-        btn.classList.remove('btn-1');
-      } else if (this.teamline1 == false) {
-        this.teamline1 = true;
-        btn.classList.add('btn-1');
+    // 유효하지 않은 방으로 입장했다면 home 화면으로 이동
+    checkRoom: function() {
+      const roomId = this.$route.params.roomId;
+      axios({
+        method: 'get',
+        url: `/game/exist/${roomId}`,
+      })
+      .then(res => {
+        let exist = res.data;
+        if (!exist) {
+          if(this.visitedRoomId) {
+            this.$store.dispatch('joinRoom', '');
+          }
+          alert('해당 방은 존재하지 않습니다. 입장코드를 확인하세요!');
+          this.$router.push('/');
+          return
+        }
+      })
+      .catch(err => {
+        return err
+      })
+    },
+    // 이름이 없으면(url을 통해 이름을 정하지 않고 들어왔다면) home 화면으로 강퇴
+    checkName: function() {
+      const userName = this.getUser.name
+      if(!userName) {
+        this.$router.push('/')
       }
     },
-    showTeam2: function() {
-      const btn = document.querySelector('#btn-2');
-      if (this.teamline2 == true) {
-        this.teamline2 = false;
-        btn.classList.remove('btn-2');
-      } else if (this.teamline2 == false) {
-        this.teamline2 = true;
-        btn.classList.add('btn-2');
-      }
-    },
-    showTeam3: function() {
-      const btn = document.querySelector('#btn-3');
-      if (this.teamline3 == true) {
-        this.teamline3 = false;
-        btn.classList.remove('btn-3');
-      } else if (this.teamline3 == false) {
-        this.teamline3 = true;
-        btn.classList.add('btn-3');
-      }
-    },
-    showTeam4: function() {
-      const btn = document.querySelector('#btn-4');
-      if (this.teamline4 == true) {
-        this.teamline4 = false;
-        btn.classList.remove('btn-4');
-      } else if (this.teamline4 == false) {
-        this.teamline4 = true;
-        btn.classList.add('btn-4');
-      }
-    },
-    showTeam5: function() {
-      const btn = document.querySelector('#btn-5');
-      if (this.teamline5 == true) {
-        this.teamline5 = false;
-        btn.classList.remove('btn-5');
-      } else if (this.teamline5 == false) {
-        this.teamline5 = true;
-        btn.classList.add('btn-5');
-      }
-    },
-    showTeam6: function() {
-      const btn = document.querySelector('#btn-6');
-      if (this.teamline6 == true) {
-        this.teamline6 = false;
-        btn.classList.remove('btn-6');
-      } else if (this.teamline6 == false) {
-        this.teamline6 = true;
-        btn.classList.add('btn-6');
-      }
-    },
-    showTeam7: function() {
-      const btn = document.querySelector('#btn-7');
-      if (this.teamline7 == true) {
-        this.teamline7 = false;
-        btn.classList.remove('btn-7');
-      } else if (this.teamline7 == false) {
-        this.teamline7 = true;
-        btn.classList.add('btn-7');
-      }
-    },
-    showTeam8: function() {
-      const btn = document.querySelector('#btn-8');
-      if (this.teamline8 == true) {
-        this.teamline8 = false;
-        btn.classList.remove('btn-8');
-      } else if (this.teamline8 == false) {
-        this.teamline8 = true;
-        btn.classList.add('btn-8');
-      }
-    },
-    showTeam9: function() {
-      const btn = document.querySelector('#btn-9');
-      if (this.teamline9 == true) {
-        this.teamline9 = false;
-        btn.classList.remove('btn-9');
-      } else if (this.teamline9 == false) {
-        this.teamline9 = true;
-        btn.classList.add('btn-9');
-      }
-    },
-    showTeam10: function() {
-      const btn = document.querySelector('#btn-10');
-      if (this.teamline10 == true) {
-        this.teamline10 = false;
-        btn.classList.remove('btn-10');
-      } else if (this.teamline10 == false) {
-        this.teamline10 = true;
-        btn.classList.add('btn-10');
+    showTeam: function(team) {
+      const btn = document.querySelector(`#btn-${team}`);
+      if (this.teamline[team] == true) {
+        this.teamline[team] = false;
+        btn.classList.remove(`btn-${team}`);
+      } else if (this.teamline[team] == false) {
+        this.teamline[team] = true;
+        console.log(this.teamline)
+        btn.classList.add(`btn-${team}`);
       }
     },
     getOpenModal(openmodal) {
@@ -385,30 +341,58 @@ export default {
       this.$copyText(this.getRoomId);
       alert('입장 코드를 복사했습니다!');
     },
-    // 입장 정보 불러오기
-    readRoom() {
-      axios({
-        method: 'get',
-        url: `/game/read/${this.getRoomId}`,
-      })
-        .then((res) => {
-          // 방 정보 초기화
-          let room = res.data;
-          this.room.name = room.name;
-          this.room.host = room.host;
-          this.room.members = room.members;
-          console.log(this.room);
+    /**
+     * Socket 요청들
+     */
+    // 게임 방 입장 : 정보 구독 및 유저 정보 전송
+    onConnected() {
+      this.stompClient.subscribe('/game/room/' + this.getRoomId, this.onMessageReceived);
+      this.stompClient.send(
+        '/pub/game/enter',
+        {},
+        JSON.stringify({
+          roomId: this.getRoomId,
+          participantId: this.getUser.id,
+          participantName: this.getUser.name,
+          teamNo: 0,
         })
-        .catch(() => {});
+      );
     },
-    // 퇴장시 정보 처리
-    exitRoom() {
-      axios({
-        method: 'delete',
-        url: `/game/exit/${this.getRoomId}/${this.getUser.name}`,
-      })
-        .then(() => {})
-        .catch(() => {});
+    // 메세지 수신
+    onMessageReceived(payload) {
+      // 방장이 퇴장한 경우
+      if (payload.body == 'exit') {
+        // 모든 참가자의 연결을 끊고
+        this.onDisconnect();
+        alert('방장이 퇴장하여 게임이 종료됩니다!');
+        // 모든 참가자 내보내기
+        this.$router.push('/room');
+        return;
+      }
+
+      let room = JSON.parse(payload.body);
+      this.room.name = room.name;
+      this.room.host = room.host;
+      this.room.members = room.members;
+      console.log(this.room);
+    },
+    onError() {},
+    // 게임 방 퇴장 소켓 연결 해제 및 게임 방 유저 정보 삭제
+    onDisconnect() {
+      this.stompClient.send(
+        '/pub/game/exit',
+        {},
+        JSON.stringify({
+          roomId: this.getRoomId,
+          participantId: this.getUser.id,
+          participantName: this.getUser.name,
+        })
+      );
+      this.stompClient.disconnect();
+    },
+    // 팀 번호 변경시 소켓 요청
+    changeTeamMessage() {
+      this.stompClient.send('/pub/game/change', {}, JSON.stringify(this.room));
     },
   },
 };

@@ -50,7 +50,7 @@ export default {
 	position: absolute;
 	margin-left: 49%;
 }
-.timer > p{
+.timer > p {
 	font-size: 3.5rem;
 	margin-top: -2%;
 	font-weight: 700;
