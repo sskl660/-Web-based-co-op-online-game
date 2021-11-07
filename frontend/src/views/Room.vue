@@ -304,6 +304,15 @@ export default {
       }
     },
     showTeam: function(team) {
+      // 그 사람 찾는 로직
+      if (this.room.members != null) {
+        for (let member of this.room.members) {
+          member.teamNo = team;
+          break;
+        }
+      }
+      this.changeTeamMessage();
+      // 자신을 찾기
       const btn = document.querySelector(`#btn-${team}`);
       if (this.teamline[team] == true) {
         this.teamline[team] = false;
