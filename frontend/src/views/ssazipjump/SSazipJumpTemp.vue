@@ -53,7 +53,7 @@ export default {
       }
       
 
-     
+    
 
       // 장애물 속성
       class Cactus {
@@ -159,7 +159,7 @@ export default {
       }
       },
       
-      
+
 
   },
   mounted() {
