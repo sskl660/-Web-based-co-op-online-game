@@ -24,9 +24,11 @@ export default {
   padding-top: 8px;
 }
 #game-title {
+  position: absolute;
+  left: 50%;
   font-weight: bold;
   font-size: 2rem;
-  margin-left: 3%;
+  transform: translate(-50%);
 }
 #game-over-btn {
   font-weight: bold;

@@ -12,13 +12,17 @@
         <p>{{ msg.message }}</p>
       </div>
     </div>
+    <div>
+      <input type="checkbox" id="chk-hear-mic"><label for="chk-hear-mic">마이크 소리 듣기</label>
+      <button id="record">녹음</button>
+      <button id="stop">중지</button>
+      <div id="sound-clips"></div>
+    </div>
   </div>
 </template>
 
 <script>
-import { Stomp } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
-import { chatURL } from '@/util/http-common.js';
+import { socketConnect } from '@/util/socket-common.js';
 
 export default {
   name: 'Chat',
@@ -29,25 +33,207 @@ export default {
       message: '',
       stompClient: null,
       receivedMessages: [],
+      record: {},
+      stop: {},
+      soundClips: {},
+      chkHearMic: {},
+      audioCtx: {},
+      analyser: {},
+      chunks: [],
     };
   },
   created() {
     this.id = this.$route.query.id;
     this.name = this.$route.query.name;
-    this.socketConnect();
+    this.stompClient = socketConnect(this.onConnected, this.onError);
+    console.log(this.stompClient);
+  },
+  mounted() {
+    this.getAudio();
+    this.translate();
   },
   methods: {
-    // 소켓 연결
-    socketConnect() {
-      var socket = new SockJS(chatURL);
-      this.stompClient = Stomp.over(socket);
-      this.stompClient.connect('', this.onConnected, this.onError);
-    },
-    onConnected() {
-      // 채널 구독
-      this.stompClient.subscribe('/sub/chat/room/' + this.id, this.onMessageReceived);
+    getAudio: function() {
+      this.record = document.getElementById("record");
+      this.stop = document.getElementById("stop");
+      this.soundClips = document.getElementById("sound-clips");
+      this.chkHearMic = document.getElementById("chk-hear-mic");
 
-      // 입장 메세지 출력
+      const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+      this.audioCtx = audioCtx;
+      
+      const analyser = audioCtx.createAnalyser()
+      this.analyser = analyser;
+
+      function makeSound(stream) {
+        const source = this.audioCtx.createMediaStreamSource(stream);
+        source.connect(this.analyser)
+        this.analyser.connect(this.audioCtx.destination)
+      }
+
+      if (navigator.mediaDevices) {
+        console.log('getUserMedia supported.')
+
+        navigator.mediaDevices.getUserMedia({audio: true})
+        .then(stream => {
+          const mediaRecorder = new MediaRecorder(stream)
+          this.mediaRecorder = mediaRecorder
+          this.chkHearMic.onchange = e => {
+            if(e.target.checked == true) {
+              audioCtx.resume();
+              makeSound(stream)
+            } else {
+              audioCtx.suspend();
+            }
+          }
+          this.record.onclick = () => {
+            this.mediaRecorder.start();
+            console.log(this.mediaRecorder.state)
+          }
+          this.stop.onclick = () => {
+            this.mediaRecorder.stop();
+            console.log(this.mediaRecorder.state)
+          }
+
+          this.mediaRecorder.onstop = () => {
+            console.log("data available after MediaRecorder.stop() called.");
+
+            const clipName = prompt("오디오 파일 제목을 입력하세요.", new Date());
+            
+            const clipContainer = document.createElement('article');
+            const clipLabel = document.createElement('p');
+            const audio = document.createElement('audio');
+            const deleteButton = document.createElement('button');
+            
+            clipContainer.classList.add('clip');
+            audio.setAttribute('controls', '');
+            deleteButton.innerHTML = "삭제";
+            clipLabel.innerHTML = clipName;
+
+            clipContainer.appendChild(audio)
+            clipContainer.appendChild(clipLabel)
+            clipContainer.appendChild(deleteButton)
+            this.soundClips.appendChild(clipContainer)
+            audio.controls = true;
+            const blob = new Blob(this.chunks, {
+              type: 'audio/ogg codecs=opus'
+              // type: 'audio/wav; codecs=0'
+            })
+            console.log(blob);
+            this.chunks = [];
+            const audioURL = URL.createObjectURL(blob);
+            audio.src = audioURL;
+            this.stompClient.send(
+              '/pub/chat/message',
+              {},
+              JSON.stringify({ roomId: this.id, message: blob.size, writer: '김태현' })
+            );
+            console.log(audio);
+            console.log("recorder stopped");
+            
+            deleteButton.onclick = e => {
+              const evtTgt = e.target;
+              evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode)
+            }
+          }
+
+          this.mediaRecorder.ondataavailable = e => {
+            this.chunks.push(e.data)
+          }
+        })
+        .catch(err => {
+          console.log('The following error occurred: ' + err)
+        })
+      }
+    },
+    /*  */
+    // 음성을 텍스트로 번역
+    /*  */
+    translate: function() {
+      if (typeof webkitSpeechRecognition !== 'function') {
+        alert('크롬에서만 동작합니다')
+        return false
+      }
+
+      const speech = new (window.SpeechRecognition || window.webkitSpeechRecognition);
+      let isRecognizing = false;
+      let ignoreEndProcess = false;
+      let finalTranscript = '';
+
+      const final_span = document.querySelector('#final_span')
+      const interim_span = document.querySelector('#interim_span')
+      // 원하는 언어를 앞으로 뺴라(해당 언어만 지원)
+      // 비어있으면 영어, 한국어 둘 다 지원(한국어 우선)
+      speech.lang = ["ko-KR", "en-US"];
+      speech.continuous = true;
+      speech.interimResults = true;
+
+      speech.onstart = function() {
+        isRecognizing = true;
+        console.log(isRecognizing)
+      }
+
+      speech.onend = function () {
+        isRecognizing = false;
+        console.log(isRecognizing)
+
+        if (ignoreEndProcess) {
+          return false;
+        }
+
+        if (!finalTranscript) {
+          return false;
+        }
+      };
+
+      speech.onresult = function (event) {
+        let interimTranscript = '';
+        if (typeof event.results === 'undefined') {
+          speech.onend = null;
+          speech.stop();
+          return;
+        }
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
+
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+            console.log('파이널', finalTranscript)
+            console.log('파이널', transcript)
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        final_span.innerHTML = finalTranscript;
+        interim_span.innerHTML = interimTranscript;
+        console.log(interimTranscript)
+      }
+
+      speech.onerror = function (event) {
+        if(event.error.match(/no-speech|audio-capture|not-allowed/)) {
+          ignoreEndProcess = true;
+        }
+      }
+      console.log(speech)
+
+      document.querySelector("#record").addEventListener("click", () => {
+        speech.start();
+      })
+
+      document.querySelector("#stop").addEventListener("click", () => {
+        speech.stop();
+      })
+
+      speech.addEventListener("result", (event) => {
+        const transcript = event["results"];
+        // this.mediaRecorder.stop();
+        console.log(transcript);
+      })
+    },
+    // 채팅 채널 구독 및 입장 메세지 출력
+    onConnected() {
+      this.stompClient.subscribe('/chat/room/' + this.id, this.onMessageReceived2);
       this.stompClient.send(
         '/pub/chat/message',
         {},
@@ -71,9 +257,13 @@ export default {
     },
     // 메세지 수신
     onMessageReceived(payload) {
-      console.log(payload);
       let receiveMessage = JSON.parse(payload.body);
       this.receivedMessages.push(receiveMessage);
+    },
+    onMessageReceived2(payload) {
+      // let receiveMessage = JSON.parse(payload.body);
+      // this.receivedMessages.push(receiveMessage);
+      console.log(payload)
     },
     // 에러 수신
     onError() {},
