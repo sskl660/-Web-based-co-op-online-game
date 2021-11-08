@@ -24,10 +24,10 @@ public class GameRoomController {
     /**
      * 게임 방 존재 여부 확인(ID로 확인)
      */
-    @GetMapping(value = "/exist/{roomId}")
-    public boolean readRoom(@PathVariable String roomId) {
-        return repository.findRoomById(roomId);
-    }
+//    @GetMapping(value = "/exist/{roomId}")
+//    public boolean readRoom(@PathVariable String roomId) {
+//        return repository.findRoomById(roomId);
+//    }
 
     /**
      * 게임 방 입장 조건 체크
