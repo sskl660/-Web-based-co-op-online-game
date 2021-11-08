@@ -34,4 +34,10 @@ public class ChatController {
     public void message(ChatMessage message) {
         template.convertAndSend("/chat/room/" + message.getRoomId(), message);
     }
+
+    // 3. 오디오 메서드
+    @MessageMapping(value = "/chat/audio")
+    public void audio(Object object) {
+        template.convertAndSend("chat/room/dec2fc4d-7175-438e-acb5-ff49dbed149e" , object);
+    }
 }

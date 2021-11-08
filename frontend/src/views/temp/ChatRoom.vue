@@ -12,15 +12,25 @@
         <p>{{ msg.message }}</p>
       </div>
     </div>
-    <div>
+    <hr>
+    <!-- <div>
       <input type="checkbox" id="chk-hear-mic"><label for="chk-hear-mic">마이크 소리 듣기</label>
       <button id="record">녹음</button>
       <button id="stop">중지</button>
       <div id="sound-clips"></div>
+    </div> -->
+    <div>
+      <p>비디오/오디오 통신</p>
+      <!-- <video src="@/assets/images/back.mp4" id="myFace" style="width: 400px; border: 1px solid black;" autoplay playsinline/> -->
+      <video id="myFace" style="width: 400px; border: 1px solid black;" autoplay playsinline/>
+      <br>
+      <button id="video">비디오 On</button>
+      <button id="audio">소리 On</button>
     </div>
   </div>
 </template>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
 import { socketConnect } from '@/util/socket-common.js';
 
@@ -40,19 +50,77 @@ export default {
       audioCtx: {},
       analyser: {},
       chunks: [],
+      video: false,
+      audio: false,
+      myStream: {},
+      myPeerConnection: {},
     };
   },
   created() {
     this.id = this.$route.query.id;
     this.name = this.$route.query.name;
     this.stompClient = socketConnect(this.onConnected, this.onError);
-    console.log(this.stompClient);
+    // console.log(this.stompClient);
   },
   mounted() {
-    this.getAudio();
-    this.translate();
+    // this.getAudio();
+    // this.translate();
+    this.socketio();
   },
   methods: {
+    socketio: async function() {
+      let myStream, myPeerConnection;
+      const myFace = document.querySelector("#myFace");
+      const video = document.querySelector("#video");
+      const audio = document.querySelector("#audio");
+      // const cameras = devices.filter((device) => device.kind === "videoinput");
+      await navigator.mediaDevices.getUserMedia(
+        {
+          audio: true,
+          video: true
+        })
+        .then(res => {
+          this.myStream = res
+          myStream = res
+          // myFace.srcObject = res;
+        });
+      
+      const makeConnection = () => {
+        this.myPeerConnection = new RTCPeerConnection();
+        this.myStream.getTracks().forEach(track => this.myPeerConnection.addTrack(track, this.myStream));
+      }
+      makeConnection();
+
+      video.addEventListener("click", () => {
+        myStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
+        if (this.video) {
+          video.innerText = '비디오 On'
+          this.video = false;
+        } else {
+          video.innerText = '비디오 Off'
+          this.video = true;
+        }
+      })
+
+      audio.addEventListener("click", () => {
+        myStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+        if (this.audio) {
+          audio.innerText = '오디오 On'
+          this.audio = false;
+        } else {
+          audio.innerText = '오디오 Off'
+          this.audio = true;
+        }
+      })
+
+      const getMikes = async () => {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audios = devices.filter(device => device.kind === 'audioinput')
+        console.log(audios)
+      };
+      // getMikes();
+
+    },
     getAudio: function() {
       this.record = document.getElementById("record");
       this.stop = document.getElementById("stop");
@@ -233,7 +301,7 @@ export default {
     },
     // 채팅 채널 구독 및 입장 메세지 출력
     onConnected() {
-      this.stompClient.subscribe('/chat/room/' + this.id, this.onMessageReceived2);
+      this.stompClient.subscribe('/chat/room/' + this.id, this.onMessageReceived);
       this.stompClient.send(
         '/pub/chat/message',
         {},
@@ -245,8 +313,11 @@ export default {
       this.stompClient.socketDisconnect();
     },
     // 메세지 발신
-    sendMessage() {
+    async sendMessage() {
       if (this.message.trim() && this.stompClient) {
+        console.log(this.id)
+        // const offer = await this.myPeerConnection.createOffer();
+        // this.myPeerConnection.setLocalDescription(offer);
         this.stompClient.send(
           '/pub/chat/message',
           {},
@@ -259,11 +330,6 @@ export default {
     onMessageReceived(payload) {
       let receiveMessage = JSON.parse(payload.body);
       this.receivedMessages.push(receiveMessage);
-    },
-    onMessageReceived2(payload) {
-      // let receiveMessage = JSON.parse(payload.body);
-      // this.receivedMessages.push(receiveMessage);
-      console.log(payload)
     },
     // 에러 수신
     onError() {},

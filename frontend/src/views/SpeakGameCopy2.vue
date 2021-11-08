@@ -32,7 +32,7 @@ export default {
     const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
     this.audioCtx = audioCtx;
     
-    const analyser = audioCtx.createAnalyser()
+    const analyser = audioCtx.createAnalyser();
     this.analyser = analyser;
 
     function makeSound(stream) {
