@@ -2,7 +2,7 @@ package com.playssafy.playssafy.restcontroller;
 
 import com.playssafy.playssafy.dto.game.GameRoom;
 import com.playssafy.playssafy.dto.game.Participant;
-import com.playssafy.playssafy.repository.GameRoomRepository;
+import com.playssafy.playssafy.service.GameRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/game")
 // 게임 방을 관리할 컨트롤러
 public class GameRoomController {
-    private final GameRoomRepository repository;
+    private final GameRoomService repository;
 
     /**
      * 게임 방 개설 및 개설 정보 반환
