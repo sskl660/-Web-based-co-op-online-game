@@ -328,19 +328,19 @@ export default {
     //   }
     // },
     async sendMessage() {
-      if (this.stompClient) {
-        const offer = await this.myPeerConnection.createOffer();
-        this.myPeerConnection.setLocalDescription(offer);
-        console.log(offer);
+      const offer = await this.myPeerConnection.createOffer();
+      this.myPeerConnection.setLocalDescription(offer);
+      if (offer.type && this.stompClient) {
         this.stompClient.send(
-          '/pub/chat/message',
+          '/pub/chat/audio',
           {},
-          JSON.stringify({type:offer.type})
+          JSON.stringify({ roomId: this.id, offer: {sdp: offer.sdp}, writer: '안기훈' })
         );
       }
     },
     // 메세지 수신
     onMessageReceived(payload) {
+      console.log(payload)
       let receiveMessage = JSON.parse(payload.body);
       this.receivedMessages.push(receiveMessage);
       console.log(receiveMessage)
