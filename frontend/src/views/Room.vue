@@ -18,7 +18,11 @@
     </div>
     <div class="d-flex justify-content-center">
       <div class="room-left">
-        <div class="btn-group">
+        <!-- <div v-if="this.checkHost()" class="btn-group"> -->
+        <div class="btn-group" v-if="this.room.host == this.getUser.id">
+          <!-- <span v-for="index in totalTeam" :key='index'>
+            <button v-bind:id="'btn-'+index" class="btn" @click="showTeam(index)">{{index}}</button>
+          </span> -->
           <button id="btn-1" class="btn" @click="showTeam(1)">1</button>
           <button id="btn-2" class="btn" @click="showTeam(2)">2</button>
           <button id="btn-3" class="btn" @click="showTeam(3)">3</button>
@@ -30,111 +34,43 @@
           <button id="btn-9" class="btn" @click="showTeam(9)">9</button>
           <button id="btn-10" class="btn" @click="showTeam(10)">10</button>
         </div>
+        <!-- </div> -->
         <div class="team-group">
-          <div class="team-group team-group-1" v-show="teamline[1]">
-            <div id="team-1" class="team">1</div>
-            <div id="team-1-name" class="team-name">권희은</div>
-            <div id="team-1-name" class="team-name">김태현</div>
-            <div id="team-1-name" class="team-name">안기훈</div>
-            <div id="team-1-name" class="team-name">이장섭</div>
-            <div id="team-1-name" class="team-name">차은채</div>
-            <div id="team-1-name" class="team-name">싸린이</div>
-          </div>
-          <div class="team-group team-group-2" v-show="teamline[2]">
-            <div id="team-2" class="team">2</div>
-            <div id="team-2-name" class="team-name">권희은</div>
-            <div id="team-2-name" class="team-name">김태현</div>
-            <div id="team-2-name" class="team-name">안기훈</div>
-            <div id="team-2-name" class="team-name">이장섭</div>
-            <div id="team-2-name" class="team-name">차은채</div>
-            <div id="team-2-name" class="team-name">싸린이</div>
-          </div>
-          <div class="team-group team-group-3" v-show="teamline[3]">
-            <div id="team-3" class="team">3</div>
-            <div id="team-3-name" class="team-name">권희은</div>
-            <div id="team-3-name" class="team-name">김태현</div>
-            <div id="team-3-name" class="team-name">안기훈</div>
-            <div id="team-3-name" class="team-name">이장섭</div>
-            <div id="team-3-name" class="team-name">차은채</div>
-            <div id="team-3-name" class="team-name">싸린이</div>
-          </div>
-          <div class="team-group team-group-4" v-show="teamline[4]">
-            <div id="team-4" class="team">4</div>
-            <div id="team-4-name" class="team-name">권희은</div>
-            <div id="team-4-name" class="team-name">김태현</div>
-            <div id="team-4-name" class="team-name">안기훈</div>
-            <div id="team-4-name" class="team-name">이장섭</div>
-            <div id="team-4-name" class="team-name">차은채</div>
-            <div id="team-4-name" class="team-name">싸린이</div>
-          </div>
-          <div class="team-group team-group-5" v-show="teamline[5]">
-            <div id="team-5" class="team">5</div>
-            <div id="team-5-name" class="team-name">권희은</div>
-            <div id="team-5-name" class="team-name">김태현</div>
-            <div id="team-5-name" class="team-name">안기훈</div>
-            <div id="team-5-name" class="team-name">이장섭</div>
-            <div id="team-5-name" class="team-name">차은채</div>
-            <div id="team-5-name" class="team-name">싸린이</div>
-          </div>
-          <div class="team-group team-group-6" v-show="teamline[6]">
-            <div id="team-6" class="team">6</div>
-            <div id="team-6-name" class="team-name">권희은</div>
-            <div id="team-6-name" class="team-name">김태현</div>
-            <div id="team-6-name" class="team-name">안기훈</div>
-            <div id="team-6-name" class="team-name">이장섭</div>
-            <div id="team-6-name" class="team-name">차은채</div>
-            <div id="team-6-name" class="team-name">싸린이</div>
-          </div>
-          <div class="team-group team-group-7" v-show="teamline[7]">
-            <div id="team-7" class="team">7</div>
-            <div id="team-7-name" class="team-name">권희은</div>
-            <div id="team-7-name" class="team-name">김태현</div>
-            <div id="team-7-name" class="team-name">안기훈</div>
-            <div id="team-7-name" class="team-name">이장섭</div>
-            <div id="team-7-name" class="team-name">차은채</div>
-            <div id="team-7-name" class="team-name">싸린이</div>
-          </div>
-          <div class="team-group team-group-8" v-show="teamline[8]">
-            <div id="team-8" class="team">8</div>
-            <div id="team-8-name" class="team-name">권희은</div>
-            <div id="team-8-name" class="team-name">김태현</div>
-            <div id="team-8-name" class="team-name">안기훈</div>
-            <div id="team-8-name" class="team-name">이장섭</div>
-            <div id="team-8-name" class="team-name">차은채</div>
-            <div id="team-8-name" class="team-name">싸린이</div>
-          </div>
-          <div class="team-group team-group-9" v-show="teamline[9]">
-            <div id="team-9" class="team">9</div>
-            <div id="team-9-name" class="team-name">권희은</div>
-            <div id="team-9-name" class="team-name">김태현</div>
-            <div id="team-9-name" class="team-name">안기훈</div>
-            <div id="team-9-name" class="team-name">이장섭</div>
-            <div id="team-9-name" class="team-name">차은채</div>
-            <div id="team-9-name" class="team-name">싸린이</div>
-          </div>
-          <div class="team-group team-group-10" v-show="teamline[10]">
-            <div id="team-10" class="team">10</div>
-            <div id="team-10-name" class="team-name">권희은</div>
-            <div id="team-10-name" class="team-name">김태현</div>
-            <div id="team-10-name" class="team-name">안기훈</div>
-            <div id="team-10-name" class="team-name">이장섭</div>
-            <div id="team-10-name" class="team-name">차은채</div>
-            <div id="team-10-name" class="team-name">싸린이</div>
+          <div v-for="index in totalTeam" :key="index">
+            <div
+              v-bind:class="'team-group team-group-' + index"
+              v-show="teamline[index]"
+              @click="changeTeam(index)"
+            >
+              <div v-bind:id="'team-' + index" class="team">{{ index }}</div>
+              <div v-bind:id="'team-' + index + '-name'" class="team-name">
+                {{ assignTeamNo[index][0] }}
+              </div>
+              <div v-bind:id="'team-' + index + '-name'" class="team-name">
+                {{ assignTeamNo[index][1] }}
+              </div>
+              <div v-bind:id="'team-' + index + '-name'" class="team-name">
+                {{ assignTeamNo[index][2] }}
+              </div>
+              <div v-bind:id="'team-' + index + '-name'" class="team-name">
+                {{ assignTeamNo[index][3] }}
+              </div>
+              <div v-bind:id="'team-' + index + '-name'" class="team-name">
+                {{ assignTeamNo[index][4] }}
+              </div>
+              <div v-bind:id="'team-' + index + '-name'" class="team-name">
+                {{ assignTeamNo[index][5] }}
+              </div>
+            </div>
           </div>
           <!-- 여기서부터는 관전자 -->
           <div class="team-group-extra">
             <div id="team-extra">관전</div>
-            <div id="team-extra-name" class="team-name">권희은</div>
-            <div id="team-extra-name" class="team-name">김태현</div>
-            <div id="team-extra-name" class="team-name">안기훈</div>
-            <div id="team-extra-name" class="team-name">이장섭</div>
-            <div id="team-extra-name" class="team-name">차은채</div>
-            <div id="team-extra-name" class="team-name">싸린이</div>
-            <div id="team-extra-name" class="team-name">싸린이</div>
-            <div id="team-extra-name" class="team-name">싸린이</div>
-            <div id="team-extra-name" class="team-name">싸린이</div>
-            <div id="team-extra-name" class="team-name">싸린이</div>
-            <div id="team-extra-name" class="team-name">싸린이</div>
+            <span v-for="(member, index) in room.members" :key="index">
+              <span v-if="member.teamNo === 0" id="team-extra-name" class="team-name">
+                {{ member.participantName }}
+              </span>
+            </span>
           </div>
         </div>
       </div>
@@ -249,6 +185,20 @@ export default {
         host: '',
         members: [],
       },
+      assignTeamNo: {
+        0: [],
+        1: [],
+        2: [],
+        3: [],
+        4: [],
+        5: [],
+        6: [],
+        7: [],
+        8: [],
+        9: [],
+        10: [],
+      },
+      totalTeam: 10,
       // socket Client
       stompClient: null,
     };
@@ -257,8 +207,6 @@ export default {
   created() {
     this.checkRoom();
     this.checkName();
-    // 방 정보 불러오기
-    // this.readRoom();
     // 소켓 연결
     this.stompClient = socketConnect(this.onConnected, this.onError);
     // 방정보 초기화
@@ -273,46 +221,99 @@ export default {
     ...mapState(['visitedRoomId']),
     ...mapActions(['joinRoom']),
   },
+  watch: {
+    'room.members'() {
+      this.assignTeam();
+    },
+  },
   methods: {
+    checkHost: function() {
+      if (this.getUser.name == this.room.host) return true;
+      else false;
+      console.log('여기좀', this.room.members[0].participantName);
+    },
     // 유효하지 않은 방으로 입장했다면 home 화면으로 이동
     checkRoom: function() {
       const roomId = this.$route.params.roomId;
+      // 서버 레벨 입장 가능 여부 확인 로직
       axios({
-        method: 'get',
-        url: `/game/exist/${roomId}`,
+        method: 'post',
+        url: `/game/user`,
+        data: {
+          roomId: roomId,
+          participantName: this.getUser.name,
+          participantId: this.getUser.id,
+        },
       })
-      .then(res => {
-        let exist = res.data;
-        if (!exist) {
-          if(this.visitedRoomId) {
-            this.$store.dispatch('joinRoom', '');
+        .then((res) => {
+          let exist = res.data;
+          // 방이 존재하지 않는 경우
+          if (exist == 0) {
+            alert('해당 방은 존재하지 않습니다. 입장코드를 확인해주세요!');
+            this.$router.push('/');
+            return;
           }
-          alert('해당 방은 존재하지 않습니다. 입장코드를 확인하세요!');
-          this.$router.push('/');
-          return
-        }
-      })
-      .catch(err => {
-        return err
-      })
+          // 입장 제한인원을 초과한 경우
+          else if (exist == 1) {
+            alert('해당 방의 입장 가능 정원을 초과했습니다!');
+            this.$router.push('/');
+            return;
+          }
+          // 동일한 이름의 참가자가 존재하는 경우
+          else if (exist == 2) {
+            alert('동일한 이름을 가진 참가자가 존재합니다. 이름을 수정해주세요!');
+            this.$router.push('/');
+            return;
+          }
+        })
+        .catch(() => {});
     },
     // 이름이 없으면(url을 통해 이름을 정하지 않고 들어왔다면) home 화면으로 강퇴
     checkName: function() {
-      const userName = this.getUser.name
-      if(!userName) {
-        this.$router.push('/')
+      const userName = this.getUser.name;
+      if (!userName) {
+        alert('잘못된 접근입니다.');
+        this.$router.push('/');
       }
     },
     showTeam: function(team) {
+      // 자신을 찾기
       const btn = document.querySelector(`#btn-${team}`);
       if (this.teamline[team] == true) {
         this.teamline[team] = false;
         btn.classList.remove(`btn-${team}`);
+        for (let member of this.room.members) {
+          if (member.teamNo == team) {
+            member.teamNo = 0;
+          }
+        }
+        this.changeTeamMessage();
       } else if (this.teamline[team] == false) {
         this.teamline[team] = true;
-        console.log(this.teamline)
+        console.log(this.teamline);
         btn.classList.add(`btn-${team}`);
       }
+      this.openTeamMessage();
+    },
+    assignTeam: function() {
+      for (let i = 0; i < 11; i++) {
+        this.assignTeamNo[i] = [];
+      }
+      for (let member of this.room.members) {
+        this.assignTeamNo[member.teamNo].push(member.participantName);
+      }
+    },
+    changeTeam: function(teamNo) {
+      for (let idx = 0; idx < this.room.members.length; idx++) {
+        if (this.room.members[idx].participantName == this.getUser.name) {
+          this.room.members[idx].teamNo = teamNo;
+          let temp = this.room.members[idx];
+          this.room.members.splice(idx, 1);
+          this.room.members.push(temp);
+          break;
+        }
+      }
+      this.changeTeamMessage();
     },
     getOpenModal(openmodal) {
       this.openmodal = openmodal;
@@ -346,6 +347,7 @@ export default {
      */
     // 게임 방 입장 : 정보 구독 및 유저 정보 전송
     onConnected() {
+      // 유저 정보 교환
       this.stompClient.subscribe('/game/room/' + this.getRoomId, this.onMessageReceived);
       this.stompClient.send(
         '/pub/game/enter',
@@ -371,10 +373,19 @@ export default {
       }
 
       let room = JSON.parse(payload.body);
+      console.log(room);
       this.room.name = room.name;
       this.room.host = room.host;
       this.room.members = room.members;
+      if (room.openTeams != null) this.teamline = JSON.parse(room.openTeams);
       console.log(this.room);
+      // 분류하는 함수
+      // this.assignTeam();
+    },
+    onTeamReceived(payload) {
+      let teams = JSON.parse(payload.body);
+      console.log(teams);
+      this.teamline = teams;
     },
     onError() {},
     // 게임 방 퇴장 소켓 연결 해제 및 게임 방 유저 정보 삭제
@@ -393,6 +404,14 @@ export default {
     // 팀 번호 변경시 소켓 요청
     changeTeamMessage() {
       this.stompClient.send('/pub/game/change', {}, JSON.stringify(this.room));
+    },
+    // 방장이 팀 창을 열어주면 소켓 요청
+    openTeamMessage() {
+      this.stompClient.send(
+        `/pub/game/openTeam/${this.getRoomId}`,
+        {},
+        JSON.stringify(this.teamline)
+      );
     },
   },
 };

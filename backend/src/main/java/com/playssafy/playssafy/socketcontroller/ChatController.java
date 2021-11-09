@@ -1,5 +1,6 @@
 package com.playssafy.playssafy.socketcontroller;
 
+import com.playssafy.playssafy.dto.chat.AudioChat;
 import com.playssafy.playssafy.dto.chat.ChatMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -33,5 +34,11 @@ public class ChatController {
     @MessageMapping(value = "/chat/message")
     public void message(ChatMessage message) {
         template.convertAndSend("/chat/room/" + message.getRoomId(), message);
+    }
+
+    // 3. 오디오 메서드
+    @MessageMapping(value = "/chat/audio")
+    public void audio(AudioChat audioChat) {
+        template.convertAndSend("/chat/room/" + audioChat.getRoomId(), audioChat);
     }
 }
