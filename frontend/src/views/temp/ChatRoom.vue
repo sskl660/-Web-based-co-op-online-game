@@ -26,6 +26,8 @@
       <br>
       <button id="video">비디오 On</button>
       <button id="audio">소리 On</button>
+      <select name="" id="cameras"></select>
+      <button id="cameraBtn">적용</button>
     </div>
   </div>
 </template>
@@ -54,6 +56,8 @@ export default {
       audio: false,
       myStream: {},
       myPeerConnection: {},
+      getOffer: false,
+      getAnswer: false,
     };
   },
   created() {
@@ -73,24 +77,73 @@ export default {
       const myFace = document.querySelector("#myFace");
       const video = document.querySelector("#video");
       const audio = document.querySelector("#audio");
-      await navigator.mediaDevices.getUserMedia(
-        {
-          audio: true,
-          video: true
-        })
-        .then(res => {
-          console.log(res)
-          this.myStream = res
-          myStream = res
-          myFace.srcObject = res;
+      const cameraSelect = document.querySelector('#cameras');
+      const cameraBtn = document.querySelector('#cameraBtn');
+
+      async function getMikes() {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cameras = devices.filter(device => device.kind === 'videoinput')
+        const currentCamera = myStream.getVideoTracks()[0];
+        cameras.forEach(camera => {
+          const option = document.createElement("option");
+          option.value = camera.deviceId;
+          option.innerText = camera.label;
+          if(currentCamera.label == camera.label) {
+            option.selected = true;
+          }
+          cameraSelect.appendChild(option);
         });
-      console.log(this.myStream)
-      
-      const makeConnection = () => {
+      };
+
+      const getMedia = async (deviceId) => {
+        const initialConstaints = {
+          audio: false,
+          video: { facingMode: "user" },
+        };
+        const cameraConstraints = {
+          audio: false,
+          video: { deviceId: { exact: deviceId } },
+        }
+        try {
+          this.myStream = await navigator.mediaDevices.getUserMedia(
+            deviceId ? cameraConstraints : initialConstaints
+          )
+          myStream = this.myStream;
+          myFace.srcObject = this.myStream;
+          if(!deviceId) {
+            await getMikes();
+          }
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
+      const initCall = async () => {
+        await getMedia();
+        makeConnection();
+      }
+
+      initCall();
+
+      const makeConnection = async () => {
         this.myPeerConnection = new RTCPeerConnection();
+        this.myPeerConnection.addEventListener("icecandidate", (data) => {
+          this.stompClient.send(
+            '/pub/chat/audio',
+            {},
+            JSON.stringify({ roomId: this.id, offer: data.candidate, writer: '김태현' })
+          );
+        });
+        this.myPeerConnection.addEventListener("addstream", (data) => {
+          console.log('This is peer stream')
+          console.log(data.stream)
+          console.log('---------------')
+          console.log('This is My Stream')
+          console.log(this.myStream)
+          console.log(myStream)
+        });
         this.myStream.getTracks().forEach(track => this.myPeerConnection.addTrack(track, this.myStream));
       }
-      makeConnection();
 
       video.addEventListener("click", () => {
         this.myStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
@@ -114,12 +167,13 @@ export default {
         }
       })
 
-      const getMikes = async () => {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const audios = devices.filter(device => device.kind === 'audioinput')
-        console.log(audios)
-      };
-      getMikes();
+      cameraBtn.addEventListener("click", () => {
+        this.useMike();
+      });
+
+      cameraSelect.addEventListener("input", async () => {
+        await getMedia(cameraSelect.value);
+      });
 
     },
     getAudio: function() {
@@ -306,12 +360,22 @@ export default {
       this.stompClient.send(
         '/pub/chat/message',
         {},
-        JSON.stringify({ roomId: this.id, message: '입장하셨습니다', writer: '김태현' })
+        JSON.stringify({ roomId: this.id, message: '입장', writer: '김태현' })
       );
     },
     // 소켓 연결 해제
     socketDisconnect() {
       this.stompClient.socketDisconnect();
+    },
+
+    async useMike() {
+      const offer = await this.myPeerConnection.createOffer();
+      this.myPeerConnection.setLocalDescription(offer);
+      this.stompClient.send(
+        '/pub/chat/audio',
+        {},
+        JSON.stringify({ roomId: this.id, offer: offer, writer: '김태현' })
+      );
     },
     // 메세지 발신
     // async sendMessage() {
@@ -327,21 +391,55 @@ export default {
     //     this.message = '';
     //   }
     // },
-    async sendMessage() {
-      const offer = await this.myPeerConnection.createOffer();
-      this.myPeerConnection.setLocalDescription(offer);
+    async sendOffer(offer) {
+      // if(this.getOffer) return;
+      await this.myPeerConnection.setRemoteDescription(offer);
+      const answer = await this.myPeerConnection.createAnswer();
+      await this.myPeerConnection.setLocalDescription(answer);
       if (offer.type && this.stompClient) {
-        this.stompClient.send(
+        await this.stompClient.send(
           '/pub/chat/audio',
           {},
-          JSON.stringify({ roomId: this.id, offer: {type: offer.type}, writer: '안기훈' })
-        );
+          JSON.stringify({ roomId: this.id, offer: answer, writer: '안기훈' })
+        )
+        this.getOffer = true;
       }
     },
+
+    async sendAnswer(answer) {
+      // if(this.getAnswer) return;
+      this.getAnswer = true;
+      this.myPeerConnection.setRemoteDescription(answer);
+      // this.stompClient.send(
+      //   '/pub/chat/audio',
+      //   {},
+      //   JSON.stringify({ roomId: this.id, offer: offer, writer: '안기훈' })
+      // );
+    },
+
+    async sendIce(ice) {
+      this.myPeerConnection.addIceCandidate(ice);
+    },
+
     // 메세지 수신
     onMessageReceived(payload) {
-      console.log(payload)
       let receiveMessage = JSON.parse(payload.body);
+      console.log(receiveMessage)
+      if (receiveMessage.offer) {
+        if (receiveMessage.offer.type === 'offer') {
+          this.sendOffer(receiveMessage.offer);
+          return
+        } else if (receiveMessage.offer.type === 'answer') {
+          this.sendAnswer(receiveMessage.offer)
+          return
+        } else if (receiveMessage.offer.candidate) {
+          this.sendIce(receiveMessage)
+          return
+        }
+        console.log('else message')
+        console.log(receiveMessage)
+        console.log('else message')
+      }
       this.receivedMessages.push(receiveMessage);
       console.log(receiveMessage)
     },
