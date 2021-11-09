@@ -224,6 +224,12 @@ export default {
     ...mapState(['visitedRoomId']),
     ...mapActions(['joinRoom']),
   },
+  watch: {
+    'room.members'() {
+      this.assignTeam();
+      console.log('asdfasdf');
+    },
+  },
   methods: {
     checkHost: function() {
       if (this.getUser.name == this.room.host) return true;
@@ -287,7 +293,6 @@ export default {
         this.assignTeamNo[member.teamNo].push(member.participantName);
         // console.log("여기 확인", this.assignTeamNo)
       }
-      this.changeTeamMessage();
     },
     changeTeam: function(teamNo) {
       for (let member of this.room.members) {
@@ -295,10 +300,11 @@ export default {
         // console.log(this.getUser.name)
         if (member.participantName == this.getUser.name) {
           member.teamNo = teamNo;
-          this.assignTeam();
+          // this.assignTeam();
           break;
         }
       }
+      this.changeTeamMessage();
     },
     getOpenModal(openmodal) {
       this.openmodal = openmodal;
@@ -362,7 +368,7 @@ export default {
       this.room.members = room.members;
       console.log(this.room);
       // 분류하는 함수
-      this.assignTeam();
+      // this.assignTeam();
     },
     onError() {},
     // 게임 방 퇴장 소켓 연결 해제 및 게임 방 유저 정보 삭제
