@@ -1,6 +1,6 @@
 package com.playssafy.playssafy.socketcontroller;
 
-import com.playssafy.playssafy.dto.chat.Audio;
+import com.playssafy.playssafy.dto.chat.AudioChat;
 import com.playssafy.playssafy.dto.chat.ChatMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
