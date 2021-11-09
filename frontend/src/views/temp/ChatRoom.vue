@@ -334,7 +334,7 @@ export default {
         this.stompClient.send(
           '/pub/chat/audio',
           {},
-          JSON.stringify({ roomId: this.id, offer: {sdp: offer.sdp}, writer: '안기훈' })
+          JSON.stringify({ roomId: this.id, offer: {type: offer.type}, writer: '안기훈' })
         );
       }
     },
