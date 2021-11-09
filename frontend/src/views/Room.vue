@@ -245,6 +245,7 @@ export default {
           // 입장 제한인원을 초과한 경우
           else if (exist == 1) {
             alert('해당 방의 입장 가능 정원을 초과했습니다!');
+
             this.$router.push('/');
             return;
           }
@@ -296,7 +297,7 @@ export default {
       for (let idx = 0; idx < this.room.members.length; idx++) {
         if (this.room.members[idx].participantName == this.getUser.name) {
           if (this.room.members[idx].teamNo == teamNo) return;
-          if (this.assignTeamNo[teamNo].length >= 6) {
+          if (this.assignTeamNo[teamNo].length >= 6 && teamNo != 0) {
             alert('해당 팀은 정원이 가득 찼습니다!');
             return;
           }
