@@ -73,17 +73,18 @@ export default {
       const myFace = document.querySelector("#myFace");
       const video = document.querySelector("#video");
       const audio = document.querySelector("#audio");
-      // const cameras = devices.filter((device) => device.kind === "videoinput");
       await navigator.mediaDevices.getUserMedia(
         {
           audio: true,
           video: true
         })
         .then(res => {
+          console.log(res)
           this.myStream = res
           myStream = res
-          // myFace.srcObject = res;
+          myFace.srcObject = res;
         });
+      console.log(this.myStream)
       
       const makeConnection = () => {
         this.myPeerConnection = new RTCPeerConnection();
@@ -92,7 +93,7 @@ export default {
       makeConnection();
 
       video.addEventListener("click", () => {
-        myStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
+        this.myStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
         if (this.video) {
           video.innerText = '비디오 On'
           this.video = false;
@@ -103,7 +104,7 @@ export default {
       })
 
       audio.addEventListener("click", () => {
-        myStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+        this.myStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
         if (this.audio) {
           audio.innerText = '오디오 On'
           this.audio = false;
@@ -118,7 +119,7 @@ export default {
         const audios = devices.filter(device => device.kind === 'audioinput')
         console.log(audios)
       };
-      // getMikes();
+      getMikes();
 
     },
     getAudio: function() {
@@ -313,23 +314,36 @@ export default {
       this.stompClient.socketDisconnect();
     },
     // 메세지 발신
+    // async sendMessage() {
+    //   if (this.message.trim() && this.stompClient) {
+    //     console.log(this.id)
+    //     // const offer = await this.myPeerConnection.createOffer();
+    //     // this.myPeerConnection.setLocalDescription(offer);
+    //     this.stompClient.send(
+    //       '/pub/chat/message',
+    //       {},
+    //       JSON.stringify({ roomId: this.id, message: this.message, writer: '김태현' })
+    //     );
+    //     this.message = '';
+    //   }
+    // },
     async sendMessage() {
-      if (this.message.trim() && this.stompClient) {
-        console.log(this.id)
-        // const offer = await this.myPeerConnection.createOffer();
-        // this.myPeerConnection.setLocalDescription(offer);
+      if (this.stompClient) {
+        const offer = await this.myPeerConnection.createOffer();
+        this.myPeerConnection.setLocalDescription(offer);
+        console.log(offer);
         this.stompClient.send(
           '/pub/chat/message',
           {},
-          JSON.stringify({ roomId: this.id, message: this.message, writer: '김태현' })
+          JSON.stringify({type:offer.type})
         );
-        this.message = '';
       }
     },
     // 메세지 수신
     onMessageReceived(payload) {
       let receiveMessage = JSON.parse(payload.body);
       this.receivedMessages.push(receiveMessage);
+      console.log(receiveMessage)
     },
     // 에러 수신
     onError() {},

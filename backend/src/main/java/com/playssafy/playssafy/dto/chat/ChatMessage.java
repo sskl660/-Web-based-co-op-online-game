@@ -12,3 +12,11 @@ public class ChatMessage {
 
     //방장여부
 }
+
+@Getter
+@Setter
+public class AudioChat {
+    private String roomId; // 속한 채팅방 ID
+    private String writer; // 말하는 사람
+    private Object offer; // offer
+}
