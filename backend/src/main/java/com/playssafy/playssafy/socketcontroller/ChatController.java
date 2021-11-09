@@ -39,6 +39,6 @@ public class ChatController {
     // 3. 오디오 메서드
     @MessageMapping(value = "/chat/audio")
     public void audio(AudioChat audioChat) {
-        template.convertAndSend("chat/room/" + audioChat.getRoomId(), audioChat);
+        template.convertAndSend("/chat/room/" + audioChat.getRoomId(), audioChat);
     }
 }
