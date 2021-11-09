@@ -39,7 +39,7 @@
           <div v-for="index in totalTeam" :key="index">
             <div
               v-bind:class="'team-group team-group-' + index"
-              v-show="teamline[index]"
+              v-show="room.teamline[index]"
               @click="changeTeam(index)"
             >
               <div v-bind:id="'team-' + index" class="team">{{ index }}</div>
@@ -64,7 +64,7 @@
             </div>
           </div>
           <!-- 여기서부터는 관전자 -->
-          <div class="team-group-extra">
+          <div class="team-group-extra" @click="changeTeam(0)">
             <div id="team-extra">관전</div>
             <span v-for="(member, index) in room.members" :key="index">
               <span v-if="member.teamNo === 0" id="team-extra-name" class="team-name">
@@ -162,18 +162,6 @@ export default {
   },
   data: function() {
     return {
-      teamline: {
-        1: false,
-        2: false,
-        3: false,
-        4: false,
-        5: false,
-        6: false,
-        7: false,
-        8: false,
-        9: false,
-        10: false,
-      },
       openmodal: false,
       ssafymind_explain: false,
       speakgame_explain: false,
@@ -184,6 +172,7 @@ export default {
         name: '',
         host: '',
         members: [],
+        teamline: [null, false, false, false, false, false, false, false, false, false, false],
       },
       assignTeamNo: {
         0: [],
@@ -261,6 +250,8 @@ export default {
           }
           // 동일한 이름의 참가자가 존재하는 경우
           else if (exist == 2) {
+            // 새로고침하는 경우
+            if (this.getUser.name.length != 0) return;
             alert('동일한 이름을 가진 참가자가 존재합니다. 이름을 수정해주세요!');
             this.$router.push('/');
             return;
@@ -279,21 +270,19 @@ export default {
     showTeam: function(team) {
       // 자신을 찾기
       const btn = document.querySelector(`#btn-${team}`);
-      if (this.teamline[team] == true) {
-        this.teamline[team] = false;
+      if (this.room.teamline[team] == true) {
+        this.room.teamline[team] = false;
         btn.classList.remove(`btn-${team}`);
         for (let member of this.room.members) {
           if (member.teamNo == team) {
             member.teamNo = 0;
           }
         }
-        this.changeTeamMessage();
-      } else if (this.teamline[team] == false) {
-        this.teamline[team] = true;
-        console.log(this.teamline);
+      } else if (this.room.teamline[team] == false) {
+        this.room.teamline[team] = true;
         btn.classList.add(`btn-${team}`);
       }
-      this.openTeamMessage();
+      this.changeTeamMessage();
     },
     assignTeam: function() {
       for (let i = 0; i < 11; i++) {
@@ -306,6 +295,11 @@ export default {
     changeTeam: function(teamNo) {
       for (let idx = 0; idx < this.room.members.length; idx++) {
         if (this.room.members[idx].participantName == this.getUser.name) {
+          if (this.room.members[idx].teamNo == teamNo) return;
+          if (this.assignTeamNo[teamNo].length >= 6) {
+            alert('해당 팀은 정원이 가득 찼습니다!');
+            return;
+          }
           this.room.members[idx].teamNo = teamNo;
           let temp = this.room.members[idx];
           this.room.members.splice(idx, 1);
@@ -373,19 +367,10 @@ export default {
       }
 
       let room = JSON.parse(payload.body);
-      console.log(room);
       this.room.name = room.name;
       this.room.host = room.host;
       this.room.members = room.members;
-      if (room.openTeams != null) this.teamline = JSON.parse(room.openTeams);
-      console.log(this.room);
-      // 분류하는 함수
-      // this.assignTeam();
-    },
-    onTeamReceived(payload) {
-      let teams = JSON.parse(payload.body);
-      console.log(teams);
-      this.teamline = teams;
+      if (room.teamline != null) this.room.teamline = room.teamline;
     },
     onError() {},
     // 게임 방 퇴장 소켓 연결 해제 및 게임 방 유저 정보 삭제
@@ -403,15 +388,8 @@ export default {
     },
     // 팀 번호 변경시 소켓 요청
     changeTeamMessage() {
+      console.log('this');
       this.stompClient.send('/pub/game/change', {}, JSON.stringify(this.room));
-    },
-    // 방장이 팀 창을 열어주면 소켓 요청
-    openTeamMessage() {
-      this.stompClient.send(
-        `/pub/game/openTeam/${this.getRoomId}`,
-        {},
-        JSON.stringify(this.teamline)
-      );
     },
   },
 };
