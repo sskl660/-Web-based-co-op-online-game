@@ -24,6 +24,7 @@
       <!-- <video src="@/assets/images/back.mp4" id="myFace" style="width: 400px; border: 1px solid black;" autoplay playsinline/> -->
       <video id="myFace" style="width: 400px; border: 1px solid black;" autoplay playsinline />
       <video id="peerFace" style="width: 400px; border: 1px solid black;" autoplay playsinline />
+      <video id="myFace2" style="width: 400px; border: 1px solid black;" autoplay playsinline />
       <br />
       <button id="video">비디오 On</button>
       <button id="audio">소리 On</button>
@@ -76,6 +77,7 @@ export default {
     socketio: async function() {
       let myStream, myPeerConnection;
       const myFace = document.querySelector("#myFace");
+      const myFace2 = document.querySelector("#myFace2");
       const video = document.querySelector("#video");
       const audio = document.querySelector("#audio");
       const cameraSelect = document.querySelector('#cameras');
@@ -143,6 +145,7 @@ export default {
           console.log(this.myStream);
           console.log(this.myStream.id);
           peerFace.srcObject = data.stream;
+          myFace2.srcObject = myStream;
           console.log(peerFace);
         });
         this.myStream.getTracks().forEach(track => this.myPeerConnection.addTrack(track, this.myStream));
