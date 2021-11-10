@@ -90,3 +90,12 @@
     opacity: 0;
   }
 }
+.paintbucket {
+  cursor: url("../assets/paint.png"), auto;
+}
+.paintbrush {
+  cursor: url("../assets/paint-brush.png") 0 32, auto;
+}
+.painteraser {
+  cursor: url("../assets/eraser-tool.png") 0 32, auto;
+}

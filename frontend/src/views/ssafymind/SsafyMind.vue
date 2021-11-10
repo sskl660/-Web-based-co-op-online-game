@@ -9,7 +9,7 @@
 			<div class="question-word">문제: SSA.zip</div>
 			<Timer />
 			<div class="turn-notice">당신 차례 입니다! 빨리 그리세요!</div>
-			<canvas id="jsCanvas" class="canvas" v-on:mousemove="onMouseMove" v-on:mousedown="startPainting" v-on:mouseup="stopPainting" v-on:mouseleave="stopPainting" v-on:mouseenter="mouseEnter" v-on:contextmenu="handleCM"></canvas>
+			<canvas id="jsCanvas" class="canvas paintbrush" v-on:mousemove="onMouseMove" v-on:mousedown="startPainting" v-on:mouseup="stopPainting" v-on:mouseleave="stopPainting" v-on:mouseenter="mouseEnter" v-on:contextmenu="handleCM"></canvas>
 			<!-- <div class="controls-stop"></div> -->
 			<div class="controls">
 				<div class="controls_colors" id="jsColors">
@@ -57,8 +57,9 @@ export default {
 			painting: false,
 			clickmouse: false,
 			filling: false,
-			drawData:[],
+			drawData:[], // 그린 좌표들 저장하는 배열
 			colorData:[],
+			saveData:[], // 마우스를 떼었을 때 멈추고 다시 저장하기 위한 배열
 		}
 	},
 	methods: {
@@ -80,14 +81,14 @@ export default {
 			if(!this.painting){
 				ctx.beginPath(); // 새로운 경로를 만든다. 경로가 생성되었다면, 이후 그리기 명령들은 경로를 구성하고 만드는 데에 사용된다.
 				ctx.moveTo(x, y); // 해당 좌표로 펜을 이동하는 메소드
-
 				// console.log(ctx.beginPath)
 			}else{
 				ctx.lineTo(x, y); // 현재 위치에서 해당 좌표까지 선 그리기
 				ctx.stroke(); // 윤곽선을 이용해 선 그리기
 				// console.log(x, y)
 				this.drawData.push({x, y, size});
-				console.log(this.drawData)
+				this.drawing();
+				// console.log(this.drawData)
 			}
 
 			// // 실시간으로 그려지나 확인
@@ -113,6 +114,32 @@ export default {
 			// ctx.stroke();
 			// ctx.closePath();
 		},
+		drawing: function(){
+			// 실시간으로 그려지나 확인
+			const canvas = document.getElementById("jsCanvas");
+			const ctx = canvas.getContext("2d");
+			// ctx.clearRect(0, 0, 1100, 760)
+			// ctx.lineWidth = 30;
+			// ctx.strokeStyle = "red";
+			if(this.saveData.length > 0){
+				this.saveData.forEach((lookline) => {
+					ctx.lineWidth = lookline.size;
+					ctx.moveTo(lookline.x+50, lookline.y+50);
+					ctx.lineTo(lookline.x+50, lookline.y+50);
+				})
+			}
+			ctx.save()
+			ctx.beginPath()
+
+			this.drawData.forEach((lookline) => {
+				ctx.lineWidth = lookline.size;
+				ctx.moveTo(lookline.x, lookline.y);
+				ctx.lineTo(lookline.x, lookline.y);
+			})
+			ctx.stroke();
+			ctx.closePath();
+			ctx.restore();
+		},
 		mouseEnter: function(){
 			if(this.clickmouse){
 				this.painting = true;
@@ -121,10 +148,22 @@ export default {
 			}
 		},
 		isMouseDown: function(){
+			// 그리기 시작
 			this.clickmouse = true;
 		},
 		isMouseUp: function(){
+			// 그리기 종료
 			this.clickmouse = false;
+			
+			console.log('여기서부터 4개 확인')
+			console.log(this.drawData)
+			console.log(this.drawData.length)
+			console.log(this.saveData)
+			console.log(this.saveData.length)
+			if(this.drawData && this.drawData.length > 0){
+				this.saveData[this.saveData.length] = this.drawData; // 그리는 거 저장하겠다
+				this.drawData = []; // 초기화
+			}
 		},
 		handleColorClick: function(event){
 			const canvas = document.getElementById("jsCanvas");
@@ -142,12 +181,20 @@ export default {
 			ctx.lineWidth = size;
 		},
 		handlePaintModeClick: function(){
+			const canvas = document.getElementById("jsCanvas");
 			if(this.filling === false){
+				// canvas.classList.remove(`painteraser`);
+				canvas.classList.remove(`paintbrush`);
+				canvas.classList.add(`paintbucket`);
 				this.filling = true;
 			}
 		},
 		handlePaletteModeClick: function(){
+			const canvas = document.getElementById("jsCanvas");
 			if(this.filling === true){
+				// canvas.classList.remove(`painteraser`);
+				canvas.classList.remove(`paintbucket`);
+				canvas.classList.add(`paintbrush`);
 				this.filling = false;
 			}
 		},
@@ -161,7 +208,11 @@ export default {
 		handleCanvasErase: function(){
 			const canvas = document.getElementById("jsCanvas");
 			const ctx = canvas.getContext("2d");
+			// canvas.classList.remove(`paintbucket`);
+			// canvas.classList.remove(`paintbrush`);
+			// canvas.classList.add(`painteraser`);
 			ctx.strokeStyle = "white";
+			// ctx.lineWidth = 30;
 		},
 		handleCM: function(event){
 			event.preventDefault();
@@ -173,8 +224,8 @@ export default {
 			// ctx.lineWidth = 30;
 			ctx.strokeStyle = "red";
 			ctx.beginPath();
-			if(this.drawData.length > 0){
-				this.drawData.forEach((lookline) => {
+			if(this.saveData.length > 0){
+				this.saveData.forEach((lookline) => {
 					ctx.lineWidth = lookline.size;
 					// ctx.fillRect(0,0,lookline.x, lookline.y)
 					ctx.moveTo(lookline.x+50, lookline.y+50);

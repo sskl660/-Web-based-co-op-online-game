@@ -267,6 +267,7 @@ export default {
       for(let i = 0; i < 11; i++){
         this.assignTeamNo[i] = [];
       }
+      console.log(this.room.members)
       for(let member of this.room.members){
         this.assignTeamNo[member.teamNo].push(member.participantName);
         // console.log("여기 확인", this.assignTeamNo)
