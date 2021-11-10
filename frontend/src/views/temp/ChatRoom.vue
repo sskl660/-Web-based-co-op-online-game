@@ -140,7 +140,7 @@ export default {
           console.log('---------------')
           console.log('This is My Stream')
           console.log(this.myStream)
-          peerFace.srcObject = this.myStream;
+          peerFace.srcObject = data.stream;
         });
         this.myStream.getTracks().forEach(track => this.myPeerConnection.addTrack(track, this.myStream));
       }
