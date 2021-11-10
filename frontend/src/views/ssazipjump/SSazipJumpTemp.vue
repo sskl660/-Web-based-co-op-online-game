@@ -26,7 +26,6 @@
                         <div class="ssazip-round-item-title">다음 게임</div>
                     </div>
                 </div>
-
                 <div class="ssazip-round-item" style="background-color:#B9D272;margin-top:2.5vh;">
                     <div class="ssazip-round-item-inner">
                         <div class="ssazip-round-item-title">3 ROUND</div>
@@ -40,6 +39,9 @@
 
 <script>
 import '../../css/ssazip-jump.css';
+import { socketConnect } from '@/util/socket-common.js';
+import { mapGetters } from 'vuex';
+
 export default {
     name: 'SSazipJumpTemp',
     data: function() {
@@ -59,6 +61,18 @@ export default {
             dinos: [],
             userId: '이미영',
             userIdx: 0,
+            ////js///////////
+            stompClient: null,
+            // 방 정보
+            room: {
+                id: '',
+                name: '',
+                host: '',
+                members: [],
+            },
+            //임의값
+
+            //////jsend//////
         };
     },
     methods: {
@@ -156,6 +170,88 @@ export default {
             };
             frame();
         },
+        //////////js/////////////
+        /**
+         * Socket 요청들
+         */
+        // 게임 방 입장 : 정보 구독 및 유저 정보 전송
+        onConnected() {
+            // 유저 정보 교환
+            this.stompClient.subscribe('/game/jumpgame/' + this.getRoomId, this.onMessageReceived);
+            this.stompClient.send(
+                '/pub/game/jump/enter',
+                {},
+                JSON.stringify({
+                    roomId: this.getRoomId,
+                    jumpArr: this.room.members,
+                    // participantId: this.getUser.id,
+                    // participantName: this.getUser.name,
+                    // teamNo: 0,
+                })
+            );
+            console.log('onconnected');
+        },
+        // 메세지 수신
+        onMessageReceived(payload) {
+            console.log('got mes');
+            // 방장이 퇴장한 경우
+            if (payload.body == 'exit') {
+                // 모든 참가자의 연결을 끊고
+                this.onDisconnect();
+                alert('방장이 퇴장하여 게임이 종료됩니다!');
+                // 모든 참가자 내보내기
+                this.$router.push('/room');
+                return;
+            }
+
+            let room = JSON.parse(payload.body);
+            console.log(room);
+            this.room.name = room.name;
+            this.room.host = room.host;
+            this.room.members = room.members;
+            if (room.openTeams != null) this.teamline = JSON.parse(room.openTeams);
+            console.log(this.room);
+            // 분류하는 함수
+            // this.assignTeam();
+        },
+        onTeamReceived(payload) {
+            let teams = JSON.parse(payload.body);
+            console.log(teams);
+            this.teamline = teams;
+        },
+        onError() {},
+        // 게임 방 퇴장 소켓 연결 해제 및 게임 방 유저 정보 삭제
+        onDisconnect() {
+            this.stompClient.send(
+                '/pub/game/jump/exit',
+                {},
+                JSON.stringify({
+                    roomId: this.getRoomId,
+                    participantId: this.getUser.id,
+                    participantName: this.getUser.name,
+                })
+            );
+            this.stompClient.disconnect();
+        },
+        // 팀 번호 변경시 소켓 요청
+        // changeTeamMessage() {
+        //     this.stompClient.send('/pub/game/change', {}, JSON.stringify(this.room));
+        // },
+        // // 방장이 팀 창을 열어주면 소켓 요청
+        // openTeamMessage() {
+        //     this.stompClient.send(`/pub/game/openTeam/${this.getRoomId}`, {}, JSON.stringify(this.teamline));
+        // },
+        jumping() {
+            this.stompClient.send(
+                '/pub/game/jumpgame',
+                {},
+                JSON.stringify({
+                    roomId: this.getRoomId,
+                    jumpArr: this.room.members,
+                })
+            );
+        },
+        //////////js end/////////////
     },
     mounted() {
         this.users.forEach((user, i, o) => {
@@ -171,10 +267,34 @@ export default {
                     if (e.code === 'Space') {
                         this.users[this.userIdx].jump = true;
                         console.log(this.dinos);
+                        console.log(this.users);
+                        console.log('1');
+                        this.jumping();
+                        console.log(this.room);
+                        console.log(this.members);
                     }
                 }
             });
     },
+    //////////js/////////////
+    created() {
+        // this.checkRoom();
+        // this.checkName();
+        // 소켓 연결
+        this.stompClient = socketConnect(this.onConnected, this.onError);
+        // 방정보 초기화
+        this.room.id = this.getRoomId;
+    },
+    destroyed() {
+        this.onDisconnect();
+    },
+    computed: {
+        ...mapGetters(['getRoomId', 'getUser']),
+        // ...mapState(['visitedRoomId']),
+        // ...mapActions(['joinRoom']),
+    },
+
+    //////////jsend//////////
 };
 </script>
 
