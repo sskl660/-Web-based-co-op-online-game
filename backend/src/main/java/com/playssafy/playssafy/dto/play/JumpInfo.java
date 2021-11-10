@@ -1,4 +1,4 @@
-package com.playssafy.playssafy.dto.game;
+package com.playssafy.playssafy.dto.play;
 
 import lombok.Data;
 

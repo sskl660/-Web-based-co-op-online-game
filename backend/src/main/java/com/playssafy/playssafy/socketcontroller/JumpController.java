@@ -1,10 +1,6 @@
 package com.playssafy.playssafy.socketcontroller;
 
-import com.playssafy.playssafy.dto.game.GameRoom;
 import com.playssafy.playssafy.dto.game.JumpInfo;
-import com.playssafy.playssafy.dto.game.Participant;
-import com.playssafy.playssafy.service.GameRoomService;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
