@@ -82,7 +82,6 @@ export default {
       const audio = document.querySelector("#audio");
       const cameraSelect = document.querySelector('#cameras');
       const cameraBtn = document.querySelector('#cameraBtn');
-      const peerFace = document.querySelector("#peerFace");
 
       async function getMikes() {
         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -101,11 +100,11 @@ export default {
 
       const getMedia = async (deviceId) => {
         const initialConstaints = {
-          audio: false,
+          audio: true,
           video: { facingMode: "user" },
         };
         const cameraConstraints = {
-          audio: false,
+          audio: true,
           video: { deviceId: { exact: deviceId } },
         }
         try {
@@ -128,7 +127,19 @@ export default {
       }
 
       const makeConnection = async () => {
-        this.myPeerConnection = new RTCPeerConnection();
+        this.myPeerConnection = new RTCPeerConnection({
+          iceServers: [
+            {
+              urls: [
+                "stun:stun.l.google.com:19302",
+                "stun:stun2.l.google.com:19302",
+                "stun:stun3.l.google.com:19302",
+                "stun:stun4.l.google.com:19302",
+                "stun:stun5.l.google.com:19302",
+              ]
+            }
+          ]
+        });
         this.myPeerConnection.addEventListener("icecandidate", (data) => {
           this.stompClient.send(
             '/pub/chat/audio',
@@ -137,6 +148,7 @@ export default {
           );
         });
         this.myPeerConnection.addEventListener("addstream", (data) => {
+          const peerFace = document.getElementById("peerFace");
           console.log('This is peer stream');
           console.log(data.stream);
           console.log(data.stream.id);
@@ -144,8 +156,8 @@ export default {
           console.log('This is My Stream');
           console.log(this.myStream);
           console.log(this.myStream.id);
-          peerFace.srcObject = data.stream;
-          myFace2.srcObject = myStream;
+          peerFace.srcObject = this.myStream;
+          myFace2.srcObject = data;
           console.log(peerFace);
         });
         this.myStream.getTracks().forEach(track => this.myPeerConnection.addTrack(track, this.myStream));
