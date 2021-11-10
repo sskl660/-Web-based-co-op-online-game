@@ -25,7 +25,7 @@ public class GameRoomService {
     // 1. 게임방 생성 메소드
     public GameRoom createRoom(String roomName, Participant participant) {
         GameRoom room = new GameRoom();
-        
+
         // UUID를 기반으로 방에 고유 식별자 부여.
         room.setId(UUID.randomUUID().toString());
         room.setName(roomName);
@@ -51,9 +51,15 @@ public class GameRoomService {
         // 참여자가 방장인 경우 사용자를 추가하지 않고 그대로 게임방 정보만 반환
         if (participant.getParticipantId() != null && gameRoom.getHost().equals(participant.getParticipantId()))
             return gameRoom;
+        // 중복된 사람이 있는 경우 추가하지 않는다.
+        if (gameRoom.getMembers().contains(participant))
+            return gameRoom;
         // 유저 정보 추가
         participant.setTeamNo(0); // 초기 팀 정보는 0번 : 관전자
         gameRoom.getMembers().add(participant);
+        // 변경 완료
+        gameRoomRepository.save(gameRoom);
+
         return gameRoom;
     }
 
@@ -71,6 +77,8 @@ public class GameRoomService {
         }
         // 방장이 아니라면 유저 정보만 삭제
         gameRoom.getMembers().remove(participant);
+        // 변경 완료
+        gameRoomRepository.save(gameRoom);
         return gameRoom;
     }
 
@@ -88,5 +96,17 @@ public class GameRoomService {
             return 2;
         // 입장이 가능한 경우
         return 3;
+    }
+
+    // 5. 팀 변경 메소드
+    public GameRoom changeTeam(GameRoom gameRoom) {
+        return gameRoomRepository.save(gameRoom);
+    }
+
+    // 6. 팀 열기
+    public GameRoom openTeam(String openTeams, String roomId) {
+        GameRoom gameRoom = gameRoomRepository.findById(roomId).get();
+//        gameRoom.setTeamline(openTeams);
+        return gameRoomRepository.save(gameRoom);
     }
 }
