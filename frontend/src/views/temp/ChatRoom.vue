@@ -23,6 +23,8 @@
       <p>비디오/오디오 통신</p>
       <!-- <video src="@/assets/images/back.mp4" id="myFace" style="width: 400px; border: 1px solid black;" autoplay playsinline/> -->
       <video id="myFace" style="width: 400px; border: 1px solid black;" autoplay playsinline />
+      <video id="peerFace" style="width: 400px; border: 1px solid black;" autoplay playsinline />
+      <video id="myFace2" style="width: 400px; border: 1px solid black;" autoplay playsinline />
       <br />
       <button id="video">비디오 On</button>
       <button id="audio">소리 On</button>
@@ -63,10 +65,10 @@ export default {
   created() {
     this.id = this.$route.query.id;
     this.name = this.$route.query.name;
-    this.stompClient = socketConnect(this.onConnected, this.onError);
     // console.log(this.stompClient);
   },
   mounted() {
+    this.stompClient = socketConnect(this.onConnected, this.onError);
     // this.getAudio();
     // this.translate();
     this.socketio();
@@ -75,6 +77,7 @@ export default {
     socketio: async function() {
       let myStream, myPeerConnection;
       const myFace = document.querySelector("#myFace");
+      const myFace2 = document.querySelector("#myFace2");
       const video = document.querySelector("#video");
       const audio = document.querySelector("#audio");
       const cameraSelect = document.querySelector('#cameras');
@@ -97,18 +100,18 @@ export default {
 
       const getMedia = async (deviceId) => {
         const initialConstaints = {
-          audio: false,
+          audio: true,
           video: { facingMode: "user" },
         };
         const cameraConstraints = {
-          audio: false,
+          audio: true,
           video: { deviceId: { exact: deviceId } },
         }
         try {
-          this.myStream = await navigator.mediaDevices.getUserMedia(
+          myStream = await navigator.mediaDevices.getUserMedia(
             deviceId ? cameraConstraints : initialConstaints
           )
-          myStream = this.myStream;
+          this.myStream = myStream;
           myFace.srcObject = this.myStream;
           if(!deviceId) {
             await getMikes();
@@ -123,10 +126,20 @@ export default {
         makeConnection();
       }
 
-      initCall();
-
       const makeConnection = async () => {
-        this.myPeerConnection = new RTCPeerConnection();
+        this.myPeerConnection = new RTCPeerConnection({
+          iceServers: [
+            {
+              urls: [
+                "stun:stun.l.google.com:19302",
+                "stun:stun2.l.google.com:19302",
+                "stun:stun3.l.google.com:19302",
+                "stun:stun4.l.google.com:19302",
+                "stun:stun5.l.google.com:19302",
+              ]
+            }
+          ]
+        });
         this.myPeerConnection.addEventListener("icecandidate", (data) => {
           this.stompClient.send(
             '/pub/chat/audio',
@@ -135,12 +148,17 @@ export default {
           );
         });
         this.myPeerConnection.addEventListener("addstream", (data) => {
-          console.log('This is peer stream')
-          console.log(data.stream)
-          console.log('---------------')
-          console.log('This is My Stream')
-          console.log(this.myStream)
-          console.log(myStream)
+          const peerFace = document.getElementById("peerFace");
+          console.log('This is peer stream');
+          console.log(data.stream);
+          console.log(data.stream.id);
+          console.log('---------------');
+          console.log('This is My Stream');
+          console.log(this.myStream);
+          console.log(this.myStream.id);
+          peerFace.srcObject = this.myStream;
+          myFace2.srcObject = data;
+          console.log(peerFace);
         });
         this.myStream.getTracks().forEach(track => this.myPeerConnection.addTrack(track, this.myStream));
       }
@@ -174,6 +192,8 @@ export default {
       cameraSelect.addEventListener("input", async () => {
         await getMedia(cameraSelect.value);
       });
+
+      await initCall();
 
     },
     getAudio: function() {
@@ -372,6 +392,7 @@ export default {
     async useMike() {
       const offer = await this.myPeerConnection.createOffer();
       this.myPeerConnection.setLocalDescription(offer);
+      console.log("sent the offer");
       this.stompClient.send(
         '/pub/chat/audio',
         {},
@@ -393,39 +414,33 @@ export default {
     //   }
     // },
     async sendOffer(offer) {
-      // if(this.getOffer) return;
-      await this.myPeerConnection.setRemoteDescription(offer);
+      console.log("received the offer");
+      this.myPeerConnection.setRemoteDescription(offer);
       const answer = await this.myPeerConnection.createAnswer();
-      await this.myPeerConnection.setLocalDescription(answer);
+      this.myPeerConnection.setLocalDescription(answer);
       if (offer.type && this.stompClient) {
         await this.stompClient.send(
           '/pub/chat/audio',
           {},
           JSON.stringify({ roomId: this.id, offer: answer, writer: '안기훈' })
         )
-        this.getOffer = true;
+        console.log("sent the answer");
       }
     },
 
     async sendAnswer(answer) {
-      // if(this.getAnswer) return;
-      this.getAnswer = true;
+      console.log("received the answer");
       this.myPeerConnection.setRemoteDescription(answer);
-      // this.stompClient.send(
-      //   '/pub/chat/audio',
-      //   {},
-      //   JSON.stringify({ roomId: this.id, offer: offer, writer: '안기훈' })
-      // );
     },
 
     async sendIce(ice) {
+      console.log("received candidate");
       this.myPeerConnection.addIceCandidate(ice);
     },
 
     // 메세지 수신
     onMessageReceived(payload) {
       let receiveMessage = JSON.parse(payload.body);
-      console.log(receiveMessage)
       if (receiveMessage.offer) {
         if (receiveMessage.offer.type === 'offer') {
           this.sendOffer(receiveMessage.offer);
@@ -434,13 +449,10 @@ export default {
           this.sendAnswer(receiveMessage.offer)
           return
         } else if (receiveMessage.offer.candidate) {
-          this.sendIce(receiveMessage)
+          this.sendIce(receiveMessage.offer)
           return
         }
-        console.log('else message')
-        console.log(receiveMessage)
-        console.log('else message')
-      }
+      } else return;
       this.receivedMessages.push(receiveMessage);
       console.log(receiveMessage);
     },
