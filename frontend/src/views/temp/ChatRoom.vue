@@ -135,12 +135,15 @@ export default {
           );
         });
         this.myPeerConnection.addEventListener("addstream", (data) => {
-          console.log('This is peer stream')
-          console.log(data.stream)
-          console.log('---------------')
-          console.log('This is My Stream')
-          console.log(this.myStream)
+          console.log('This is peer stream');
+          console.log(data.stream);
+          console.log(data.stream.id);
+          console.log('---------------');
+          console.log('This is My Stream');
+          console.log(this.myStream);
+          console.log(this.myStream.id);
           peerFace.srcObject = data.stream;
+          console.log(peerFace);
         });
         this.myStream.getTracks().forEach(track => this.myPeerConnection.addTrack(track, this.myStream));
       }
