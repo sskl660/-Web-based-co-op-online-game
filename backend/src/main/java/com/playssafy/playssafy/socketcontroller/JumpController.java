@@ -1,6 +1,7 @@
 package com.playssafy.playssafy.socketcontroller;
 
 import com.playssafy.playssafy.dto.game.GameRoom;
+import com.playssafy.playssafy.dto.game.JumpInfo;
 import com.playssafy.playssafy.dto.game.Participant;
 import com.playssafy.playssafy.service.GameRoomService;
 import lombok.Data;
@@ -18,14 +19,14 @@ public class JumpController {
     private final SimpMessagingTemplate template;
 //    private final GameRoomService gameRoomService; // 게임 방 저장소
 
-    @MessageMapping(value = "/game/jump/enter")
+    @MessageMapping(value = "/game/jumpsend")
     public void enter(JumpInfo jumpInfo) {
+        System.out.println(jumpInfo.getRoomId());
+//        System.out.println(jumpInfo.getJumpArr2().toString());
+//        System.out.println(jumpInfo.toString());
+//        System.out.println(jumpInfo.getJumpArr2().toString());
+        System.out.println(jumpInfo.getClass().getSimpleName());
         template.convertAndSend("/game/jumpgame/" + jumpInfo.getRoomId(), jumpInfo);
     }
 
-    @Data
-    class JumpInfo{
-        private String roomId; // 게임방 ID
-        private boolean[] jumpArr; // 점프값 어레이
-    }
 }
