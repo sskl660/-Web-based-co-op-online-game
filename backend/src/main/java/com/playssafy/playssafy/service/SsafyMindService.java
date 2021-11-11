@@ -1,8 +1,11 @@
 package com.playssafy.playssafy.service;
 
 
-import com.playssafy.playssafy.dto.waitroom.InitGame;
+import com.playssafy.playssafy.dto.ssafymind.MindMessage;
+import com.playssafy.playssafy.dto.ssafymind.Point;
 import com.playssafy.playssafy.dto.ssafymind.SsafyMind;
+import com.playssafy.playssafy.dto.ssafymind.Team;
+import com.playssafy.playssafy.dto.waitroom.InitGame;
 import com.playssafy.playssafy.dto.waitroom.Participant;
 import com.playssafy.playssafy.repository.SsafyMindRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +46,7 @@ public class SsafyMindService {
             teams.set(a, teams.get(b));
             teams.set(b, temp);
         }
-        System.out.println(teams);
+
         // 최종 결정된 순서 넣기
         for (Integer i : teams) {
             ssafyMind.getTeamOrder().add(i);
@@ -53,23 +56,18 @@ public class SsafyMindService {
     }
 
     // 1. 게임방 입장 메서드
-    public SsafyMind enter(Participant participant) {
+    public synchronized SsafyMind enter(Participant participant) {
         SsafyMind ssafyMind = ssafyMindRepository.findById(participant.getRoomId()).get();
-        // 방장이 아닌 경우에만
-        if (!ssafyMind.getHost().equals(participant.getParticipantId())) {
-            // 방에 팀 정보 추가(해당 팀에 유저가 존재하지 않는 경우)
-//            ArrayList<Participant> team = ssafyMind.getTeams().get(participant.getTeamNo());
-            if (!ssafyMind.getTeams().get(participant.getTeamNo()).contains(participant)) {
-                ssafyMind.getTeams().get(participant.getTeamNo()).add(participant);
-            }
-        }
+        Team team = ssafyMind.getTeams().get(participant.getTeamNo());
+        if (!team.getMembers().contains(participant))
+            team.getMembers().add(participant);
 
         // 변경 완료
         return ssafyMindRepository.save(ssafyMind);
     }
 
     // 2. 게임방 퇴장 메서드
-    public SsafyMind exit(Participant participant) {
+    public synchronized SsafyMind exit(Participant participant) {
         SsafyMind ssafyMind = ssafyMindRepository.findById(participant.getRoomId()).get();
 
         // 방장이라면 방 자체를 삭제 후 종료
@@ -78,10 +76,40 @@ public class SsafyMindService {
             return null;
         }
         // 방장이 아니라면 유저 정보만 삭제
-        ssafyMind.getTeams().get(participant.getTeamNo()).remove(participant);
+        Team team = ssafyMind.getTeams().get(participant.getTeamNo());
+        team.getMembers().remove(participant);
 
         // 변경 완료
         return ssafyMindRepository.save(ssafyMind);
+    }
+
+    // 3. 그림 데이터 교환
+    public void draw(String roomId, Point point) {
+        SsafyMind ssafyMind = ssafyMindRepository.findById(roomId).get();
+
+        // 그림 데이터 추가
+        ssafyMind.getPoints().add(point);
+        ssafyMindRepository.save(ssafyMind);
+    }
+
+    // 4. 정답 여부 확인
+    public boolean answer(String roomId, MindMessage mindMessage) {
+        SsafyMind ssafyMind = ssafyMindRepository.findById(roomId).get();
+
+        // 메세지 스택 저장
+        ssafyMind.getChat().add(mindMessage);
+        // 리스트의 마지막 부분 부터 문제 회수
+        int lastIndex = ssafyMind.getQuizzes().size();
+        if(ssafyMind.getQuizzes().get(lastIndex).equals(mindMessage.getMessage())) {
+            // 마지막 문제를 제거하고
+            ssafyMind.getQuizzes().remove(lastIndex);
+            // 저장한 뒤
+            ssafyMindRepository.save(ssafyMind);
+            // 정답
+            return true;
+        }
+        // 오답
+        return false;
     }
 
 

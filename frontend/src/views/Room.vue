@@ -36,7 +36,7 @@
         </div>
         <!-- </div> -->
         <div class="team-group">
-          <div v-for="index in totalTeam" :key="index">
+          <div v-for="index in totalTeam" :key="index" class="line">
             <div
               v-bind:class="'team-group team-group-' + index"
               v-show="room.teamline[index]"
@@ -201,13 +201,17 @@ export default {
     this.checkName();
     // 소켓 연결
     // this.setStompClient(socketConnect(this.onConnected, this.onError));
-    this.stompClient = socketConnect(this.onConnected, this.onError);
+    // this.stompClient = socketConnect(this.onConnected, this.onError);
     // 방정보 초기화
     this.room.id = this.getRoomId;
+    this.stompClient = socketConnect(this.onConnected, this.onError);
   },
   // 방 삭제시
   destroyed() {
     this.onDisconnect();
+  },
+  updated() {
+    this.setButton();
   },
   computed: {
     ...mapGetters(['getRoomId', 'getUser', 'getStompClient']),
@@ -321,7 +325,6 @@ export default {
           break;
         }
       }
-      console.log('aa');
       this.changeTeamMessage();
     },
     getOpenModal(openmodal) {
@@ -370,7 +373,7 @@ export default {
           roomId: this.getRoomId,
           participantId: this.getUser.id,
           participantName: this.getUser.name,
-          teamNo: 0,
+          teamNo: this.getUser.teamNo,
         })
       );
     },
@@ -391,20 +394,32 @@ export default {
       this.room.name = room.name;
       this.room.host = room.host;
       this.room.members = room.members;
-      if (room.teamline != null) this.room.teamline = room.teamline;
+      if (room.teamline != null) {
+        this.room.teamline = room.teamline;
+      }
+    },
+    // 버튼 클릭 초기화
+    setButton() {
+      for (let idx = 1; idx < 11; idx++) {
+        if (this.room.teamline[idx]) {
+          // 자신을 찾기
+          let btn = document.querySelector(`#btn-${idx}`);
+          btn.classList.add(`btn-${idx}`);
+        }
+      }
     },
     onError() {},
     // 게임 방 퇴장 소켓 연결 해제 및 게임 방 유저 정보 삭제
     onDisconnect() {
-      this.stompClient.send(
-        '/pub/game/exit',
-        {},
-        JSON.stringify({
-          roomId: this.getRoomId,
-          participantId: this.getUser.id,
-          participantName: this.getUser.name,
-        })
-      );
+      // this.stompClient.send(
+      //   '/pub/game/exit',
+      //   {},
+      //   JSON.stringify({
+      //     roomId: this.getRoomId,
+      //     participantId: this.getUser.id,
+      //     participantName: this.getUser.name,
+      //   })
+      // );
       this.stompClient.disconnect();
     },
     // 팀 번호 변경시 소켓 요청
