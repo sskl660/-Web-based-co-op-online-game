@@ -16,7 +16,7 @@
       <div class="turn-notice">당신 차례 입니다! 빨리 그리세요!</div>
       <canvas
         id="jsCanvas"
-        class="canvas"
+        class="canvas paintbrush"
         v-on:mousemove="onMouseMove"
         v-on:mousedown="startPainting"
         v-on:mouseup="stopPainting"
@@ -99,7 +99,7 @@ export default {
 			offsetX: 0,
 			offsetY: 0,
 			lineSize: 2.5,
-			color: "rgb(0, 0, 0)",
+			color: "rgb(255, 255, 255)",
 			beginPath: true,
 			};
   },
@@ -191,8 +191,6 @@ export default {
 		drawing: function(){
 			// 실시간으로 그려지나 확인
 			// ctx.clearRect(0, 0, 1100, 760)
-			// ctx.lineWidth = 30;
-			// ctx.strokeStyle = "red";
 			// console.log("saveData 확인", this.saveData.length)
 			if(this.saveData.length > 0){
 				this.saveData.forEach((lookline) => {
@@ -362,35 +360,15 @@ export default {
       event.preventDefault();
     },
     handleSave: function() {
-      const canvas = document.getElementById('jsCanvas');
-      const ctx = canvas.getContext('2d');
-      // ctx.clearRect(0, 0, 1100, 760)
-      // ctx.lineWidth = 30;
-      ctx.strokeStyle = 'red';
-      ctx.beginPath();
-      if (this.saveData.length > 0) {
-        this.saveData.forEach((lookline) => {
-          ctx.lineWidth = lookline.size;
-          // ctx.fillRect(0,0,lookline.x, lookline.y)
-          ctx.moveTo(lookline.x + 50, lookline.y + 50);
-          ctx.lineTo(lookline.x + 50, lookline.y + 50);
-          // console.log(lookline.x, lookline.y, lookline.size);
-          console.log(ctx.lineWidth);
-        });
-      }
-      // console.log(this.drawData.length)
-      ctx.stroke();
-      ctx.closePath();
-
-      // const canvas = document.getElementById("jsCanvas");
-      // const image = canvas.toDataURL();
-      // const link = document.createElement("a");
-      // // const imageName = prompt("그림 이름 지어줭");
-      // link.href = image;
-      // // link.download = imageName;
-      // link.download = "내가그린기린그림";
-      // link.click();
-      // // console.log(image);
+      const canvas = document.getElementById("jsCanvas");
+      const image = canvas.toDataURL();
+      const link = document.createElement("a");
+      // const imageName = prompt("그림 이름 지어줭");
+      link.href = image;
+      // link.download = imageName;
+      link.download = "내가그린기린그림";
+      link.click();
+      // console.log(image);
     },
     setCanvas: function() {
       const canvas = document.getElementById('jsCanvas');
@@ -403,6 +381,7 @@ export default {
 			this.canvas = canvas;
 			this.ctx = ctx;
       const INITIAL_COLOR = 'black';
+			console.log(INITIAL_COLOR)
       canvas.width = 1100;
       canvas.height = 760;
       // canvas.width = window.innerWidth;
@@ -466,9 +445,25 @@ export default {
       }
       const data = JSON.parse(payload.body);
       this.room = data;
+			console.log('포인트를 알고싶다고')
       console.log(data);
       // 여기에 받은 데이터를 기반으로 그리고 있는 그림 초기화하는 로직 구현
       // for(this.room.points)
+			if(data.points.length > 0){
+				data.points.forEach((lookline) => {
+					this.ctx.beginPath()
+					this.ctx.moveTo(lookline[0].x, lookline[0].y);
+					lookline.forEach((index) => {
+						// console.log('확인',index.x)
+						this.ctx.lineWidth = index.size;
+						// console.log('lookline', index.x+50)
+						this.ctx.lineTo(index.x, index.y);
+						this.ctx.stroke();
+					})
+					this.ctx.closePath();
+					this.ctx.save()
+				})
+			}
     },
     // 게임 방 퇴장 소켓 연결 해제 및 게임 방 유저 정보 삭제
     onDisconnect() {
@@ -500,8 +495,12 @@ export default {
     },
     onDrawMessageReceived(payload) {
       const data = JSON.parse(payload.body);
-      console.log(data);
+      // console.log(data);
       // 여기에 실시간으로 그리는 로직 작성
+
+			this.ctx.lineWidth = data.size;
+			this.ctx.strokeStyle = data.color;
+			this.ctx.fillStyle = data.color;
 			if (data.beginPath) {
         this.ctx.beginPath();
 				this.ctx.moveTo(data.x, data.y); 
@@ -510,6 +509,10 @@ export default {
         this.ctx.lineTo(data.x, data.y);
         this.ctx.stroke();
       }
+
+			if(data.fillFlag){
+				this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+			}
     },
     test() {
       this.stompClient.send(
