@@ -1,5 +1,6 @@
 <template>
   <div class="ssafymind" v-on:mousedown="isMouseDown" v-on:mouseup="isMouseUp">
+    <button @click="sendTimeTrigger()">눌러</button>
     <GameOrderModal v-if="ordermodal == true" @getCloseModal="getCloseModal" />
     <!-- <div class="room-title">
       <span id="game-title">싸피마인드</span>
@@ -9,10 +10,13 @@
       v-bind:host="room.host"
       v-on:onDisconnect="onDisconnect()"
     />
-    <GameStatus />
+    <GameStatus v-bind:teamOrder="room.teamOrder" />
     <div class="ssafymind-center">
-      <div class="question-word">문제: SSA.zip</div>
-      <Timer />
+      <div class="question-word" v-if="room.quizzes != null">
+        {{ room.quizzes[room.quizzes.length - 1].problem }}
+      </div>
+      <!-- <div class="question-word">{{ 싸집 }}</div> -->
+      <Timer v-bind:minutes="minutes" v-bind:seconds="seconds" />
       <div class="turn-notice">당신 차례 입니다! 빨리 그리세요!</div>
       <canvas
         id="jsCanvas"
@@ -60,25 +64,39 @@
         </div>
       </div>
     </div>
-    <SsafymindRight />
+    <!-- <SsafymindRight /> -->
+    <div class="ssafymind-right">
+      <div>
+        <input
+          type="text"
+          placeholder="메세지를 입력하세요"
+          v-model="message"
+          @keyup.enter="sendAnswerMessage"
+        />
+        <div v-for="(msg, idx) in room.chat" :key="idx">
+          <p>{{ msg.name }} : {{ msg.message }}</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
 import Header from '@/components/common/Header.vue';
 import GameOrderModal from '@/components/GameOrderModal';
 import GameStatus from '@/components/GameStatus.vue';
-import SsafymindRight from '@/components/ssafymind/SsafymindRight.vue';
+// import SsafymindRight from '@/components/ssafymind/SsafymindRight.vue';
 import Timer from '@/components/common/Timer.vue';
 import '@/css/ssafymind.css';
 import { mapGetters } from 'vuex';
 import { socketConnect } from '@/util/socket-common.js';
+import '@/components/css/ssafymind/ssafymind-right.css';
 
 export default {
   name: 'SsafyMind',
   components: {
     Header,
     GameStatus,
-    SsafymindRight,
+    // SsafymindRight,
     Timer,
     GameOrderModal, // 게임 순서 모달
   },
@@ -92,8 +110,12 @@ export default {
       drawData: [], // 그린 좌표들 저장하는 배열
       colorData: [],
       saveData: [], // 마우스를 떼었을 때 멈추고 다시 저장하기 위한 배열
-      stompClient: null, // socket
+      // socket 관련 데이터
+      stompClient: null, // stompClient
       room: {}, // 방 정보
+      message: '', // 보낼 메세지
+      minutes: '',
+      seconds: '',
     };
   },
   created() {
@@ -391,6 +413,18 @@ export default {
       this.stompClient.subscribe('/ssafymind/' + this.getRoomId, this.onMesseageReceived);
       // 그림 정보 교환 채널
       this.stompClient.subscribe('/ssafymind/draw/' + this.getRoomId, this.onDrawMessageReceived);
+      // 메세지 교환 채널
+      this.stompClient.subscribe(
+        '/ssafymind/message/' + this.getRoomId,
+        this.onAnswerMessageReceived
+      );
+      // 정답 여부 교환 채널
+      this.stompClient.subscribe(
+        '/ssafymind/correct/' + this.getRoomId,
+        this.onCorrectMessageReceived
+      );
+      // 시간 정보 교환 채널
+      this.stompClient.subscribe('/ssafymind/time/' + this.getRoomId, this.onTimeMessageReceived);
       this.stompClient.send(
         '/pub/ssafymind/enter',
         {},
@@ -401,7 +435,7 @@ export default {
           teamNo: this.getUser.teamNo,
         })
       );
-      // this.test();
+      this.test();
     },
     onMesseageReceived(payload) {
       if (payload.body == 'exit') {
@@ -432,6 +466,9 @@ export default {
       this.stompClient.disconnect();
       this.$router.push('/room/' + this.getRoomId);
     },
+    /**
+     * 좌표 보내기, 받기
+     */
     sendDrawMessage() {
       // 보내는 객체 여기다가 넣기
       this.stompClient.send(`/pub/ssafymind/draw/${this.getRoomId}`, {}, JSON.stringify());
@@ -440,6 +477,46 @@ export default {
       const data = JSON.parse(payload.body);
       console.log(data);
       // 여기에 실시간으로 그리는 로직 작성
+    },
+    /**
+     * 메세지 보내기, 받기
+     */
+    sendAnswerMessage() {
+      this.stompClient.send(
+        `/pub/ssafymind/message/${this.getRoomId}`,
+        {},
+        JSON.stringify({
+          name: this.getUser.name,
+          teamNo: this.getUser.teamNo,
+          message: this.message,
+        })
+      );
+      this.message = '';
+    },
+    onAnswerMessageReceived(payload) {
+      const data = JSON.parse(payload.body);
+      console.log(data);
+      this.room.chat.push(data);
+    },
+    /**
+     * 정답 여부 수신
+     */
+    onCorrectMessageReceived(payload) {
+      console.log(payload.body);
+      const flag = JSON.parse(payload.body);
+      if (flag) alert('정답입니다!');
+    },
+    /**
+     * 시간 트리거 발동, 수신
+     */
+    sendTimeTrigger() {
+      // this.stompClient.send('/pub/ssafymind/time', {}, 'stop');
+      this.stompClient.send(`/pub/ssafymind/time/${90}`, {}, this.getRoomId);
+    },
+    onTimeMessageReceived(payload) {
+      const time = JSON.parse(payload.body);
+      this.minutes = parseInt(time / 60);
+      this.seconds = time % 60;
     },
     test() {
       this.stompClient.send(
