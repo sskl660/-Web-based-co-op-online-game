@@ -481,28 +481,42 @@ export default {
             //     console.log('=========got nothing');
             //     return;
             // }
-            console.log('======got mes');
-            if(info.reload){
-                this.reloadFlag=false;
+            console.log('======got mes=========');
+            if (info.reload) {
+                this.reloadFlag = false;
                 this.$router.go();
                 return;
             }
-
+            console.log(info.jumpArr1);
+            console.log(info.jumpArr2);
+            console.log(this.jumpsss1);
+            console.log(this.jumpsss2);
             this.jumpsss1 = info.jumpArr1;
             this.jumpsss2 = info.jumpArr2;
-            console.log('========i got arr');
             console.log(this.jumpsss1);
             console.log(this.jumpsss2);
             for (let i = 0; i < this.jumpsss1.length; i++) {
-                this.users1[i].jump = this.jumpsss1[i];
+                if (this.jumpsss1[i]) {
+                    //점프 명령
+                    this.users1[i].jump = true;
+                    //초기화
+                    this.jumpsss1[i] = false;
+                }
+                // this.users1[i].jump = this.jumpsss1[i];
             }
             for (let i = 0; i < this.jumpsss2.length; i++) {
-                this.users2[i].jump = this.jumpsss2[i];
+                if (this.jumpsss2[i]) {
+                    //점프 명령
+                    this.users2[i].jump = true;
+                    //초기화
+                    this.jumpsss2[i] = false;
+                }
+                // this.users2[i].jump = this.jumpsss2[i];
             }
-            console.log('users');
-            console.log(this.users1);
-            console.log(this.users2);
-            console.log('users');
+            // console.log('users');
+            // console.log(this.users1);
+            // console.log(this.users2);
+            // console.log('users');
 
             if (payload.body == 'exit') {
                 // 모든 참가자의 연결을 끊고
@@ -566,9 +580,9 @@ export default {
             // this.jumpsss1 = [];
             // this.jumpsss2 = [];
         },
-        reloading(){
-            console.log("=======sending reloading");
-            this.reloadFlag=true;
+        reloading() {
+            console.log('=======sending reloading');
+            this.reloadFlag = true;
             this.stompClient.send(
                 '/pub/game/jumpsend',
                 {},
@@ -606,65 +620,84 @@ export default {
                 this.reloading();
             }
         }),
+            //스페이스바 누르면 점프값 변경
+            document.addEventListener('keydown', (e) => {
+                //착지해야만 점프가능
 
-        //스페이스바 누르면 점프값 변경
-        document.addEventListener('keydown', (e) => {
-            //착지해야만 점프가능
+                if (this.teamIdx == 1) {
+                    if (this.dinos1[this.userIdx].y == 200) {
+                        if (e.code === 'Space') {
+                            console.log('space pushed team1');
+                            console.log(this.getUser.name);
+                            // this.users1[this.userIdx].jump = true;
+                            /////////////////////////////////////
+                            console.log(this.jumpsss1);
+                            console.log(this.jumpsss2);
 
-            if (this.teamIdx == 1) {
-                if (this.dinos1[this.userIdx].y == 200) {
-                    if (e.code === 'Space') {
-                        console.log('space pushed team1');
-                        console.log(this.getUser.name);
-                        // this.users1[this.userIdx].jump = true;
-                        /////////////////////////////////////
-                        this.jumpsss1[this.userIdx] = true;
-                        // console.log("jump idx== "+this.userIdx);
-                        // const newarr= this.room.members;
-                        // const newarr = Array;
-                        // for (var i = 0; i < this.users1.length; i++) {
-                        //     this.jumpsss1.push(this.users1[i].jump);
-                        // }
-                        // this.room.members = newarr;
-                        // console.log(this.users[this.userIdx].jump);
-                        // console.log(this.jumpsss1);
-                        // console.log(this.getRoomId);
-                        // console.log('1');
-                        this.jumping();
-                        // console.log(this.room);
-                        // console.log(this.members);
-                        ///////////////////end//////////
+                            this.jumpsss1[this.userIdx] = true;
+                            console.log(this.jumpsss1);
+
+                            // console.log("jump idx== "+this.userIdx);
+                            // const newarr= this.room.members;
+                            // const newarr = Array;
+                            // for (var i = 0; i < this.users1.length; i++) {
+                            //     this.jumpsss1.push(this.users1[i].jump);
+                            // }
+                            // this.room.members = newarr;
+                            // console.log(this.users[this.userIdx].jump);
+                            // console.log(this.jumpsss1);
+                            // console.log(this.getRoomId);
+                            // console.log('1');
+                            this.jumping();
+                            this.jumpsss1[this.userIdx] = false;
+                            console.log('=========');
+
+                            console.log(this.jumpsss1);
+
+                            // console.log(this.room);
+                            // console.log(this.members);
+                            ///////////////////end//////////
+                        }
+                    }
+                } else {
+                    if (this.dinos2[this.userIdx].y == 200) {
+                        if (e.code === 'Space') {
+                            console.log('space pushed team2');
+                            console.log(this.getUser.name);
+                            // this.users2[this.userIdx].jump = true;
+                            //////////////////////////////////////
+                            console.log(this.jumpsss1);
+                            console.log(this.jumpsss2);
+
+                            this.jumpsss2[this.userIdx] = true;
+                            console.log(this.jumpsss2);
+
+                            // console.log("jump idx== "+this.userIdx);
+                            // const newarr= this.room.members;
+                            // const newarr = Array;
+                            // console.log(this.jumpsss2);
+                            // for (var j = 0; j < this.users2.length; j++) {
+                            //     this.jumpsss2.push(this.users2[j].jump);
+                            // }
+                            // this.room.members = newarr;
+                            // console.log(this.users[this.userIdx].jump);
+
+                            // console.log(this.getRoomId);
+                            // console.log('1');
+                            this.jumping();
+
+                            this.jumpsss2[this.userIdx] = false;
+                            console.log('=========');
+
+                            console.log(this.jumpsss2);
+
+                            // console.log(this.room);
+                            // console.log(this.members);
+                            ///////////////////end//////////
+                        }
                     }
                 }
-            } else {
-                if (this.dinos2[this.userIdx].y == 200) {
-                    if (e.code === 'Space') {
-                        console.log('space pushed team2');
-                        console.log(this.getUser.name);
-                        // this.users2[this.userIdx].jump = true;
-                        //////////////////////////////////////
-                        this.jumpsss2[this.userIdx] = true;
-
-                        // console.log("jump idx== "+this.userIdx);
-                        // const newarr= this.room.members;
-                        // const newarr = Array;
-                        // console.log(this.jumpsss2);
-                        // for (var j = 0; j < this.users2.length; j++) {
-                        //     this.jumpsss2.push(this.users2[j].jump);
-                        // }
-                        // this.room.members = newarr;
-                        // console.log(this.users[this.userIdx].jump);
-
-                        // console.log(this.getRoomId);
-                        // console.log('1');
-                        this.jumping();
-                        // console.log(this.room);
-                        // console.log(this.members);
-                        ///////////////////end//////////
-                    }
-                }
-            }
-        });
+            });
 
         // document.addEventListener('keydown', (e) => {
         //     //착지해야만 점프가능
