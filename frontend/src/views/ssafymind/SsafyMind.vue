@@ -1,55 +1,77 @@
 <template>
-	<div class="ssafymind" v-on:mousedown="isMouseDown" v-on:mouseup="isMouseUp">
-		
-		<GameOrderModal v-if="ordermodal == true" @getCloseModal="getCloseModal"/>
-		<!-- <div class="room-title">
+  <div class="ssafymind" v-on:mousedown="isMouseDown" v-on:mouseup="isMouseUp">
+	<GameOrderModal v-if="ordermodal == true" @getCloseModal="getCloseModal"/>
+    <!-- <div class="room-title">
       <span id="game-title">싸피마인드</span>
     </div> -->
-		<Header v-bind:gameTitle="'싸피마인드'"/>
-		<GameStatus />
-		<div class="ssafymind-center">
-			<div class="question-word">문제: SSA.zip</div>
-			<Timer v-if="startTime == false" @startTimer="startTimer"/>
-			<div class="turn-notice">당신 차례 입니다! 빨리 그리세요!</div>
-			<canvas id="jsCanvas" class="canvas paintbrush" v-on:mousemove="onMouseMove" v-on:mousedown="startPainting" v-on:mouseup="stopPainting" v-on:mouseleave="stopPainting" v-on:mouseenter="mouseEnter" v-on:contextmenu="handleCM"></canvas>
-			<!-- <div class="controls-stop"></div> -->
-			<div class="controls">
-				<div class="controls_colors" id="jsColors">
-					<div class="controls_color jsColor" style="background-color:#E00F0F"></div>
-					<div class="controls_color jsColor" style="background-color:#FFA500"></div>
-					<div class="controls_color jsColor" style="background-color:#EDCD11"></div>
-					<div class="controls_color jsColor" style="background-color:#B0CF3D"></div>
-					<div class="controls_color jsColor" style="background-color:#058B05"></div>
-					<div class="controls_color jsColor" style="background-color:#9BC8DA"></div>
-					<div class="controls_color jsColor" style="background-color:#2377F4"></div>
-					<div class="controls_color jsColor" style="background-color:#081765"></div>
-					<div class="controls_color jsColor" style="background-color:#EDA3ED"></div>
-					<div class="controls_color jsColor" style="background-color:#7118CA"></div>
-					<div class="controls_color jsColor" style="background-color:#000000"></div>
-				<div class="controls_range">
-					<input type="range" id="jsRange" min="0.1" max="8.0" value="2.5" step="0.1">
-				</div>
-				<img class="ssafymind-img" id="jsMode-paint" src="~@/assets/paint-bucket.png" alt="" />
-				<img class="ssafymind-img" id="jsMode-palette" src="~@/assets/paint-palette.png" alt="" />
-				<img class="ssafymind-img" id="jsErase" @click="handleCanvasErase()" src="~@/assets/eraser.png" alt="" />
-				<img class="ssafymind-img" id="" @click="handleSave()" src="~@/assets/floppy-disk.png" alt="" />
-				</div>
-			</div>
-		</div>
-		<SsafymindRight />
-	</div>
+    <Header v-bind:gameTitle="'싸피마인드'" />
+    <GameStatus />
+    <div class="ssafymind-center">
+      <div class="question-word">문제: SSA.zip</div>
+      <Timer />
+      <div class="turn-notice">당신 차례 입니다! 빨리 그리세요!</div>
+      <canvas
+        id="jsCanvas"
+        class="canvas"
+        v-on:mousemove="onMouseMove"
+        v-on:mousedown="startPainting"
+        v-on:mouseup="stopPainting"
+        v-on:mouseleave="stopPainting"
+        v-on:mouseenter="mouseEnter"
+        v-on:contextmenu="handleCM"
+      ></canvas>
+      <!-- <div class="controls-stop"></div> -->
+      <div class="controls">
+        <div class="controls_colors" id="jsColors">
+          <div class="controls_color jsColor" style="background-color:#E00F0F"></div>
+          <div class="controls_color jsColor" style="background-color:#FFA500"></div>
+          <div class="controls_color jsColor" style="background-color:#EDCD11"></div>
+          <div class="controls_color jsColor" style="background-color:#B0CF3D"></div>
+          <div class="controls_color jsColor" style="background-color:#058B05"></div>
+          <div class="controls_color jsColor" style="background-color:#9BC8DA"></div>
+          <div class="controls_color jsColor" style="background-color:#2377F4"></div>
+          <div class="controls_color jsColor" style="background-color:#081765"></div>
+          <div class="controls_color jsColor" style="background-color:#EDA3ED"></div>
+          <div class="controls_color jsColor" style="background-color:#7118CA"></div>
+          <div class="controls_color jsColor" style="background-color:#000000"></div>
+          <div class="controls_range">
+            <input type="range" id="jsRange" min="0.1" max="8.0" value="2.5" step="0.1" />
+          </div>
+          <img class="ssafymind-img" id="jsMode-paint" src="~@/assets/paint-bucket.png" alt="" />
+          <img class="ssafymind-img" id="jsMode-palette" src="~@/assets/paint-palette.png" alt="" />
+          <img
+            class="ssafymind-img"
+            id="jsErase"
+            @click="handleCanvasErase()"
+            src="~@/assets/eraser.png"
+            alt=""
+          />
+          <img
+            class="ssafymind-img"
+            id=""
+            @click="handleSave()"
+            src="~@/assets/floppy-disk.png"
+            alt=""
+          />
+        </div>
+      </div>
+    </div>
+    <SsafymindRight />
+  </div>
 </template>
 <script>
-import Header from '@/components/common/Header.vue'
+import Header from '@/components/common/Header.vue';
 import GameOrderModal from '@/components/GameOrderModal';
-import GameStatus from '@/components/GameStatus.vue'
-import SsafymindRight from '@/components/ssafymind/SsafymindRight.vue'
-import Timer from '@/components/common/Timer.vue'
-import "@/css/ssafymind.css";
+import GameStatus from '@/components/GameStatus.vue';
+import SsafymindRight from '@/components/ssafymind/SsafymindRight.vue';
+import Timer from '@/components/common/Timer.vue';
+import '@/css/ssafymind.css';
+import { mapGetters } from 'vuex';
+import { socketConnect } from '@/util/socket-common.js';
 
 export default {
   name: 'SsafyMind',
-	components: {
+  components: {
     Header,
 		GameStatus,
 		SsafymindRight,
@@ -66,8 +88,15 @@ export default {
 			drawData:[], // 그린 좌표들 저장하는 배열
 			colorData:[],
 			saveData:[], // 마우스를 떼었을 때 멈추고 다시 저장하기 위한 배열
-		}
-	},
+			stompClient: null, // socket
+			};
+  },
+  created() {
+    this.stompClient = socketConnect(this.onConnected, this.onError);
+  },
+  computed: {
+    ...mapGetters(['getUser', 'getRoomId']),
+  },
 	methods: {
 		startTimer(startTime){
 			this.startTime = startTime;
@@ -298,61 +327,121 @@ export default {
 			ctx.stroke();
 			ctx.closePath();
 
-			// const canvas = document.getElementById("jsCanvas");
-			// const image = canvas.toDataURL();
-			// const link = document.createElement("a");
-			// // const imageName = prompt("그림 이름 지어줭");
-			// link.href = image;
-			// // link.download = imageName;
-			// link.download = "내가그린기린그림";
-			// link.click();
-			// // console.log(image);
-		},
-		setCanvas: function(){
-			const canvas = document.getElementById("jsCanvas");
-			const ctx = canvas.getContext("2d"); // 픽셀로 접근할 수 있는 방법
-			const colors = document.getElementsByClassName("jsColor"); // 색깔 변경 시 사용
-			const range = document.getElementById("jsRange"); // 선 굵기 변경 시 사용
-			const paintmode = document.getElementById("jsMode-paint"); // 색 채우기 시 사용
-			const palettemode = document.getElementById("jsMode-palette"); // 펜 바꾸기 시 사용
+      // const canvas = document.getElementById("jsCanvas");
+      // const image = canvas.toDataURL();
+      // const link = document.createElement("a");
+      // // const imageName = prompt("그림 이름 지어줭");
+      // link.href = image;
+      // // link.download = imageName;
+      // link.download = "내가그린기린그림";
+      // link.click();
+      // // console.log(image);
+    },
+    setCanvas: function() {
+      const canvas = document.getElementById('jsCanvas');
+      const ctx = canvas.getContext('2d'); // 픽셀로 접근할 수 있는 방법
+      const colors = document.getElementsByClassName('jsColor'); // 색깔 변경 시 사용
+      const range = document.getElementById('jsRange'); // 선 굵기 변경 시 사용
+      const paintmode = document.getElementById('jsMode-paint'); // 색 채우기 시 사용
+      const palettemode = document.getElementById('jsMode-palette'); // 펜 바꾸기 시 사용
 
-			const INITIAL_COLOR = "black";
-			canvas.width = 1100;
-			canvas.height = 760;
-			// canvas.width = window.innerWidth;
-			// canvas.height = window.innerHeight;
-			ctx.fillStyle = "white";
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const INITIAL_COLOR = 'black';
+      canvas.width = 1100;
+      canvas.height = 760;
+      // canvas.width = window.innerWidth;
+      // canvas.height = window.innerHeight;
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-			ctx.strokeStyle = INITIAL_COLOR;
-			ctx.fillStyle = INITIAL_COLOR;
-			ctx.lineWidth = 2.5;
-			ctx.lineCap = "round";
+      ctx.strokeStyle = INITIAL_COLOR;
+      ctx.fillStyle = INITIAL_COLOR;
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round';
 
-			// 색깔을 가지고 있는 배열값을 받아오자
-			Array.from(colors).forEach(color => color.addEventListener("click", this.handleColorClick));
+      // 색깔을 가지고 있는 배열값을 받아오자
+      Array.from(colors).forEach((color) => color.addEventListener('click', this.handleColorClick));
 
-			if(range){
-				range.addEventListener("input", this.handleRangeChange);
-			}
+      if (range) {
+        range.addEventListener('input', this.handleRangeChange);
+      }
 
-			if(paintmode){
-				paintmode.addEventListener("click", this.handlePaintModeClick);
-			}
-			if(palettemode){
-				palettemode.addEventListener("click", this.handlePaletteModeClick);
-			}
+      if (paintmode) {
+        paintmode.addEventListener('click', this.handlePaintModeClick);
+      }
+      if (palettemode) {
+        palettemode.addEventListener('click', this.handlePaletteModeClick);
+      }
 
-			canvas.addEventListener("click", this.handleCanvasClick);
-		}
-	},
-	mounted: function(){
-		this.setCanvas();
-	},
-	created: function(){
-	}
-}
+      canvas.addEventListener('click', this.handleCanvasClick);
+    },
+    /**
+     * 소켓 통신
+     */
+    // 게임 방 입장 : 정보 구독 및 유저 정보 전송
+    onConnected() {
+      this.stompClient.subscribe('/ssafymind/' + this.getRoomId, this.onMesseageReceived);
+      this.stompClient.send(
+        '/pub/ssafymind/enter',
+        {},
+        JSON.stringify({
+          roomId: this.getRoomId,
+          participantId: this.getUser.id,
+          participantName: this.getUser.name,
+          teamNo: this.getUser.teamNo,
+        })
+      );
+      // this.test();
+    },
+    onMesseageReceived(payload) {
+      const data = JSON.parse(payload.body);
+      console.log(data);
+    },
+    test() {
+      this.stompClient.send(
+        '/pub/ssafymind/enter',
+        {},
+        JSON.stringify({
+          roomId: this.getRoomId,
+          participantId: 1,
+          participantName: '김태현',
+          teamNo: '1',
+        })
+      );
+      this.stompClient.send(
+        '/pub/ssafymind/enter',
+        {},
+        JSON.stringify({
+          roomId: this.getRoomId,
+          participantId: 2,
+          participantName: '김태현2',
+          teamNo: '2',
+        })
+      );
+      this.stompClient.send(
+        '/pub/ssafymind/enter',
+        {},
+        JSON.stringify({
+          roomId: this.getRoomId,
+          participantId: 3,
+          participantName: '김태현3',
+          teamNo: '3',
+        })
+      );
+      this.stompClient.send(
+        '/pub/ssafymind/enter',
+        {},
+        JSON.stringify({
+          roomId: this.getRoomId,
+          participantId: 4,
+          participantName: '김태현4',
+          teamNo: '3',
+        })
+      );
+    },
+  },
+  mounted: function() {
+    this.setCanvas();
+  },
+};
 </script>
-<style>
-    
-</style>
+<style></style>

@@ -6,11 +6,12 @@ import SignUp from '@/views/accounts/SignUp.vue';
 import Rank from '@/views/Rank.vue';
 import Room from '@/views/Room.vue';
 import CreateRoom from '@/views/CreateRoom.vue';
-import SpeakingGame from '@/views/SpeakingGame.vue'
+import SpeakingGame from '@/views/SpeakingGame.vue';
 import Temp from '@/views/temp/Chat.vue';
 import Chat from '@/views/temp/ChatRoom.vue';
 import SSazipJump from '@/views/SSazipJump.vue';
 import SSazipJumpTemp from '@/views/ssazipjump/SSazipJumpTemp.vue';
+import SSazipJumpSeop from '@/views/ssazipjump/SSazipJumpSeop.vue';
 import SsafyMind from '@/views/ssafymind/SsafyMind.vue';
 
 Vue.use(VueRouter);
@@ -44,17 +45,17 @@ const routes = [
   {
     path: '/room',
     name: 'CreateRoom',
-    component: CreateRoom
+    component: CreateRoom,
   },
   {
     path: '/speaking',
     name: 'SpeakingGame',
-    component: SpeakingGame
+    component: SpeakingGame,
   },
   {
-    path: '/ssafymind',
+    path: '/ssafymind/:roomId',
     name: 'SsafyMind',
-    component: SsafyMind
+    component: SsafyMind,
   },
   // {
   //   path: '/about',
@@ -85,13 +86,18 @@ const routes = [
     path: '/ssazipjumptemp',
     name: 'SSazipJumpTemp',
     component: SSazipJumpTemp,
-  }
+  },
+  {
+    path: '/ssazipjumpseop',
+    name: 'SSazipJumpSeop',
+    component: SSazipJumpSeop,
+  },
 ];
 
 const router = new VueRouter({
-    mode: 'history',
-    base: process.env.BASE_URL,
-    routes,
+  mode: 'history',
+  base: process.env.BASE_URL,
+  routes,
 });
 
 export default router;

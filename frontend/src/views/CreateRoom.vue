@@ -40,6 +40,7 @@ export default {
       let user = {
         id: '',
         name: '',
+        teamNo: '',
       };
       this.login(user);
       // 로그아웃 상태로 전환
@@ -61,6 +62,7 @@ export default {
         .then((res) => {
           // room 정보 받기
           let room = res.data;
+          console.log(room);
           // 방장이 참가중인 방 갱신
           this.joinRoom(room.id);
           // 방으로 이동
