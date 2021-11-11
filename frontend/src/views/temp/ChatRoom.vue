@@ -125,6 +125,11 @@ export default {
       }
 
       const makeConnection = async () => {
+        console.log(this.myPeerConnection);
+        console.log(this.myPeerConnection);
+        console.log(this.myPeerConnection);
+        console.log(this.myPeerConnection);
+        console.log(this.myPeerConnection);
         this.myPeerConnection = new RTCPeerConnection({
           iceServers: [
             {
@@ -140,13 +145,11 @@ export default {
         });
         this.myPeerConnection.addEventListener("icecandidate", (data) => {
           console.log(data)
-          // if (data.candidate != null) {
           this.stompClient.send(
             '/pub/chat/audio',
             {},
             JSON.stringify({ roomId: this.id, offer: data.candidate, writer: '김태현' })
           );
-          // }
         });
         this.myPeerConnection.addEventListener("addstream", (data) => {
           const peerFace = document.getElementById("peerFace");
@@ -154,20 +157,14 @@ export default {
 
           console.log('---------------');
           console.log('This is peer stream');
-          console.log(this.dataStream);
+          console.log(data.stream);
           console.log('---------------');
           console.log('This is My Stream');
           console.log(this.myStream);
           console.log('---------------');
-          // if (this.dataStream.id) {
-          console.log('무야호!!!!!!!!!!!!!!!!!!!!!!!')
+
           peerFace.srcObject = data.stream;
           myFace2.srcObject = myStream;
-          console.log(peerFace.srcObject == myFace.srcObject);
-          console.log(this.myStream == myFace.srcObject);
-          console.log(this.myStream == myFace2.srcObject);
-          console.log(this.myStream == peerFace.srcObject);
-          // }
         });
         myStream
           .getTracks()
@@ -247,9 +244,9 @@ export default {
     // },
     async sendOffer(offer) {
       console.log("received the offer");
-      this.myPeerConnection.setRemoteDescription(offer);
+      await this.myPeerConnection.setRemoteDescription(offer);
       const answer = await this.myPeerConnection.createAnswer();
-      this.myPeerConnection.setLocalDescription(answer);
+      await this.myPeerConnection.setLocalDescription(answer);
       if (offer.type && this.stompClient) {
         await this.stompClient.send(
           '/pub/chat/audio',
@@ -262,18 +259,22 @@ export default {
 
     async sendAnswer(answer) {
       console.log("received the answer");
-      this.myPeerConnection.setRemoteDescription(answer);
+      console.log('==========================================')
+      await this.myPeerConnection.setRemoteDescription(answer);
+      console.log(this.myPeerConnection)
+      console.log('==========================================')
     },
 
     async sendIce(ice) {
       console.log("received the candidate");
-      this.myPeerConnection.addIceCandidate(ice);
+      await this.myPeerConnection.addIceCandidate(ice);
     },
 
     // 메세지 수신
     onMessageReceived(payload) {
       let receiveMessage = JSON.parse(payload.body);
       if (receiveMessage.offer) {
+        if (receiveMessage.writer == '안기훈') return
         if (receiveMessage.offer.type === 'offer') {
           this.sendOffer(receiveMessage.offer);
           return
