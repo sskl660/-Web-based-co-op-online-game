@@ -10,6 +10,9 @@ public class JumpInfo {
     private boolean[] jumpArr1; // 점프값 어레이
     private boolean[] jumpArr2;
     private boolean reload;
+    private String participantId; // 참가자의 고유 ID
+    private String participantName; // 참가자의 이름
+    private int teamNo; // 참가자 소속 팀 번호
 
 //    @Override
 //    public String toString() {

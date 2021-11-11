@@ -466,9 +466,9 @@ export default {
                     roomId: this.getRoomId,
                     jumpArr1: [],
                     jumpArr2: [],
-                    // participantId: this.getUser.id,
-                    // participantName: this.getUser.name,
-                    // teamNo: 0,
+                    participantId: this.getUser.id,
+                    participantName: this.getUser.name,
+                    teamNo: 0,
                 })
             );
             console.log('onconnected');
@@ -628,85 +628,22 @@ export default {
                     if (this.dinos1[this.userIdx].y == 200) {
                         if (e.code === 'Space') {
                             console.log('space pushed team1');
-                            console.log(this.getUser.name);
-                            // this.users1[this.userIdx].jump = true;
-                            /////////////////////////////////////
-                            console.log(this.jumpsss1);
-                            console.log(this.jumpsss2);
-
                             this.jumpsss1[this.userIdx] = true;
-                            console.log(this.jumpsss1);
-
-                            // console.log("jump idx== "+this.userIdx);
-                            // const newarr= this.room.members;
-                            // const newarr = Array;
-                            // for (var i = 0; i < this.users1.length; i++) {
-                            //     this.jumpsss1.push(this.users1[i].jump);
-                            // }
-                            // this.room.members = newarr;
-                            // console.log(this.users[this.userIdx].jump);
-                            // console.log(this.jumpsss1);
-                            // console.log(this.getRoomId);
-                            // console.log('1');
                             this.jumping();
                             this.jumpsss1[this.userIdx] = false;
-                            console.log('=========');
-
-                            console.log(this.jumpsss1);
-
-                            // console.log(this.room);
-                            // console.log(this.members);
-                            ///////////////////end//////////
                         }
                     }
                 } else {
                     if (this.dinos2[this.userIdx].y == 200) {
                         if (e.code === 'Space') {
                             console.log('space pushed team2');
-                            console.log(this.getUser.name);
-                            // this.users2[this.userIdx].jump = true;
-                            //////////////////////////////////////
-                            console.log(this.jumpsss1);
-                            console.log(this.jumpsss2);
-
                             this.jumpsss2[this.userIdx] = true;
-                            console.log(this.jumpsss2);
-
-                            // console.log("jump idx== "+this.userIdx);
-                            // const newarr= this.room.members;
-                            // const newarr = Array;
-                            // console.log(this.jumpsss2);
-                            // for (var j = 0; j < this.users2.length; j++) {
-                            //     this.jumpsss2.push(this.users2[j].jump);
-                            // }
-                            // this.room.members = newarr;
-                            // console.log(this.users[this.userIdx].jump);
-
-                            // console.log(this.getRoomId);
-                            // console.log('1');
                             this.jumping();
-
                             this.jumpsss2[this.userIdx] = false;
-                            console.log('=========');
-
-                            console.log(this.jumpsss2);
-
-                            // console.log(this.room);
-                            // console.log(this.members);
-                            ///////////////////end//////////
                         }
                     }
                 }
             });
-
-        // document.addEventListener('keydown', (e) => {
-        //     //착지해야만 점프가능
-        //     if (this.dinos2[4].y == 220) {
-        //         if (e.code === 'Enter') {
-        //             this.users2[4].jump = true;
-        //         }
-        //     }
-        // });
     },
     ///////////////////////////////////
     created() {
