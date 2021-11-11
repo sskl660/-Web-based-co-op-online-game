@@ -147,7 +147,7 @@ export default {
           this.stompClient.send(
             '/pub/chat/audio',
             {},
-            JSON.stringify({ roomId: this.id, offer: data.candidate, writer: '안기훈' })
+            JSON.stringify({ roomId: this.id, offer: data.candidate, writer: this.user.name })
           );
         });
         this.myPeerConnection.addEventListener("addstream", (data) => {
@@ -208,7 +208,7 @@ export default {
       this.stompClient.send(
         '/pub/chat/message',
         {},
-        JSON.stringify({ roomId: this.id, message: '입장', writer: '안기훈' })
+        JSON.stringify({ roomId: this.id, message: '입장', writer: this.user.name })
       );
     },
     // 소켓 연결 해제
@@ -223,7 +223,7 @@ export default {
       this.stompClient.send(
         '/pub/chat/audio',
         {},
-        JSON.stringify({ roomId: this.id, offer: offer, writer: '안기훈' })
+        JSON.stringify({ roomId: this.id, offer: offer, writer: this.user.name })
       );
     },
     // 메세지 발신
@@ -249,7 +249,7 @@ export default {
         await this.stompClient.send(
           '/pub/chat/audio',
           {},
-          JSON.stringify({ roomId: this.id, offer: answer, writer: '안기훈' })
+          JSON.stringify({ roomId: this.id, offer: answer, writer: this.user.name })
         )
         console.log("sent the answer");
       }
