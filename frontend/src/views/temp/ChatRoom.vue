@@ -36,6 +36,7 @@
 
 <script>
 import { socketConnect } from '@/util/socket-common.js';
+import { mapState } from 'vuex'
 
 export default {
   name: 'Chat',
@@ -61,6 +62,9 @@ export default {
       getAnswer: false,
       dataStream: {},
     };
+  },
+  computed: {
+    ...mapState(['user'])
   },
   created() {
     this.id = this.$route.query.id;
@@ -125,11 +129,6 @@ export default {
       }
 
       const makeConnection = async () => {
-        console.log(this.myPeerConnection);
-        console.log(this.myPeerConnection);
-        console.log(this.myPeerConnection);
-        console.log(this.myPeerConnection);
-        console.log(this.myPeerConnection);
         this.myPeerConnection = new RTCPeerConnection({
           iceServers: [
             {
@@ -148,7 +147,7 @@ export default {
           this.stompClient.send(
             '/pub/chat/audio',
             {},
-            JSON.stringify({ roomId: this.id, offer: data.candidate, writer: '김태현' })
+            JSON.stringify({ roomId: this.id, offer: data.candidate, writer: '안기훈' })
           );
         });
         this.myPeerConnection.addEventListener("addstream", (data) => {
@@ -157,13 +156,12 @@ export default {
 
           console.log('---------------');
           console.log('This is peer stream');
-          console.log(data.stream);
+          console.log(this.dataStream);
           console.log('---------------');
           console.log('This is My Stream');
           console.log(this.myStream);
           console.log('---------------');
-
-          peerFace.srcObject = data.stream;
+          peerFace.srcObject = this.dataStream;
           myFace2.srcObject = myStream;
         });
         myStream
@@ -210,7 +208,7 @@ export default {
       this.stompClient.send(
         '/pub/chat/message',
         {},
-        JSON.stringify({ roomId: this.id, message: '입장', writer: '김태현' })
+        JSON.stringify({ roomId: this.id, message: '입장', writer: '안기훈' })
       );
     },
     // 소켓 연결 해제
@@ -225,7 +223,7 @@ export default {
       this.stompClient.send(
         '/pub/chat/audio',
         {},
-        JSON.stringify({ roomId: this.id, offer: offer, writer: '김태현' })
+        JSON.stringify({ roomId: this.id, offer: offer, writer: '안기훈' })
       );
     },
     // 메세지 발신
@@ -274,7 +272,7 @@ export default {
     onMessageReceived(payload) {
       let receiveMessage = JSON.parse(payload.body);
       if (receiveMessage.offer) {
-        if (receiveMessage.writer == '안기훈') return
+        if (receiveMessage.writer === this.user.name) return
         if (receiveMessage.offer.type === 'offer') {
           this.sendOffer(receiveMessage.offer);
           return
