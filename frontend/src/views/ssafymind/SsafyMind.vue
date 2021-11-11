@@ -96,6 +96,10 @@ export default {
 			canvas: null,
 			ctx: {},
 			room: {}, // 방 정보
+			offsetX: 0,
+			offsetY: 0,
+			lineSize: 2.5,
+			color: "rgb(0, 0, 0)",
 			};
   },
   created() {
@@ -123,22 +127,23 @@ export default {
     onMouseMove: function(event) {
       const canvas = document.getElementById('jsCanvas');
       const ctx = canvas.getContext('2d');
-      const x = event.offsetX;
-      const y = event.offsetY;
-      const size = ctx.lineWidth;
+      this.offsetX = event.offsetX;
+      this.offsetY = event.offsetY;
+      this.lineSize = ctx.lineWidth;
       // console.log(x, y)
       // console.log(event)
 
       if (!this.painting) {
         ctx.beginPath(); // 새로운 경로를 만든다. 경로가 생성되었다면, 이후 그리기 명령들은 경로를 구성하고 만드는 데에 사용된다.
-        ctx.moveTo(x, y); // 해당 좌표로 펜을 이동하는 메소드
+        ctx.moveTo(this.offsetX, this.offsetY); // 해당 좌표로 펜을 이동하는 메소드
         // console.log(ctx.beginPath)
       } else {
-        this.strokePath(x, y);
-        ctx.lineTo(x, y); // 현재 위치에서 해당 좌표까지 선 그리기
+        // this.strokePath(x, y);
+        ctx.lineTo(this.offsetX, this.offsetY); // 현재 위치에서 해당 좌표까지 선 그리기
         ctx.stroke(); // 윤곽선을 이용해 선 그리기
         // console.log(x, y)
-        this.drawData.push({ x, y, size });
+        // this.drawData.push({ x, y, size });
+				this.sendDrawMessage();
         this.drawing();
         // console.log(this.drawData)
       }
@@ -175,43 +180,6 @@ export default {
       if (color !== null) {
         ctx.strokeStyle = color;
       }
-
-      ctx.lineTo(x, y);
-      ctx.stroke();
-      ctx.strokeStyle = currentColor;
-    },
-    drawing: function() {
-      // 실시간으로 그려지나 확인
-      const canvas = document.getElementById('jsCanvas');
-      const ctx = canvas.getContext('2d');
-      // ctx.clearRect(0, 0, 1100, 760)
-      // ctx.lineWidth = 30;
-      // ctx.strokeStyle = "red";
-      // console.log("saveData 확인", this.saveData.length)
-      if (this.saveData.length > 0) {
-        this.saveData.forEach((lookline) => {
-          ctx.lineWidth = lookline.size;
-          console.log('lookline', lookline[0].x + 50);
-          // ctx.beginPath()
-          ctx.moveTo(lookline[0].x + 50, lookline.y + 50);
-          ctx.lineTo(lookline[0].x + 50, lookline.y + 50);
-          // ctx.stroke();
-        });
-      }
-      // ctx.save()
-
-      // ctx.closePath();
-      // ctx.restore();
-      // if(this.saveData.length > 0){
-      // 	this.saveData.forEach((lookline) => {
-      // 		ctx.lineWidth = lookline.size;
-      // 		ctx.moveTo(lookline.x+50, lookline.y+50);
-      // 		ctx.lineTo(lookline.x+50, lookline.y+50);
-      // 	})
-      // }
-      // ctx.save()
-      // ctx.beginPath()
-
 			ctx.lineTo(x, y);
 			ctx.stroke();
 			ctx.strokeStyle = currentColor;
@@ -266,9 +234,17 @@ export default {
 				this.painting = false;
 			}
 		},
-		isMouseDown: function(){
+		isMouseDown: function(event){
 			// 그리기 시작
 			this.clickmouse = true;
+
+			this.offsetX = event.offsetX;
+      this.offsetY = event.offsetY;
+			this.ctx.beginPath();
+			this.ctx.moveTo(this.offsetX, this.offsetY);
+			this.ctx.lineTo(this.offsetX, this.offsetY);
+			this.ctx.stroke();
+			this.sendDrawMessage();
 		},
 		isMouseUp: function(){
 			// 그리기 종료
@@ -310,6 +286,7 @@ export default {
 			}
 		},
 		handleColorClick: function(color){
+			console.log("색깔", color)
 			const canvas = document.getElementById("jsCanvas");
 			const ctx = canvas.getContext("2d");
 			ctx.strokeStyle = color;
@@ -373,6 +350,7 @@ export default {
       // canvas.classList.remove(`paintbrush`);
       // canvas.classList.add(`painteraser`);
       ctx.strokeStyle = 'white';
+			this.color = 'rgb(255, 255, 255)'
       // ctx.lineWidth = 30;
       this.handlePaletteModeClick();
     },
@@ -434,7 +412,10 @@ export default {
       ctx.lineCap = 'round';
 
       // 색깔을 가지고 있는 배열값을 받아오자
-      Array.from(colors).forEach((color) => color.addEventListener('click', this.handleColorClick(color.style.backgroundColor)));
+      Array.from(colors).forEach((color) => color.addEventListener('click', () => {
+				const backgroundColor = color.style.backgroundColor;
+				this.handleColorClick(backgroundColor);
+			}));
 
       if (range) {
         range.addEventListener('input', this.handleRangeChange);
@@ -501,12 +482,23 @@ export default {
     },
     sendDrawMessage() {
       // 보내는 객체 여기다가 넣기
-      this.stompClient.send(`/pub/ssafymind/draw/${this.getRoomId}`, {}, JSON.stringify());
+      this.stompClient.send(
+				`/pub/ssafymind/draw/${this.getRoomId}`,
+				{}, 
+				JSON.stringify({
+					x: this.offsetX,
+					y: this.offsetY,
+					size: this.lineSize,
+					color: this.color,
+					fillFlag: this.filling,
+					painting : this.painting,
+				}));
     },
     onDrawMessageReceived(payload) {
       const data = JSON.parse(payload.body);
       console.log(data);
       // 여기에 실시간으로 그리는 로직 작성
+
     },
     test() {
       this.stompClient.send(
