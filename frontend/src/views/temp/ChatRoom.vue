@@ -36,6 +36,7 @@
 
 <script>
 import { socketConnect } from '@/util/socket-common.js';
+import { mapState } from 'vuex'
 
 export default {
   name: 'Chat',
@@ -61,6 +62,9 @@ export default {
       getAnswer: false,
       dataStream: {},
     };
+  },
+  computed: {
+    ...mapState(['user'])
   },
   created() {
     this.id = this.$route.query.id;
@@ -140,13 +144,11 @@ export default {
         });
         this.myPeerConnection.addEventListener("icecandidate", (data) => {
           console.log(data)
-          // if (data.candidate != null) {
           this.stompClient.send(
             '/pub/chat/audio',
             {},
-            JSON.stringify({ roomId: this.id, offer: data.candidate, writer: '김태현' })
+            JSON.stringify({ roomId: this.id, offer: data.candidate, writer: this.user.name })
           );
-          // }
         });
         this.myPeerConnection.addEventListener("addstream", (data) => {
           const peerFace = document.getElementById("peerFace");
@@ -159,15 +161,8 @@ export default {
           console.log('This is My Stream');
           console.log(this.myStream);
           console.log('---------------');
-          // if (this.dataStream.id) {
-          console.log('무야호!!!!!!!!!!!!!!!!!!!!!!!')
-          peerFace.srcObject = data.stream;
+          peerFace.srcObject = this.dataStream;
           myFace2.srcObject = myStream;
-          console.log(peerFace.srcObject == myFace.srcObject);
-          console.log(this.myStream == myFace.srcObject);
-          console.log(this.myStream == myFace2.srcObject);
-          console.log(this.myStream == peerFace.srcObject);
-          // }
         });
         myStream
           .getTracks()
@@ -213,7 +208,7 @@ export default {
       this.stompClient.send(
         '/pub/chat/message',
         {},
-        JSON.stringify({ roomId: this.id, message: '입장', writer: '김태현' })
+        JSON.stringify({ roomId: this.id, message: '입장', writer: this.user.name })
       );
     },
     // 소켓 연결 해제
@@ -228,7 +223,7 @@ export default {
       this.stompClient.send(
         '/pub/chat/audio',
         {},
-        JSON.stringify({ roomId: this.id, offer: offer, writer: '김태현' })
+        JSON.stringify({ roomId: this.id, offer: offer, writer: this.user.name })
       );
     },
     // 메세지 발신
@@ -247,14 +242,14 @@ export default {
     // },
     async sendOffer(offer) {
       console.log("received the offer");
-      this.myPeerConnection.setRemoteDescription(offer);
+      await this.myPeerConnection.setRemoteDescription(offer);
       const answer = await this.myPeerConnection.createAnswer();
-      this.myPeerConnection.setLocalDescription(answer);
+      await this.myPeerConnection.setLocalDescription(answer);
       if (offer.type && this.stompClient) {
         await this.stompClient.send(
           '/pub/chat/audio',
           {},
-          JSON.stringify({ roomId: this.id, offer: answer, writer: '안기훈' })
+          JSON.stringify({ roomId: this.id, offer: answer, writer: this.user.name })
         )
         console.log("sent the answer");
       }
@@ -262,18 +257,22 @@ export default {
 
     async sendAnswer(answer) {
       console.log("received the answer");
-      this.myPeerConnection.setRemoteDescription(answer);
+      console.log('==========================================')
+      await this.myPeerConnection.setRemoteDescription(answer);
+      console.log(this.myPeerConnection)
+      console.log('==========================================')
     },
 
     async sendIce(ice) {
       console.log("received the candidate");
-      this.myPeerConnection.addIceCandidate(ice);
+      await this.myPeerConnection.addIceCandidate(ice);
     },
 
     // 메세지 수신
     onMessageReceived(payload) {
       let receiveMessage = JSON.parse(payload.body);
       if (receiveMessage.offer) {
+        if (receiveMessage.writer === this.user.name) return
         if (receiveMessage.offer.type === 'offer') {
           this.sendOffer(receiveMessage.offer);
           return
