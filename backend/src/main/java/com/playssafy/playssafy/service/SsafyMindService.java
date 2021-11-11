@@ -1,6 +1,7 @@
 package com.playssafy.playssafy.service;
 
 
+import com.playssafy.playssafy.dto.ssafymind.Point;
 import com.playssafy.playssafy.dto.ssafymind.SsafyMind;
 import com.playssafy.playssafy.dto.ssafymind.Team;
 import com.playssafy.playssafy.dto.waitroom.InitGame;
@@ -79,6 +80,15 @@ public class SsafyMindService {
 
         // 변경 완료
         return ssafyMindRepository.save(ssafyMind);
+    }
+
+    // 3. 그림 데이터 교환
+    public void draw(String roomId, Point point) {
+        SsafyMind ssafyMind = ssafyMindRepository.findById(roomId).get();
+
+        // 그림 데이터 추가
+        ssafyMind.getPoints().add(point);
+        ssafyMindRepository.save(ssafyMind);
     }
 
 
