@@ -1,5 +1,7 @@
 <template>
 	<div class="ssafymind" v-on:mousedown="isMouseDown" v-on:mouseup="isMouseUp">
+		
+		<GameOrderModal v-if="ordermodal == true" @getCloseModal="getCloseModal"/>
 		<!-- <div class="room-title">
       <span id="game-title">싸피마인드</span>
     </div> -->
@@ -7,7 +9,7 @@
 		<GameStatus />
 		<div class="ssafymind-center">
 			<div class="question-word">문제: SSA.zip</div>
-			<Timer />
+			<Timer v-if="startTime == false" @startTimer="startTimer"/>
 			<div class="turn-notice">당신 차례 입니다! 빨리 그리세요!</div>
 			<canvas id="jsCanvas" class="canvas paintbrush" v-on:mousemove="onMouseMove" v-on:mousedown="startPainting" v-on:mouseup="stopPainting" v-on:mouseleave="stopPainting" v-on:mouseenter="mouseEnter" v-on:contextmenu="handleCM"></canvas>
 			<!-- <div class="controls-stop"></div> -->
@@ -39,6 +41,7 @@
 </template>
 <script>
 import Header from '@/components/common/Header.vue'
+import GameOrderModal from '@/components/GameOrderModal';
 import GameStatus from '@/components/GameStatus.vue'
 import SsafymindRight from '@/components/ssafymind/SsafymindRight.vue'
 import Timer from '@/components/common/Timer.vue'
@@ -50,10 +53,13 @@ export default {
     Header,
 		GameStatus,
 		SsafymindRight,
-		Timer
+		Timer,
+		GameOrderModal, // 게임 순서 모달
   },
 	data: function() {
 		return {
+			ordermodal: true,
+			startTime: false,
 			painting: false,
 			clickmouse: false,
 			filling: false,
@@ -63,6 +69,12 @@ export default {
 		}
 	},
 	methods: {
+		startTimer(startTime){
+			this.startTime = startTime;
+		},
+		getCloseModal(ordermodal) {
+      this.ordermodal = ordermodal;
+    },
 		stopPainting: function(){
 			this.painting = false;                                                                                           
 		},
@@ -83,6 +95,7 @@ export default {
 				ctx.moveTo(x, y); // 해당 좌표로 펜을 이동하는 메소드
 				// console.log(ctx.beginPath)
 			}else{
+				this.strokePath(x, y);
 				ctx.lineTo(x, y); // 현재 위치에서 해당 좌표까지 선 그리기
 				ctx.stroke(); // 윤곽선을 이용해 선 그리기
 				// console.log(x, y)
@@ -114,6 +127,20 @@ export default {
 			// ctx.stroke();
 			// ctx.closePath();
 		},
+		strokePath: function(x, y){
+			const canvas = document.getElementById("jsCanvas");
+			const ctx = canvas.getContext("2d");
+			var color = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+			var currentColor = ctx.strokeStyle;
+			console.log('색깔이 보이나?', arguments.length)
+			if (color !== null) {
+				ctx.strokeStyle = color;
+			}
+
+			ctx.lineTo(x, y);
+			ctx.stroke();
+			ctx.strokeStyle = currentColor;
+		},
 		drawing: function(){
 			// 실시간으로 그려지나 확인
 			const canvas = document.getElementById("jsCanvas");
@@ -121,24 +148,39 @@ export default {
 			// ctx.clearRect(0, 0, 1100, 760)
 			// ctx.lineWidth = 30;
 			// ctx.strokeStyle = "red";
+			// console.log("saveData 확인", this.saveData.length)
 			if(this.saveData.length > 0){
 				this.saveData.forEach((lookline) => {
 					ctx.lineWidth = lookline.size;
-					ctx.moveTo(lookline.x+50, lookline.y+50);
-					ctx.lineTo(lookline.x+50, lookline.y+50);
+					console.log('lookline', lookline[0].x+50)
+					// ctx.beginPath()
+					ctx.moveTo(lookline[0].x+50, lookline.y+50);
+					ctx.lineTo(lookline[0].x+50, lookline.y+50);
+					// ctx.stroke();
 				})
 			}
-			ctx.save()
-			ctx.beginPath()
+			// ctx.save()
+			
+			// ctx.closePath();
+			// ctx.restore();
+			// if(this.saveData.length > 0){
+			// 	this.saveData.forEach((lookline) => {
+			// 		ctx.lineWidth = lookline.size;
+			// 		ctx.moveTo(lookline.x+50, lookline.y+50);
+			// 		ctx.lineTo(lookline.x+50, lookline.y+50);
+			// 	})
+			// }
+			// ctx.save()
+			// ctx.beginPath()
 
-			this.drawData.forEach((lookline) => {
-				ctx.lineWidth = lookline.size;
-				ctx.moveTo(lookline.x, lookline.y);
-				ctx.lineTo(lookline.x, lookline.y);
-			})
-			ctx.stroke();
-			ctx.closePath();
-			ctx.restore();
+			// this.drawData.forEach((lookline) => {
+			// 	ctx.lineWidth = lookline.size;
+			// 	ctx.moveTo(lookline.x, lookline.y);
+			// 	ctx.lineTo(lookline.x, lookline.y);
+			// })
+			// ctx.stroke();
+			// ctx.closePath();
+			// ctx.restore();
 		},
 		mouseEnter: function(){
 			if(this.clickmouse){
@@ -202,9 +244,26 @@ export default {
 			const canvas = document.getElementById("jsCanvas");
 			const ctx = canvas.getContext("2d");
 			if(this.filling){
+				// this.fill();
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
 			}
 		},
+		// fill: function(){
+		// 	const canvas = document.getElementById("jsCanvas");
+		// 	const ctx = canvas.getContext("2d");
+
+		// 	var color = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+		// 	var currentColor = ctx.fillStyle;
+
+		// 	if (color !== null) {
+		// 		ctx.fillStyle = color;
+		// 	}
+
+		// 	ctx.fillRect(0, 0, canvas.width, canvas.height);
+		// 	ctx.fillStyle = currentColor;
+
+		// 	console.log('fill이 되나', arguments)
+		// },
 		handleCanvasErase: function(){
 			const canvas = document.getElementById("jsCanvas");
 			const ctx = canvas.getContext("2d");
@@ -213,6 +272,7 @@ export default {
 			// canvas.classList.add(`painteraser`);
 			ctx.strokeStyle = "white";
 			// ctx.lineWidth = 30;
+			this.handlePaletteModeClick();
 		},
 		handleCM: function(event){
 			event.preventDefault();
