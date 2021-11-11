@@ -18,7 +18,6 @@ public class SsafyMindService {
 
     // 0. 게임방 생성 메서드
     public void createSsafyMind(InitGame initGame) {
-        System.out.println(ssafyMindRepository.findById(initGame.getRoomId()));
         if(!ssafyMindRepository.findById(initGame.getRoomId()).isEmpty())
             return;
         SsafyMind ssafyMind = new SsafyMind();
