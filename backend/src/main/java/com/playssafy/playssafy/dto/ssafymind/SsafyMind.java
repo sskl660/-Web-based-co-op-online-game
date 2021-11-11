@@ -35,9 +35,10 @@ public class SsafyMind {
         // 최대 10개 팀에 대응하는 팀 정보를 저장할 리스트 선언해두기
         int teamSize = 11;
         teams = new ArrayList<>();
-        for (int i = 0; i < teamSize; i++) {
-            teams.add(new ArrayList<>());
-        }
+//        for (int i = 0; i < teamSize; i++) {
+//            teams.add(new ArrayList<Participant>());
+//            teams.get(i).add(new Participant("sdf", "ss", "ss", 1));
+//        }
         // 기타 동적 리스트 초기화
         quizzes = new ArrayList<>();
         points = new ArrayList<>();
