@@ -6,10 +6,15 @@
       v-bind:teamOrder="room.teamOrder"
       v-bind:teamCnt="room.curTeamCnt"
       v-on:sendGameStartTrigger="sendGameStartTrigger"
+      @getProgressBar = "getProgressBar"
     />
     <!-- <div class="room-title">
       <span id="game-title">싸피마인드</span>
     </div> -->
+    <!-- 진행바 확인차 -->
+    <!-- <div id="progress">
+			<div id="progress-bar"></div>
+		</div> -->
     <Header
       v-bind:gameTitle="'싸피마인드'"
       v-bind:host="room.host"
@@ -19,6 +24,7 @@
       v-bind:teamOrder="room.teamOrder"
       v-bind:teams="room.teams"
       v-bind:curPlayer="room.curPlayer"
+      @getProgressBar = "getProgressBar"
     />
     <div class="ssafymind-center">
       <div class="question-word" v-if="room.quizzes != null">
@@ -103,6 +109,7 @@ import '@/css/ssafymind.css';
 import { mapGetters } from 'vuex';
 import { socketConnect } from '@/util/socket-common.js';
 import '@/components/css/ssafymind/ssafymind-right.css';
+import "@/components/css/ssafymind/progressbar.css";
 
 export default {
   name: 'SsafyMind',
@@ -137,6 +144,7 @@ export default {
       color: 'rgb(0, 0, 0)',
       beginPath: true,
       temp: 0,
+      startProgress: true,
     };
   },
   created() {
@@ -157,6 +165,9 @@ export default {
     // },
     getCloseModal(ordermodal) {
       this.ordermodal = ordermodal;
+    },
+    getProgressBar(startProgress){
+      this.startProgress = startProgress;
     },
     stopPainting: function() {
       this.painting = false;
@@ -457,6 +468,19 @@ export default {
 
       canvas.addEventListener('click', this.handleCanvasClick);
     },
+    moveProgressBar: function(){
+      const progress = document.getElementById("progress-bar");
+      var width = 1;
+      var id = setInterval(frame, 50);
+      function frame(){
+        if(width >= 100){
+          clearInterval(id)
+        } else{
+          width++;
+          progress.style.width = width + '%';
+        }
+      }
+    },
     /**
      * 소켓 통신
      */
@@ -659,6 +683,7 @@ export default {
     sendGameStartTrigger() {
       this.sendTimeTrigger('start');
       // 게임 시작시 왼쪽 화면에 시간 흐르는 JavaSciprt 추가
+      this.moveProgressBar();
     },
     scrollDown() {
       const scrollbox = document.getElementById('chat-box');

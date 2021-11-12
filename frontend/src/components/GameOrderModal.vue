@@ -39,6 +39,7 @@ export default {
     return {
       ordermodal: false,
       startTime: false,
+      getProgressBar: false,
     };
   },
   methods: {
@@ -46,6 +47,7 @@ export default {
       this.$emit('getCloseModal', this.ordermodal);
       this.$emit('startTimer', this.startTime);
       this.$emit('sendGameStartTrigger');
+      this.$emit('getProgressBar', this.getProgressBar);
     },
   },
 };
