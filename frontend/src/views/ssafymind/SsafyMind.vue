@@ -1,7 +1,12 @@
 <template>
   <div class="ssafymind" v-on:mousedown="isMouseDown" v-on:mouseup="isMouseUp">
     <button @click="sendTimeTrigger()">눌러</button>
-    <GameOrderModal v-if="ordermodal == true" @getCloseModal="getCloseModal" />
+    <GameOrderModal
+      v-if="ordermodal == true"
+      @getCloseModal="getCloseModal"
+      v-bind:teamOrder="room.teamOrder"
+      v-bind:teamCnt="room.curTeamCnt"
+    />
     <!-- <div class="room-title">
       <span id="game-title">싸피마인드</span>
     </div> -->
@@ -113,8 +118,9 @@ export default {
       stompClient: null, // socket
       room: {}, // 방 정보
       message: '', // 보낼 메세지
-      minutes: '',
-      seconds: '',
+      minutes: '', // 분
+      seconds: '', // 초
+      timeReceiveFlag: false, // 시간 수신 메세지 잠시 무시
       canvas: null,
       ctx: {},
       offsetX: 0,
@@ -576,17 +582,39 @@ export default {
     onCorrectMessageReceived(payload) {
       console.log(payload.body);
       const flag = JSON.parse(payload.body);
-      if (flag) alert('정답입니다!');
+      if (flag) {
+        // 정답이라면, 다음 게임이 시작된다는 정보 알려주기
+        alert('정답입니다!');
+        // 시간 수신 1초간 멈추기
+        this.timeReceiveFlag = true;
+        console.log(this.timeReceiveFlag);
+        // 1초뒤 수신 지연 풀기
+        // setTimeout(function() {
+        //   alert('here');
+        //   this.timeReceiveFlag = false;
+        //   console.log(this.timeReceiveFlag);
+        // }, 1000);
+        // 시간 보내기
+        if (this.room.host == this.getUser.id) {
+          this.sendTimeTrigger();
+        }
+      }
     },
     /**
      * 시간 트리거 발동, 수신
      */
     sendTimeTrigger() {
-      // this.stompClient.send('/pub/ssafymind/time', {}, 'stop');
-      this.stompClient.send(`/pub/ssafymind/time/${90}`, {}, this.getRoomId);
+      this.stompClient.send(`/pub/ssafymind/time/${91}`, {}, this.getRoomId);
     },
     onTimeMessageReceived(payload) {
+      console.log(this.timeReceiveFlag);
+      // 현재 시간 수신이 거부중인 경우 수신 받지 않기
       const time = JSON.parse(payload.body);
+      if (this.timeReceiveFlag && time < 88) {
+        alert('ss');
+        this.timeReceiveFlag = false;
+        return;
+      }
       this.minutes = parseInt(time / 60);
       this.seconds = time % 60;
     },

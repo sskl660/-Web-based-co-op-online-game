@@ -52,12 +52,15 @@ public class SsafyMindService {
                 ssafyMind.getTeamOrder().add(team);
             }
         }
+        // 현재 팀 개수 초기화
+        ssafyMind.setCurTeamCnt(teams.size());
 
         // 테스트 문제 리스트 ////////
-        ssafyMind.getQuizzes().add(new Quiz(1, "아미타불", "아미타불"));
-        ssafyMind.getQuizzes().add(new Quiz(1, "원시천존", "원시천존"));
-        ssafyMind.getQuizzes().add(new Quiz(1, "무량수불", "무량수불"));
-
+        for(int i = 0; i < 20; i++) {
+            ssafyMind.getQuizzes().add(new Quiz(1, "아미타불", "아미타불"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "원시천존", "원시천존"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "무량수불", "무량수불"));
+        }
 
         ssafyMindRepository.save(ssafyMind);
     }

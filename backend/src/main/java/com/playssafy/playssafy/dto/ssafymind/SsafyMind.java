@@ -32,6 +32,7 @@ public class SsafyMind {
     private int curPlayer; // 현재 진행중인 사람
     private int curTime; // 현재 시간
     private int first; // 트리거 최초 시작
+    private int curTeamCnt; // 현재 팀 개수
 
     public SsafyMind() {
         // 최대 10개 팀에 대응하는 팀 정보를 저장할 리스트 선언해두기
