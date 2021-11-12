@@ -21,23 +21,21 @@
     </div> -->
     <div>
       <p>비디오/오디오 통신</p>
-      <input type="text" id="room-id" value="abcdef" autocorrect=off autocapitalize=off size=20>
-      <button id="open-room">Open Room</button>
-      <button id="join-room">Join Room</button>
-      <div id="room-urls" style="text-align: center;display: none;background: #F1EDED;margin: 15px -10px;border: 1px solid rgb(189, 189, 189);border-left: 0;border-right: 0;"></div>
-      <div id="audios-container"></div>
+      <!-- <video src="@/assets/images/back.mp4" id="myFace" style="width: 400px; border: 1px solid black;" autoplay playsinline/> -->
+      <video id="myFace" style="width: 400px; border: 1px solid black;" autoplay playsinline />
+      <video id="peerFace" style="width: 400px; border: 1px solid black;" autoplay playsinline />
+      <video id="myFace2" style="width: 400px; border: 1px solid black;" autoplay playsinline />
+      <br />
+      <button id="video">비디오 On</button>
       <button id="audio">소리 On</button>
+      <select name="" id="cameras"></select>
       <button id="cameraBtn">적용</button>
     </div>
   </div>
 </template>
 
-<script src="/node_modules/webrtc-adapter/out/adapter.js"></script>
-<script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
-<script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
 <script>
-
-// import { socketConnect } from '@/util/socket-common.js';
+import { socketConnect } from '@/util/socket-common.js';
 
 export default {
   name: 'Chat',
@@ -50,6 +48,18 @@ export default {
       receivedMessages: [],
       record: {},
       stop: {},
+      soundClips: {},
+      chkHearMic: {},
+      audioCtx: {},
+      analyser: {},
+      chunks: [],
+      video: false,
+      audio: false,
+      myStream: {},
+      myPeerConnection: {},
+      getOffer: false,
+      getAnswer: false,
+      dataStream: {},
     };
   },
   created() {
@@ -58,147 +68,151 @@ export default {
     // console.log(this.stompClient);
   },
   mounted() {
-    // this.stompClient = socketConnect(this.onConnected, this.onError);
+    this.stompClient = socketConnect(this.onConnected, this.onError);
     this.socketio();
   },
   methods: {
     socketio: async function() {
-      const connection = new RTCMultiConnection();
-      console.log(connection)
+      let myStream;
+      const myFace = document.querySelector("#myFace");
+      const myFace2 = document.querySelector("#myFace2");
+      const video = document.querySelector("#video");
+      const audio = document.querySelector("#audio");
+      const cameraSelect = document.querySelector('#cameras');
+      const cameraBtn = document.querySelector('#cameraBtn');
 
-      document.getElementById('open-room').onclick = function() {
-        connection.open(document.getElementById('room-id').value, function() {
-          showRoomURL(connection.sessionid);
-        });
-      };
-
-      document.getElementById('join-room').onclick = function() {
-        connection.join(document.getElementById('room-id').value);
-      };
-
-      connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
-
-      connection.socketMessageEvent = 'audio-conference-demo';
-      connection.session = {
-        audio: true,
-        video: false
-      };
-      connection.mediaConstraints = {
-        audio: true,
-        video: false
-      };
-      connection.sdpConstraints.mandatory = {
-        OfferToReceiveAudio: true,
-        OfferToReceiveVideo: false
-      };
-      connection.iceServers = [{
-        'urls': [
-          'stun:stun.l.google.com:19302',
-          'stun:stun1.l.google.com:19302',
-          'stun:stun2.l.google.com:19302',
-          'stun:stun.l.google.com:19302?transport=udp',
-        ]
-      }];
-      connection.audiosContainer = document.getElementById('audios-container');
-      connection.onstream = function(event) {
-        var width = parseInt(connection.audiosContainer.clientWidth / 2) - 20;
-        var mediaElement = getHTMLMediaElement(event.mediaElement, {
-          title: event.userid,
-          buttons: ['full-screen'],
-          width: width,
-          showOnMouseEnter: false
-        });
-
-        connection.audiosContainer.appendChild(mediaElement);
-
-        setTimeout(function() {
-          mediaElement.media.play();
-        }, 5000);
-
-        mediaElement.id = event.streamid;
-      };
-      connection.onstreamended = function(event) {
-        var mediaElement = document.getElementById(event.streamid);
-        if (mediaElement) {
-          mediaElement.parentNode.removeChild(mediaElement);
-        }
-      };
-      function showRoomURL(roomid) {
-        var roomHashURL = '#' + roomid;
-        var roomQueryStringURL = '?roomid=' + roomid;
-
-        var html = '<h2>Unique URL for your room:</h2><br>';
-
-        html += 'Hash URL: <a href="' + roomHashURL + '" target="_blank">' + roomHashURL + '</a>';
-        html += '<br>';
-        html += 'QueryString URL: <a href="' + roomQueryStringURL + '" target="_blank">' + roomQueryStringURL + '</a>';
-
-        var roomURLsDiv = document.getElementById('room-urls');
-        roomURLsDiv.innerHTML = html;
-
-        roomURLsDiv.style.display = 'block';
-      }
-      (function() {
-        var params = {},
-          r = /([^&=]+)=?([^&]*)/g;
-
-        function d(s) {
-          return decodeURIComponent(s.replace(/\+/g, ' '));
-        }
-        var match, search = window.location.search;
-        while (match = r.exec(search.substring(1)))
-          params[d(match[1])] = d(match[2]);
-        window.params = params;
-      })();
-      var roomid = '';
-    if (localStorage.getItem(connection.socketMessageEvent)) {
-        roomid = localStorage.getItem(connection.socketMessageEvent);
-    } else {
-        roomid = connection.token();
-    }
-    document.getElementById('room-id').value = roomid;
-    document.getElementById('room-id').onkeyup = function() {
-        localStorage.setItem(connection.socketMessageEvent, this.value);
-    };
-
-    var hashString = location.hash.replace('#', '');
-    if (hashString.length && hashString.indexOf('comment-') == 0) {
-      hashString = '';
-    }
-
-    var roomid = params.roomid;
-    if (!roomid && hashString.length) {
-      roomid = hashString;
-    }
-
-    if (roomid && roomid.length) {
-      document.getElementById('room-id').value = roomid;
-      localStorage.setItem(connection.socketMessageEvent, roomid);
-
-      // auto-join-room
-      (function reCheckRoomPresence() {
-        connection.checkPresence(roomid, function(isRoomExist) {
-          if (isRoomExist) {
-            connection.join(roomid);
-            return;
+      async function getMikes() {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cameras = devices.filter(device => device.kind === 'audioinput');
+        const currentCamera = myStream.getVideoTracks()[0];
+        cameras.forEach(camera => {
+          const option = document.createElement("option");
+          option.value = camera.deviceId;
+          option.innerText = camera.label;
+          if(currentCamera.label == camera.label) {
+            option.selected = true;
           }
-
-          setTimeout(reCheckRoomPresence, 5000);
+          cameraSelect.appendChild(option);
         });
-      })();
+      }
+      
+      const getMedia = async (deviceId) => {
+        const initialConstaints = {
+          audio: false,
+          video: { facingMode: "user" },
+        };
+        const cameraConstraints = {
+          audio: false,
+          video: { deviceId: { exact: deviceId } },
+        }
+        try {
+          myStream = await navigator.mediaDevices.getUserMedia(
+            deviceId ? cameraConstraints : initialConstaints
+          )
+          myFace.srcObject = myStream;
+          if(!deviceId) {
+            await getMikes();
+          }
+          this.myStream = myStream;
+        } catch (e) {
+          console.log(e);
+        }
+      }
 
-      disableInputButtons();
-    }
+      const initCall = async () => {
+        await getMedia();
+        makeConnection();
+      }
+
+      const makeConnection = async () => {
+        console.log(this.myPeerConnection);
+        console.log(this.myPeerConnection);
+        console.log(this.myPeerConnection);
+        console.log(this.myPeerConnection);
+        console.log(this.myPeerConnection);
+        this.myPeerConnection = new RTCPeerConnection({
+          iceServers: [
+            {
+              urls: [
+                "stun:stun.l.google.com:19302",
+                "stun:stun2.l.google.com:19302",
+                "stun:stun3.l.google.com:19302",
+                "stun:stun4.l.google.com:19302",
+                "stun:stun5.l.google.com:19302",
+              ]
+            }
+          ],
+        });
+        this.myPeerConnection.addEventListener("icecandidate", (data) => {
+          console.log(data)
+          this.stompClient.send(
+            '/pub/chat/audio',
+            {},
+            JSON.stringify({ roomId: this.id, offer: data.candidate, writer: '김태현' })
+          );
+        });
+        this.myPeerConnection.addEventListener("addstream", (data) => {
+          const peerFace = document.getElementById("peerFace");
+          this.dataStream = data.stream;
+
+          console.log('---------------');
+          console.log('This is peer stream');
+          console.log(data.stream);
+          console.log('---------------');
+          console.log('This is My Stream');
+          console.log(this.myStream);
+          console.log('---------------');
+
+          peerFace.srcObject = this.dataStream;
+          myFace2.srcObject = myStream;
+        });
+        myStream
+          .getTracks()
+          .forEach((track) => this.myPeerConnection.addTrack(track, myStream));
+      }
+
+      video.addEventListener('click', () => {
+        this.myStream.getVideoTracks().forEach((track) => (track.enabled = !track.enabled));
+        if (this.video) {
+          video.innerText = '비디오 On';
+          this.video = false;
+        } else {
+          video.innerText = '비디오 Off';
+          this.video = true;
+        }
+      });
+
+      audio.addEventListener('click', () => {
+        this.myStream.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
+        if (this.audio) {
+          audio.innerText = '오디오 On';
+          this.audio = false;
+        } else {
+          audio.innerText = '오디오 Off';
+          this.audio = true;
+        }
+      });
+
+      cameraBtn.addEventListener("click", () => {
+        this.useMike();
+      });
+
+      cameraSelect.addEventListener("input", async () => {
+        await getMedia(cameraSelect.value);
+      });
+
+      await initCall();
+
     },
     // 채팅 채널 구독 및 입장 메세지 출력
-    // onConnected() {
-    //   this.stompClient.subscribe('/chat/room/' + this.id, this.onMessageReceived);
-    //   this.stompClient.send(
-    //     '/pub/chat/message',
-    //     {},
-    //     JSON.stringify({ roomId: this.id, message: '입장', writer: '김태현' })
-    //   );
-    // },
+    onConnected() {
+      this.stompClient.subscribe('/chat/room/' + this.id, this.onMessageReceived);
+      this.stompClient.send(
+        '/pub/chat/message',
+        {},
+        JSON.stringify({ roomId: this.id, message: '입장', writer: '김태현' })
+      );
+    },
     // 소켓 연결 해제
     socketDisconnect() {
       this.stompClient.socketDisconnect();
@@ -259,7 +273,7 @@ export default {
     // 메세지 수신
     onMessageReceived(payload) {
       let receiveMessage = JSON.parse(payload.body);
-      if (receiveMessage.offer.type === '무시') {
+      if (receiveMessage.offer) {
         if (receiveMessage.writer == '안기훈') return
         if (receiveMessage.offer.type === 'offer') {
           this.sendOffer(receiveMessage.offer);
@@ -271,7 +285,7 @@ export default {
           this.sendIce(receiveMessage.offer)
           return
         }
-      }
+      } else return;
       this.receivedMessages.push(receiveMessage);
       console.log(receiveMessage);
     },
@@ -280,4 +294,5 @@ export default {
   },
 };
 </script>
+
 <style></style>
