@@ -22,4 +22,11 @@ public class JumpGameData {
     private HashMap<Integer, Integer> Awarded;//수상자, 등수-팀번호
     private List<Integer> list; //플레이 팀 리스트
     private List<Integer> nextList; //다음 강 리스트
+
+    public JumpGameData(String roomId, HashMap<Integer, Integer> awarded, List<Integer> list, List<Integer> nextList) {
+        this.roomId = roomId;
+        Awarded = awarded;
+        this.list = list;
+        this.nextList = nextList;
+    }
 }
