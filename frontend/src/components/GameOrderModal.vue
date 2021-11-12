@@ -45,6 +45,7 @@ export default {
     startModal() {
       this.$emit('getCloseModal', this.ordermodal);
       this.$emit('startTimer', this.startTime);
+      this.$emit('sendGameStartTrigger');
     },
   },
 };
