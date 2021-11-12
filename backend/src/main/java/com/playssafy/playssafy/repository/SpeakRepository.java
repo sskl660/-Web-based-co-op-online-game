@@ -1,9 +1,7 @@
 package com.playssafy.playssafy.repository;
 
-import com.playssafy.playssafy.domain.Quiz.SpeakEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import com.playssafy.playssafy.dto.speaking.Speaking;
+import org.springframework.data.repository.CrudRepository;
 
-@Repository
-public interface SpeakRepository extends JpaRepository<SpeakEntity, Long> {
+public interface SpeakRepository extends CrudRepository<Speaking, String> {
 }
