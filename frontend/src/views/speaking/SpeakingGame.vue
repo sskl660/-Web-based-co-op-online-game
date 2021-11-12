@@ -13,16 +13,12 @@
                 <img src="@/assets/images/speak-success.png" alt="">
               </div>
               <div class="member-sentence member-sentence-left">
-                <span>
-                  삼성 청년 소프트웨어 아카데미
-                </span>
+                <span id="doin"></span>
               </div>
             </div>
             <div v-else class="member-right">
               <div class="member-sentence member-sentence-right">
-                <span>
-                  삼성 청년 소프트웨어 아카데미
-                </span>
+                <span>삼성 청년 소프트웨어 아카데미</span>
               </div>
               <div class="member-name">
                 <span>{{ member }}</span>
@@ -30,7 +26,7 @@
               </div>
             </div>
           </div>
-          <img src="@/assets/images/mike-on.png" alt="" class="game-mike">
+          <img src="@/assets/images/mike-off.png" alt="" class="game-mike" id="record">
         </div>
       </div>
     </div>
@@ -39,8 +35,8 @@
     <div style="display:none;">
       <p>녹음하기</p>
       <input type="checkbox" id="chk-hear-mic"><label for="chk-hear-mic">마이크 소리 듣기</label>
-      <button id="record">녹음</button>
-      <button id="stop">녹음 정지</button>
+      <!-- <button id="record">녹음</button> -->
+      <!-- <button id="stop">녹음 정지</button> -->
       <span id="final_span"></span>
       <span id="interim_span"></span>
       <div id="sound-clips"></div>
@@ -70,13 +66,142 @@ export default {
       chunks: [],
       mediaRecorder: {},
       teamMember: ['김태현', '권희은', '차은채', '안기훈', '이장섭', '오일남'],
+      answer: [
+        '삼성 청년 소프트웨어 아카데미',
+        '간장공장 공장장은 김 공장장',
+        '내가 그린 기린 그림은 긴 기린 그림이다',
+      ],
+      answerIdx: 0,
+      userAnswer: [],
+      userAnswerIdx: 0,
+      doing: '',
+      isRecording: false,
     }
   },
   mounted: function() {
     // this.getAudio();
-    // this.translate();
+    this.translate();
+  },
+  watch: {
+    doing() {
+      console.log(this.doing)
+    },
   },
   methods: {
+    /*  */
+    // 음성을 텍스트로 번역
+    /*  */
+    translate: function() {
+      if (typeof webkitSpeechRecognition !== 'function') {
+        alert('크롬에서만 동작합니다')
+        return false
+      }
+
+      const speech = new (window.SpeechRecognition || window.webkitSpeechRecognition);
+      let isRecognizing = false;
+      let ignoreEndProcess = false;
+      let finalTranscript = '';
+      const doin = document.querySelector('#doin');
+
+      const final_span = document.querySelector('#final_span')
+      const interim_span = document.querySelector('#interim_span')
+      // 원하는 언어를 앞으로 뺴라(해당 언어만 지원)
+      // 비어있으면 영어, 한국어 둘 다 지원(한국어 우선)
+      speech.lang = ["ko-KR", "en-US"];
+      speech.continuous = true;
+      speech.interimResults = true;
+
+      speech.onstart = function() {
+        isRecognizing = true;
+        console.log(isRecognizing)
+      }
+
+      speech.onend = function () {
+        isRecognizing = false;
+        console.log(isRecognizing)
+
+        if (ignoreEndProcess) {
+          return false;
+        }
+
+        if (!finalTranscript) {
+          return false;
+        }
+      };
+
+      speech.onresult = function (event) {
+        let interimTranscript = '';
+        if (typeof event.results === 'undefined') {
+          speech.onend = null;
+          speech.stop();
+          return;
+        }
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
+
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+            console.log('파이널', finalTranscript)
+            console.log('파이널', transcript)
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        final_span.innerHTML = finalTranscript;
+        interim_span.innerHTML = interimTranscript;
+        this.doing = interimTranscript;
+        console.log('doing')
+        doin.innerText = finalTranscript + interimTranscript;
+        console.log('doing')
+        console.log(interimTranscript)
+      }
+
+      speech.onerror = function (event) {
+        if(event.error.match(/no-speech|audio-capture|not-allowed/)) {
+          ignoreEndProcess = true;
+        }
+      }
+
+      const record = document.querySelector("#record");
+      console.log(record.src)
+      console.log(record)
+      console.log(record)
+      console.log(record)
+      record.addEventListener("click", () => {
+        if (this.isRecording) {
+          record.src = '/img/mike-off.10e24890.png';
+          // record.src = 'http://localhost:3000/img/mike-off.10e24890.png'
+          if (this.answer[this.answerIdx] === finalTranscript) { // 띄어쓰기 제외시켜주기
+            this.userAnswer.push(finalTranscript);
+          }
+          finalTranscript = '';
+          doin.innerText = '';
+          this.isRecording = false
+          speech.stop();
+        } else {
+          record.src = '/img/mike-on.d4e34f6f.png'
+          this.isRecording = true;
+          speech.start();
+        }
+      })
+
+      const stop = document.querySelector("#stop");
+      console.log(stop.src);
+      // stop.addEventListener("click", () => {
+        
+      // })
+
+      speech.addEventListener("result", (event) => {
+        const transcript = event["results"];
+        // this.mediaRecorder.stop();
+        console.log(transcript);
+      })
+    },
+    nextTurn: function() {
+      this.userAnswerIdx++;
+      this.answerIdx++;
+    },
     /*  */
     // 음성 녹음해 blob 파일로 만들기
     /*  */
@@ -168,91 +293,6 @@ export default {
           console.log('The following error occurred: ' + err)
         })
       }
-    },
-    /*  */
-    // 음성을 텍스트로 번역
-    /*  */
-    translate: function() {
-      if (typeof webkitSpeechRecognition !== 'function') {
-        alert('크롬에서만 동작합니다')
-        return false
-      }
-
-      const speech = new (window.SpeechRecognition || window.webkitSpeechRecognition);
-      let isRecognizing = false;
-      let ignoreEndProcess = false;
-      let finalTranscript = '';
-
-      const final_span = document.querySelector('#final_span')
-      const interim_span = document.querySelector('#interim_span')
-      // 원하는 언어를 앞으로 뺴라(해당 언어만 지원)
-      // 비어있으면 영어, 한국어 둘 다 지원(한국어 우선)
-      speech.lang = ["ko-KR", "en-US"];
-      speech.continuous = true;
-      speech.interimResults = true;
-
-      speech.onstart = function() {
-        isRecognizing = true;
-        console.log(isRecognizing)
-      }
-
-      speech.onend = function () {
-        isRecognizing = false;
-        console.log(isRecognizing)
-
-        if (ignoreEndProcess) {
-          return false;
-        }
-
-        if (!finalTranscript) {
-          return false;
-        }
-      };
-
-      speech.onresult = function (event) {
-        let interimTranscript = '';
-        if (typeof event.results === 'undefined') {
-          speech.onend = null;
-          speech.stop();
-          return;
-        }
-
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const transcript = event.results[i][0].transcript;
-
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript;
-            console.log('파이널', finalTranscript)
-            console.log('파이널', transcript)
-          } else {
-            interimTranscript += transcript;
-          }
-        }
-        final_span.innerHTML = finalTranscript;
-        interim_span.innerHTML = interimTranscript;
-        console.log(interimTranscript)
-      }
-
-      speech.onerror = function (event) {
-        if(event.error.match(/no-speech|audio-capture|not-allowed/)) {
-          ignoreEndProcess = true;
-        }
-      }
-      console.log(speech)
-
-      document.querySelector("#record").addEventListener("click", () => {
-        speech.start();
-      })
-
-      document.querySelector("#stop").addEventListener("click", () => {
-        speech.stop();
-      })
-
-      speech.addEventListener("result", (event) => {
-        const transcript = event["results"];
-        // this.mediaRecorder.stop();
-        console.log(transcript);
-      })
     },
   },
 }
