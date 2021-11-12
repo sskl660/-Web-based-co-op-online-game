@@ -6,7 +6,7 @@ import SignUp from '@/views/accounts/SignUp.vue';
 import Rank from '@/views/Rank.vue';
 import Room from '@/views/Room.vue';
 import CreateRoom from '@/views/CreateRoom.vue';
-import SpeakingGame from '@/views/SpeakingGame.vue';
+import SpeakingGame from '@/views/speaking/SpeakingGame.vue';
 import Temp from '@/views/temp/Chat.vue';
 import Chat from '@/views/temp/ChatRoom.vue';
 import SSazipJump from '@/views/SSazipJump.vue';
