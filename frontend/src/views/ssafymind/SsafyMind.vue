@@ -28,7 +28,7 @@
         v-on:mouseenter="mouseEnter"
         v-on:contextmenu="handleCM"
       ></canvas>
-      <!-- <div class="controls-stop"></div> -->
+      <div class="controls-stop" v-if="this.room.host == this.getUser.id"></div>
       <div class="controls">
         <div class="controls_colors" id="jsColors">
           <div class="controls_color jsColor" style="background-color:#E00F0F"></div>
@@ -73,6 +73,7 @@
           v-model="message"
           @keyup.enter="sendAnswerMessage"
           id="send-ans"
+          v-if="this.room.host != this.getUser.id"
         />
         <div v-for="(msg, idx) in room.chat" :key="idx">
           <p id="chat-block"><strong>{{ msg.name }}</strong> : {{ msg.message }}</p>
@@ -487,8 +488,8 @@ export default {
       }
       const data = JSON.parse(payload.body);
       this.room = data;
-			console.log('포인트를 알고싶다고')
-      console.log(data);
+			// console.log('포인트를 알고싶다고')
+      // console.log(data);
       // 여기에 받은 데이터를 기반으로 그리고 있는 그림 초기화하는 로직 구현
 			// console.log(data.points)
       // console.log(data.points.length)
@@ -595,6 +596,7 @@ export default {
     onCorrectMessageReceived(payload) {
       console.log(payload.body);
       const flag = JSON.parse(payload.body);
+      console.log('정답보이나')
       if (flag) alert('정답입니다!');
     },
     /**
