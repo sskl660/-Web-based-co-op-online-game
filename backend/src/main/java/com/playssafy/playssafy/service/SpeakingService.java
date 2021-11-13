@@ -110,7 +110,7 @@ public class SpeakingService {
             // 다음 팀으로 옮기고
             speaking.getTeamOrder().remove(0);
             // 그린 그림 정보 삭제하고
-            speaking.getPoints().clear();
+            // speaking.getPoints().clear();
             System.out.println(speaking.getQuizzes());
             // 저장한 뒤
             speakRepository.save(speaking);
