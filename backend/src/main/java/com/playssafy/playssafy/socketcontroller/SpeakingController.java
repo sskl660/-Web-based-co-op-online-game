@@ -1,6 +1,6 @@
 package com.playssafy.playssafy.socketcontroller;
 
-import com.playssafy.playssafy.dto.speaking.Answer;
+import com.playssafy.playssafy.dto.speaking.Talking;
 import com.playssafy.playssafy.dto.speaking.SpeakMessage;
 import com.playssafy.playssafy.dto.speaking.Speaking;
 import com.playssafy.playssafy.dto.waitroom.Participant;
@@ -40,11 +40,21 @@ public class SpeakingController {
         template.convertAndSend("/speaking/" + participant.getRoomId(), speaking);
     }
 
-    // 3. 또박또박 말해요 문장 데이터 교환
-    @MessageMapping(value = "/speaking/answer")
-    public void answer(@DestinationVariable String roomId, Answer answer) {
-        template.convertAndSend("/speaking/" + roomId, answer);
+    // 3. 중간 문장 전송
+    @MessageMapping(value = "/speaking/talk/{roomId}")
+    public void talk(@DestinationVariable String roomId, Talking talking) {
+        // 중간 결과를 전송
+        template.convertAndSend("/speaking/" + roomId, talking);
+    }
+
+    // 4. 결과 문장 전송
+    @MessageMapping(value = "/speaking/answer/{roomId}")
+    public void answer(@DestinationVariable String roomId, SpeakMessage speakMessage) {
+        speakMessage = speakingService.answer(roomId, speakMessage);
+        // 우선 보내주기
+        template.convertAndSend("/speaking/" + roomId, speakMessage);
         // 말을 서버에 저장
-        speakingService.speak(roomId, point);
-  }
+        // speakingService.answer(roomId, speakMessage);
+    }
+
 }

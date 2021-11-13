@@ -1,7 +1,7 @@
 package com.playssafy.playssafy.service;
 
 import com.playssafy.playssafy.dto.speaking.SpeakMessage;
-import com.playssafy.playssafy.dto.speaking.Answer;
+import com.playssafy.playssafy.dto.speaking.Talking;
 import com.playssafy.playssafy.dto.speaking.Speaking;
 import com.playssafy.playssafy.dto.speaking.Team;
 import com.playssafy.playssafy.dto.waitroom.InitGame;
@@ -20,6 +20,8 @@ public class SpeakingService {
 
     // 0. 게임방 생성 메서드
     public void createSsafyMind(InitGame initGame) {
+        if(!SpeakRepository.findById(initGame.getRoomId()).isEmpty())
+            return;
         Speaking speaking = new Speaking();
 
         // 방 ID 초기화
@@ -46,10 +48,24 @@ public class SpeakingService {
             teams.set(b, temp);
         }
 
-        // 최종 결정된 순서 넣기
-        for (Integer i : teams) {
-          speaking.getTeamOrder().add(i);
+        // 현재 팀 개수 초기화
+        speaking.setCurTeamCnt(teams.size());
+
+        // 테스트 문제 리스트 ////////
+        for(int i = 0; i < 20; i++) {
+            speaking.getQuizzes().add(new Quiz(1, "삼성 청년 소프트웨어 아카데미", "삼성 청년 소프트웨어 아카데미"));
+            speaking.getQuizzes().add(new Quiz(1, "간장공장 공장장", "간장공장 공장장"));
+            speaking.getQuizzes().add(new Quiz(1, "내가 그린 기린 그림", "내가 그린 기린 그림"));
         }
+        // 팀 초기화////////
+        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "1", "김태현1", 1));
+        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "2", "김태현2", 1));
+        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "3", "김태현3", 1));
+        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "4", "김태현4", 1));
+        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "1", "이장섭1", 2));
+        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "2", "이장섭2", 2));
+        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "3", "이장섭3", 2));
+        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "4", "이장섭4", 2));
 
         speakRepository.save(speaking);
     }
@@ -83,39 +99,39 @@ public class SpeakingService {
     }
 
     // 3. 중간 문장 데이터 전달
-    public void speak(String roomId, Answer answer) {
+    public void talk(String roomId, Answer answer) {
         Speaking speaking = speakRepository.findById(roomId).get();
 
         // 문장 데이터 추가
-        speaking.getAnswer().add(answer);
+        speaking.getTalking().add(answer);
         speakRepository.save(speaking);
     }
 
     // 4. 정답 여부 확인
-    public synchronized boolean answer(String roomId, SpeakMessage speakMessage) {
-      Speaking speaking = speakRepository.findById(roomId).get();
+    public synchronized SpeakMessage answer(String roomId, SpeakMessage speakMessage) {
+        Speaking speaking = speakRepository.findById(roomId).get();
 
-      // 메세지 스택 저장
-      speaking.getChat().add(speakMessage);
-      speakRepository.save(speaking);
-      // 리스트의 마지막 부분 부터 문제 회수
-      int lastIndex = speaking.getQuizzes().size() - 1;
-      if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage())) {
-          // 마지막 문제를 제거하고
-          speaking.getQuizzes().remove(lastIndex);
-          // 다음 팀으로 옮기고
-          speaking.getTeamOrder().remove(0);
-          // 그린 그림 정보 삭제하고
-          speaking.getPoints().clear();
-          System.out.println(speaking.getQuizzes());
-          // 저장한 뒤
-          speakRepository.save(speaking);
-          // 정답
-          return true;
-      }
-      // 오답
-      return false;
-  }
+        // 메세지 스택 저장
+        speaking.getChat().add(speakMessage);
+        speakRepository.save(speaking);
+        // 리스트의 마지막 부분 부터 문제 회수
+        int lastIndex = speaking.getQuizzes().size() - 1;
+        if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage())) {
+            // 마지막 문제를 제거하고
+            speaking.getQuizzes().remove(lastIndex);
+            // 다음 팀으로 옮기고
+            speaking.getTeamOrder().remove(0);
+            // 그린 그림 정보 삭제하고
+            speaking.getPoints().clear();
+            System.out.println(speaking.getQuizzes());
+            // 저장한 뒤
+            speakRepository.save(speaking);
+            // 정답
+            return speakMessage;
+        }
+        // 오답
+        return speakMessage;
+    }
 
 
 //    @Autowired//자동주입
