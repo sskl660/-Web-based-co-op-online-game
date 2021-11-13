@@ -3,7 +3,7 @@ package com.playssafy.playssafy.service;
 import com.playssafy.playssafy.dto.speaking.*;
 import com.playssafy.playssafy.dto.waitroom.InitGame;
 import com.playssafy.playssafy.dto.waitroom.Participant;
-import com.playssafy.playssafy.repository.SpeakRepository;
+import com.playssafy.playssafy.repository.SpeakGameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +13,11 @@ import java.util.List;
 @Service
 public class SpeakingService {
     @Autowired
-    private SpeakRepository speakRepository;
+    private SpeakGameRepository speakGameRepository;
 
     // 0. 게임방 생성 메서드
     public void createSsafyMind(InitGame initGame) {
-        if(!speakRepository.findById(initGame.getRoomId()).isEmpty())
+        if(!speakGameRepository.findById(initGame.getRoomId()).isEmpty())
             return;
         Speaking speaking = new Speaking();
 
@@ -64,27 +64,27 @@ public class SpeakingService {
         speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "3", "이장섭3", 2));
         speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "4", "이장섭4", 2));
 
-        speakRepository.save(speaking);
+        speakGameRepository.save(speaking);
     }
 
     // 1. 게임방 입장 메서드
     public synchronized Speaking enter(Participant participant) {
-        Speaking speaking = speakRepository.findById(participant.getRoomId()).get();
+        Speaking speaking = speakGameRepository.findById(participant.getRoomId()).get();
         Team team = speaking.getTeams().get(participant.getTeamNo());
         if (!team.getMembers().contains(participant))
             team.getMembers().add(participant);
 
         // 변경 완료
-        return speakRepository.save(speaking);
+        return speakGameRepository.save(speaking);
     }
 
     // 2. 게임방 퇴장 메서드
     public synchronized Speaking exit(Participant participant) {
-        Speaking speaking = speakRepository.findById(participant.getRoomId()).get();
+        Speaking speaking = speakGameRepository.findById(participant.getRoomId()).get();
 
         // 방장이라면 방 자체를 삭제 후 종료
         if (speaking.getHost().equals(participant.getParticipantId())) {
-            speakRepository.deleteById(participant.getRoomId());
+            speakGameRepository.deleteById(participant.getRoomId());
             return null;
         }
         // 방장이 아니라면 유저 정보만 삭제
@@ -92,16 +92,16 @@ public class SpeakingService {
         team.getMembers().remove(participant);
 
         // 변경 완료
-        return speakRepository.save(speaking);
+        return speakGameRepository.save(speaking);
     }
 
     // 3. 정답 여부 확인
     public synchronized SpeakMessage answer(String roomId, SpeakMessage speakMessage) {
-        Speaking speaking = speakRepository.findById(roomId).get();
+        Speaking speaking = speakGameRepository.findById(roomId).get();
 
         // 메세지 스택 저장
         speaking.getChat().add(speakMessage);
-        speakRepository.save(speaking);
+        speakGameRepository.save(speaking);
         // 리스트의 마지막 부분 부터 문제 회수
         int lastIndex = speaking.getQuizzes().size() - 1;
         if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage())) {
@@ -113,7 +113,7 @@ public class SpeakingService {
             // speaking.getPoints().clear();
             System.out.println(speaking.getQuizzes());
             // 저장한 뒤
-            speakRepository.save(speaking);
+            speakGameRepository.save(speaking);
             // 정답
             return speakMessage;
         }
