@@ -17,7 +17,7 @@ public class SpeakingService {
 
     // 0. 게임방 생성 메서드
     public void createSsafyMind(InitGame initGame) {
-        if(!SpeakRepository.findById(initGame.getRoomId()).isEmpty())
+        if(!speakRepository.findById(initGame.getRoomId()).isEmpty())
             return;
         Speaking speaking = new Speaking();
 
