@@ -179,9 +179,18 @@ export default {
         if (this.isRecording) {
           record.src = '/img/mike-off.10e24890.png';
           // record.src = 'http://localhost:3000/img/mike-off.10e24890.png'
-          if (this.answer[this.answerIdx] === finalTranscript) { // 띄어쓰기 제외시켜주기
-            this.userAnswer.push(finalTranscript);
-          }
+          // if (this.answer[this.answerIdx] === finalTranscript) { // 띄어쓰기 제외시켜주기
+          //   this.userAnswer.push(finalTranscript);
+          // }
+          this.stompClient.send(
+            `/pub/speaking/answer/${this.getRoomId}`,
+            {},
+            JSON.stringify({
+              name: '안기훈',
+              teamNo: 1,
+              message: '제발!!'
+            })
+          )
           finalTranscript = '';
           doin.innerText = '';
           this.isRecording = false
@@ -305,13 +314,12 @@ export default {
       // 방 정보 교환 채널
       this.stompClient.subscribe('/speaking/' + this.getRoomId, this.onMessageReceived);
       // 정답 데이터 채널
-      this.stompClient.subscribe('/speaking/answer' + this.getRoomId, this.onAnswerMessageReceived);
+      this.stompClient.subscribe('/speaking/answer/' + this.getRoomId, this.onAnswerMessageReceived);
       // 현재 진행 중인 사람의 문장 전송
-      this.stompClient.subscribe('/speaking/talk' + this.getRoomId, this.onTalkingMessageReceived);
-
+      this.stompClient.subscribe('/speaking/talk/' + this.getRoomId, this.onTalkingMessageReceived);
       // 입장 시 데이터 수신
       this.stompClient.send(
-        '/pub/ssafymind/enter',
+        '/pub/speaking/enter',
         {},
         JSON.stringify({
           roomId: this.getRoomId,
