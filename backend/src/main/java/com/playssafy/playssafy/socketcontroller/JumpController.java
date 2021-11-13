@@ -28,8 +28,13 @@ public class JumpController {
 //    private JumpService jumpService;
 
     private final SimpMessagingTemplate template;
-//    private final GameRoomService gameRoomService; // 게임 방 저장소
-
+    //1.마스터에게 초기값 요청
+    @MessageMapping(value = "/game/jump/enter/reqMaster")
+    public void needEnviroment(JumpInfo jumpInfo) {
+    System.out.println("입장 전 정보 요청");
+    System.out.println(jumpInfo.toString());
+    template.convertAndSend("/game/jumpgame/" + jumpInfo.getRoomId(), jumpInfo);
+}
     //점프 값 중계
     @MessageMapping(value = "/game/jump/data")
     public void sendJumpInfo(JumpInfo jumpInfo) {
@@ -48,6 +53,7 @@ public class JumpController {
         template.convertAndSend("/game/jumpgame/" + jumpInfo.getRoomId(), jumpInfo);
     }
 
+
     //중지
     @MessageMapping(value = "/game/jump/stop")
     public void sendStop(JumpInfo jumpInfo) {
@@ -61,6 +67,13 @@ public class JumpController {
     @MessageMapping(value = "/game/jump/obstacle")
     public synchronized void sendOB(JumpInfo jumpInfo) {
 //        System.out.println(jumpInfo.toString());
+        template.convertAndSend("/game/jumpgame/" + jumpInfo.getRoomId(), jumpInfo);
+    }
+    //7.현 상태 중계 마스터로부터
+    @MessageMapping(value = "/game/jump/state")
+    public void broadcastState(JumpInfo jumpInfo) {
+        System.out.println("현 상태전송");
+        System.out.println(jumpInfo.toString());
         template.convertAndSend("/game/jumpgame/" + jumpInfo.getRoomId(), jumpInfo);
     }
 
