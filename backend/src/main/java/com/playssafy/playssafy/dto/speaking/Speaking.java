@@ -32,7 +32,7 @@ public class Speaking {
     private int curPlayer; // 현재 진행중인 사람
     private int curTeamCnt; // 현재 팀 개수
     
-
+    
     public Speaking() {
       // 최대 10개 팀에 대응하는 팀 정보를 저장할 리스트 선언해두기
         int teamSize = 11;

@@ -1,9 +1,6 @@
 package com.playssafy.playssafy.service;
 
-import com.playssafy.playssafy.dto.speaking.SpeakMessage;
-import com.playssafy.playssafy.dto.speaking.Talking;
-import com.playssafy.playssafy.dto.speaking.Speaking;
-import com.playssafy.playssafy.dto.speaking.Team;
+import com.playssafy.playssafy.dto.speaking.*;
 import com.playssafy.playssafy.dto.waitroom.InitGame;
 import com.playssafy.playssafy.dto.waitroom.Participant;
 import com.playssafy.playssafy.repository.SpeakRepository;
@@ -98,16 +95,7 @@ public class SpeakingService {
         return speakRepository.save(speaking);
     }
 
-    // 3. 중간 문장 데이터 전달
-    public void talk(String roomId, Answer answer) {
-        Speaking speaking = speakRepository.findById(roomId).get();
-
-        // 문장 데이터 추가
-        speaking.getTalking().add(answer);
-        speakRepository.save(speaking);
-    }
-
-    // 4. 정답 여부 확인
+    // 3. 정답 여부 확인
     public synchronized SpeakMessage answer(String roomId, SpeakMessage speakMessage) {
         Speaking speaking = speakRepository.findById(roomId).get();
 
