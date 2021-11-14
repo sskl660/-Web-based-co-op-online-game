@@ -72,7 +72,6 @@ export default {
       answerIdx: 0,
       userAnswer: [],
       userAnswerIdx: 0,
-      doing: '',
       isRecording: false,
     }
   },
@@ -87,9 +86,6 @@ export default {
     this.onDisconnect();
   },
   watch: {
-    doing() {
-      console.log(this.doing)
-    },
   },
   computed: {
     ...mapGetters(['getUser', 'getRoomId']),
@@ -108,7 +104,6 @@ export default {
       let isRecognizing = false;
       let ignoreEndProcess = false;
       let finalTranscript = '';
-      const doin = document.querySelector('#doin');
 
       const final_span = document.querySelector('#final_span')
       const interim_span = document.querySelector('#interim_span')
@@ -136,7 +131,7 @@ export default {
         }
       };
 
-      speech.onresult = function (event) {
+      speech.onresult = (event) => {
         let interimTranscript = '';
         if (typeof event.results === 'undefined') {
           speech.onend = null;
@@ -155,13 +150,17 @@ export default {
             interimTranscript += transcript;
           }
         }
+        console.log('파이널', finalTranscript);
+        console.log('파이널', interimTranscript);
+        this.stompClient.send(
+          `/speaking/talk/${this.getRoomId}`,
+          {},
+          JSON.stringify({
+            sentence: finalTranscript + interimTranscript
+          })
+        );
         final_span.innerHTML = finalTranscript;
         interim_span.innerHTML = interimTranscript;
-        this.doing = interimTranscript;
-        console.log('doing')
-        doin.innerText = finalTranscript + interimTranscript;
-        console.log('doing')
-        console.log(interimTranscript)
       }
 
       speech.onerror = function (event) {
@@ -171,10 +170,6 @@ export default {
       }
 
       const record = document.querySelector("#record");
-      console.log(record.src)
-      console.log(record)
-      console.log(record)
-      console.log(record)
       record.addEventListener("click", () => {
         if (this.isRecording) {
           record.src = '/img/mike-off.10e24890.png';
@@ -183,20 +178,22 @@ export default {
           //   this.userAnswer.push(finalTranscript);
           // }
           this.stompClient.send(
-            `/pub/speaking/answer/${this.getRoomId}`,
+            `/speaking/answer/${this.getRoomId}`,
             {},
             JSON.stringify({
               name: '안기훈',
               teamNo: 1,
-              message: '제발!!'
+              message: finalTranscript
             })
-          )
+          );
           finalTranscript = '';
-          doin.innerText = '';
-          this.isRecording = false
+          this.isRecording = false;
           speech.stop();
         } else {
-          record.src = '/img/mike-on.d4e34f6f.png'
+          record.src = '/img/mike-on.d4e34f6f.png';
+          finalTranscript = '';
+          const doin = document.querySelector('#doin');
+          doin.innerText = '';
           this.isRecording = true;
           speech.start();
         }
@@ -319,7 +316,7 @@ export default {
       this.stompClient.subscribe('/speaking/talk/' + this.getRoomId, this.onTalkingMessageReceived);
       // 입장 시 데이터 수신
       this.stompClient.send(
-        '/pub/speaking/enter',
+        'pub/speaking/enter',
         {},
         JSON.stringify({
           roomId: this.getRoomId,
@@ -356,12 +353,16 @@ export default {
       this.$router.push('/room/', this.getRoomId)
     },
     onAnswerMessageReceived(payload) {
-      const data = payload.body;
-      console.log(data)
+      const data = JSON.parse(payload.body);
+      const doin = document.querySelector('#doin');
+      console.log(data.message)
+      doin.innerText = data.message;
     },
     onTalkingMessageReceived(payload) {
-      const data = payload.body;
-      console.log(data)
+      const data = JSON.parse(payload.body);
+      const doin = document.querySelector('#doin');
+      console.log(data.sentence)
+      doin.innerText = data.sentence;
     },
     onError() {},
   },

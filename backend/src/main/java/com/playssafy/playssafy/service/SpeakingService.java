@@ -45,6 +45,13 @@ public class SpeakingService {
             teams.set(b, temp);
         }
 
+        // 최종 결정된 순서 넣기(문제 개수 만큼)
+        for(int i = 0; i < initGame.getQuizCnt(); i++) {
+            for (Integer team : teams) {
+                speaking.getTeamOrder().add(team);
+            }
+        }
+
         // 현재 팀 개수 초기화
         speaking.setCurTeamCnt(teams.size());
 
@@ -100,8 +107,8 @@ public class SpeakingService {
         Speaking speaking = speakGameRepository.findById(roomId).get();
 
         // 메세지 스택 저장
-        speaking.getChat().add(speakMessage);
-        speakGameRepository.save(speaking);
+        // speaking.getChat().add(speakMessage);
+        // speakGameRepository.save(speaking);
         // 리스트의 마지막 부분 부터 문제 회수
         int lastIndex = speaking.getQuizzes().size() - 1;
         if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage())) {
