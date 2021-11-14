@@ -46,6 +46,8 @@
 
 <script>
 import "@/css/speaking-game.css";
+import { mapGetters } from 'vuex';
+import { socketConnect } from '@/util/socket-common.js';
 import Header from '@/components/common/Header.vue';
 import GameStatus from '@/components/GameStatus.vue';
 
@@ -57,6 +59,7 @@ export default {
   },
   data: () => {
     return {
+      stompClient: null,
       record: {},
       stop: {},
       soundClips: {},
@@ -66,11 +69,6 @@ export default {
       chunks: [],
       mediaRecorder: {},
       teamMember: ['김태현', '권희은', '차은채', '안기훈', '이장섭', '오일남'],
-      answer: [
-        '삼성 청년 소프트웨어 아카데미',
-        '간장공장 공장장은 김 공장장',
-        '내가 그린 기린 그림은 긴 기린 그림이다',
-      ],
       answerIdx: 0,
       userAnswer: [],
       userAnswerIdx: 0,
@@ -78,14 +76,23 @@ export default {
       isRecording: false,
     }
   },
-  mounted: function() {
+  created() {
+    this.stompClient = socketConnect(this.onConnected, this.onError);
+  },
+  mounted() {
     // this.getAudio();
     this.translate();
+  },
+  destroyed() {
+    this.onDisconnect();
   },
   watch: {
     doing() {
       console.log(this.doing)
     },
+  },
+  computed: {
+    ...mapGetters(['getUser', 'getRoomId']),
   },
   methods: {
     /*  */
@@ -172,9 +179,18 @@ export default {
         if (this.isRecording) {
           record.src = '/img/mike-off.10e24890.png';
           // record.src = 'http://localhost:3000/img/mike-off.10e24890.png'
-          if (this.answer[this.answerIdx] === finalTranscript) { // 띄어쓰기 제외시켜주기
-            this.userAnswer.push(finalTranscript);
-          }
+          // if (this.answer[this.answerIdx] === finalTranscript) { // 띄어쓰기 제외시켜주기
+          //   this.userAnswer.push(finalTranscript);
+          // }
+          this.stompClient.send(
+            `/pub/speaking/answer/${this.getRoomId}`,
+            {},
+            JSON.stringify({
+              name: '안기훈',
+              teamNo: 1,
+              message: '제발!!'
+            })
+          )
           finalTranscript = '';
           doin.innerText = '';
           this.isRecording = false
@@ -294,6 +310,60 @@ export default {
         })
       }
     },
+    onConnected() {
+      // 방 정보 교환 채널
+      this.stompClient.subscribe('/speaking/' + this.getRoomId, this.onMessageReceived);
+      // 정답 데이터 채널
+      this.stompClient.subscribe('/speaking/answer/' + this.getRoomId, this.onAnswerMessageReceived);
+      // 현재 진행 중인 사람의 문장 전송
+      this.stompClient.subscribe('/speaking/talk/' + this.getRoomId, this.onTalkingMessageReceived);
+      // 입장 시 데이터 수신
+      this.stompClient.send(
+        '/pub/speaking/enter',
+        {},
+        JSON.stringify({
+          roomId: this.getRoomId,
+          participantId: this.getUser.id,
+          participantName: this.getUser.name,
+          teamNo: this.getUser.teamNo,
+        })
+      );
+    },
+    onMessageReceived(payload) {
+      if (payload.body === 'exit') {
+        // 모든 참가자의 연결을 끊고
+        this.onDisconnect();
+        alert('방장이 퇴장하여 게임이 종료됩니다!');
+        // 모든 참가자 내보내기
+        this.$router.push('/room/' + this.getRoomId);
+        return;
+      }
+      const data = JSON.parse(payload.body);
+      this.room = data;
+      console.log(data);
+    },
+    onDisconnect() {
+      this.stompClient.send(
+        '/pub/speaking/exit',
+        {},
+        JSON.stringify({
+          roomId: this.getRoomId,
+          participantId: this.getUser.id,
+          participantName: this.getUser.name,
+        })
+      );
+      this.stompClient.disconnect();
+      this.$router.push('/room/', this.getRoomId)
+    },
+    onAnswerMessageReceived(payload) {
+      const data = payload.body;
+      console.log(data)
+    },
+    onTalkingMessageReceived(payload) {
+      const data = payload.body;
+      console.log(data)
+    },
+    onError() {},
   },
 }
 </script>

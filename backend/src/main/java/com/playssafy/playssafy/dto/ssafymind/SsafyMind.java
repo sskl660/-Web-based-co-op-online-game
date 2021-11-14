@@ -50,7 +50,6 @@ public class SsafyMind {
 //        playerOrder = new ArrayList<>();
     }
 
-
 //    @Override
 //    public String toString() {
 //        return "SsafyMind{" +
