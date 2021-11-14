@@ -152,8 +152,8 @@ export default {
     },
     data: function() {
         return {
-            openmodal: false, //게임 선택 모달 플레그
-            ssafymind_explain: false, //설명용 플레그
+            openmodal: false,
+            ssafymind_explain: false,
             speakgame_explain: false,
             jumpgame_explain: false,
             // 방 정보
@@ -179,7 +179,7 @@ export default {
                 9: [],
                 10: [],
             },
-            curGame: '', //서버 통신용 타입인듯
+            curGame: '',
             totalTeam: 10,
             // socket Client
             stompClient: null,
@@ -212,11 +212,16 @@ export default {
             this.assignTeam();
         },
         curGame() {
+            // 싸피마인드로 이동
             if (this.curGame == 1) {
                 this.$router.push('/ssafymind/' + this.room.id);
-            } else if (this.curGame == 2) {
-                //
-            } else {
+            }
+            // 또박또박말해요로 이동
+            else if (this.curGame == 2) {
+                this.$router.push('/speaking/' + this.room.id);
+            }
+            // 싸집이 점프로 이동
+            else {
                 //
             }
         },
@@ -418,6 +423,7 @@ export default {
         },
         // 게임 시작
         gameStart() {
+            // 싸피마인드
             if (this.room.gameType == 1) {
                 axios({
                     method: 'post',
@@ -433,45 +439,15 @@ export default {
                 })
                     .then(() => {
                         // 방에 있는 모든 참가자 게임방으로 옮기기
-                        if (this.room.gameType == 1) {
-                            // 싸피마인드
-                            this.stompClient.send(`/pub/game/start/${1}`, {}, this.room.id);
-                            // 게임방 이동 메세지 보내기
-                        } else if (this.room.gameType == 2) {
-                            // 또박또박말해요
-                        } else {
-                            // 싸집이 점프
-                        }
+                        this.stompClient.send(`/pub/game/start/${this.room.gameType}`, {}, this.room.id);
                     })
                     .catch(() => {});
-            } else if (this.room.gameType == 2) {
+            }
+            // 또박또박말해요
+            else if (this.room.gameType == 2) {
                 axios({
                     method: 'post',
-                    url: `/game/create/ssazipjump`,
-                    data: {
-                        roomId: this.room.id,
-                        host: this.room.host,
-                        exist: this.room.teamline,//열린 팀 정보
-                        gameType: this.room.gameType,
-                    },
-                })
-                    .then(() => {
-                        // 방에 있는 모든 참가자 게임방으로 옮기기
-                        if (this.room.gameType == 1) {
-                            // 싸피마인드
-                            this.stompClient.send(`/pub/game/start/${1}`, {}, this.room.id);
-                            // 게임방 이동 메세지 보내기
-                        } else if (this.room.gameType == 2) {
-                            // 또박또박말해요
-                        } else {
-                            // 싸집이 점프
-                        }
-                    })
-                    .catch(() => {});
-            } else if (this.room.gameType == 3) {
-                axios({
-                    method: 'post',
-                    url: `/game/create/ssafymind`,
+                    url: `/game/create/speaking`,
                     data: {
                         roomId: this.room.id,
                         host: this.room.host,
@@ -483,15 +459,27 @@ export default {
                 })
                     .then(() => {
                         // 방에 있는 모든 참가자 게임방으로 옮기기
-                        if (this.room.gameType == 1) {
-                            // 싸피마인드
-                            this.stompClient.send(`/pub/game/start/${1}`, {}, this.room.id);
-                            // 게임방 이동 메세지 보내기
-                        } else if (this.room.gameType == 2) {
-                            // 또박또박말해요
-                        } else {
-                            // 싸집이 점프
-                        }
+                        this.stompClient.send(`/pub/game/start/${this.room.gameType}`, {}, this.room.id);
+                    })
+                    .catch(() => {});
+            }
+            // 싸집이 점프
+            else {
+                axios({
+                    method: 'post',
+                    url: `/game/create/speaking`,
+                    data: {
+                        roomId: this.room.id,
+                        host: this.room.host,
+                        exist: this.room.teamline,
+                        gameType: this.room.gameType,
+                        // 팀당 문제 개수 설정
+                        quizCnt: 3,
+                    },
+                })
+                    .then(() => {
+                        // 방에 있는 모든 참가자 게임방으로 옮기기
+                        this.stompClient.send(`/pub/game/start/${this.room.gameType}`, {}, this.room.id);
                     })
                     .catch(() => {});
             }
