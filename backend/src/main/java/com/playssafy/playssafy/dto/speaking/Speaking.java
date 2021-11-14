@@ -24,7 +24,7 @@ public class Speaking {
     private String host; // 방장 정보
     private List<Quiz> quizzes; // 퀴즈 정보 - 팀 수의 배수
     private int[] speakScore; // 팀당 점수(배열 형태)
-    private List<MindMessage> chat; // 채팅정보
+    private List<SpeakMessage> chat; // 채팅정보
     private List<Team> teams; // 팀원 구성 정보
     private List<Integer> teamOrder; // 팀 진행 순서
     private int curPlayer; // 현재 진행중인 사람

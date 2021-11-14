@@ -1,11 +1,12 @@
 package com.playssafy.playssafy.service;
 
+import com.playssafy.playssafy.dto.speaking.SpeakMessage;
 import com.playssafy.playssafy.dto.speaking.Speaking;
 import com.playssafy.playssafy.dto.ssafymind.Quiz;
 import com.playssafy.playssafy.dto.ssafymind.Team;
 import com.playssafy.playssafy.dto.waitroom.InitGame;
 import com.playssafy.playssafy.dto.waitroom.Participant;
-import com.playssafy.playssafy.repository.SpeakingRepository;
+import com.playssafy.playssafy.repository.SpeakGameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +16,11 @@ import java.util.List;
 @Service
 public class SpeakingService {
     @Autowired
-    private SpeakingRepository speakingRepository;
+    private SpeakGameRepository speakGameRepository;
 
     // 0. 게임방 생성 메서드
     public void createSpeaking(InitGame initGame) {
-        if(!speakingRepository.findById(initGame.getRoomId()).isEmpty())
+        if(!speakGameRepository.findById(initGame.getRoomId()).isEmpty())
             return;
         Speaking speaking = new Speaking();
 
@@ -61,6 +62,9 @@ public class SpeakingService {
             speaking.getQuizzes().add(new Quiz(1, "아미타불", "아미타불"));
             speaking.getQuizzes().add(new Quiz(1, "원시천존", "원시천존"));
             speaking.getQuizzes().add(new Quiz(1, "무량수불", "무량수불"));
+            speaking.getQuizzes().add(new Quiz(1, "삼성 청년 소프트웨어 아카데미", "삼성 청년 소프트웨어 아카데미"));
+            speaking.getQuizzes().add(new Quiz(1, "간장공장 공장장", "간장공장 공장장"));
+            speaking.getQuizzes().add(new Quiz(1, "내가 그린 기린 그림", "내가 그린 기린 그림"));
         }
         // 팀 초기화////////
         speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "1", "김태현1", 1));
@@ -73,17 +77,60 @@ public class SpeakingService {
         speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "4", "이장섭4", 2));
 
 
-        speakingRepository.save(speaking);
+        speakGameRepository.save(speaking);
     }
 
     // 1. 게임방 입장 메서드
     public synchronized Speaking enter(Participant participant) {
-        Speaking speaking = speakingRepository.findById(participant.getRoomId()).get();
+        Speaking speaking = speakGameRepository.findById(participant.getRoomId()).get();
         Team team = speaking.getTeams().get(participant.getTeamNo());
         if (!team.getMembers().contains(participant))
             team.getMembers().add(participant);
 
         // 변경 완료
-        return speakingRepository.save(speaking);
+        return speakGameRepository.save(speaking);
+    }
+
+    // 2. 게임방 퇴장 메서드
+    public synchronized Speaking exit(Participant participant) {
+        Speaking speaking = speakGameRepository.findById(participant.getRoomId()).get();
+
+        // 방장이라면 방 자체를 삭제 후 종료
+        if (speaking.getHost().equals(participant.getParticipantId())) {
+            speakGameRepository.deleteById(participant.getRoomId());
+            return null;
+        }
+        // 방장이 아니라면 유저 정보만 삭제
+        Team team = speaking.getTeams().get(participant.getTeamNo());
+        team.getMembers().remove(participant);
+
+        // 변경 완료
+        return speakGameRepository.save(speaking);
+    }
+
+    // 3. 정답 여부 확인
+    public synchronized SpeakMessage answer(String roomId, SpeakMessage speakMessage) {
+        Speaking speaking = speakGameRepository.findById(roomId).get();
+
+        // 메세지 스택 저장
+        speaking.getChat().add(speakMessage);
+        speakGameRepository.save(speaking);
+        // 리스트의 마지막 부분 부터 문제 회수
+        int lastIndex = speaking.getQuizzes().size() - 1;
+        if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage())) {
+            // 마지막 문제를 제거하고
+            speaking.getQuizzes().remove(lastIndex);
+            // 다음 팀으로 옮기고
+            speaking.getTeamOrder().remove(0);
+            // 그린 그림 정보 삭제하고
+            // speaking.getPoints().clear();
+            System.out.println(speaking.getQuizzes());
+            // 저장한 뒤
+            speakGameRepository.save(speaking);
+            // 정답
+            return speakMessage;
+        }
+        // 오답
+        return speakMessage;
     }
 }
