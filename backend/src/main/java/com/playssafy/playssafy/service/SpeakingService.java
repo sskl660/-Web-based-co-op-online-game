@@ -109,7 +109,7 @@ public class SpeakingService {
     public synchronized SpeakMessage answer(String roomId, SpeakMessage speakMessage) {
         Speaking speaking = speakGameRepository.findById(roomId).get();
         // 정답 여부 기본값을 fasle로 설정
-        speaking.setCorrect(false);
+        speakMessage.setCorrect(false);
 
         int lastIndex = speaking.getQuizzes().size() - 1;
         if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage().replaceAll("\\s+",""))) {

@@ -59,7 +59,7 @@ public class SpeakingController {
     @MessageMapping(value = "/speaking/change/player")
     public void changePlayer(String roomId) {
         int curPlayer = speakingService.changePlayer(roomId);
-        template.convertAndSend("/ssafymind/change/player/" + roomId, curPlayer);
+        template.convertAndSend("/speaking/change/player/" + roomId, curPlayer);
     }
 
     // 6. 다음 문제
