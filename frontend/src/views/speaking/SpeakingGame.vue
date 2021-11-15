@@ -191,7 +191,7 @@ export default {
             JSON.stringify({
               name: '안기훈',
               teamNo: 1,
-              message: 'gd',
+              message: '내가그린기린그림',
               correct: false,
             })
           )
@@ -246,13 +246,13 @@ export default {
       this.stompClient.subscribe('/speaking/' + this.getRoomId, this.onMessageReceived);
       // 정답 데이터 채널
       this.stompClient.subscribe(
-        '/pub/speaking/answer/' + this.getRoomId,
+        '/speaking/answer/' + this.getRoomId,
         this.onAnswerMessageReceived
       );
       // 현재 진행 중인 사람의 문장 전송
-      this.stompClient.subscribe('/pub/speaking/talk/' + this.getRoomId, this.onTalkingMessageReceived);
+      this.stompClient.subscribe('/speaking/talk/' + this.getRoomId, this.onTalkingMessageReceived);
       // 플레이어 변경
-      this.stompClient.subscribe('/pub/speaking/change/player/' + this.getRoomId, this.onChangePlayerMessageReceived);
+      this.stompClient.subscribe('/speaking/change/player/' + this.getRoomId, this.onChangePlayerMessageReceived);
       // 입장 시 데이터 수신
       this.stompClient.send(
         '/pub/speaking/enter',
