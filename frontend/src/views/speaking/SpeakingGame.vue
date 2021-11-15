@@ -89,8 +89,7 @@ export default {
   destroyed() {
     this.onDisconnect();
   },
-  watch: {
-  },
+  watch: {},
   computed: {
     ...mapGetters(['getUser', 'getRoomId']),
   },
@@ -161,7 +160,7 @@ export default {
           `/pub/speaking/talk/${this.getRoomId}`,
           {},
           JSON.stringify({
-            sentence: finalTranscript + interimTranscript
+            sentence: finalTranscript + interimTranscript,
           })
         );
       }
@@ -404,7 +403,7 @@ export default {
           })
           .catch((err) => {
             console.log('The following error occurred: ' + err);
-          })
+          });
       }
     },
   },
