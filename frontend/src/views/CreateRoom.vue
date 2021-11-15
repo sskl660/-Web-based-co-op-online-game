@@ -11,7 +11,7 @@
         alt="ssazip-create-img"
         class="ssazip-create-img"
       />
-      <input type="text" placeholder="방 제목을 설정해주세요" v-model="roomName" />
+      <input type="text" placeholder="방 제목을 설정해주세요" v-model="roomName" @enter="createGameRoom"/>
       <button @click="createGameRoom">방 만들기</button>
     </div>
   </div>

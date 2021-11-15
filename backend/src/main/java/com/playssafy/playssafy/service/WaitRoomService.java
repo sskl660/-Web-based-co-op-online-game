@@ -39,8 +39,6 @@ public class WaitRoomService {
 //        room.setTeamline(new boolean[] {false, true, true, false, false, true, false, true, false, false, true});
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        System.out.println(room.getMembers());
-
         // UUID를 기반으로 방에 고유 식별자 부여.
         room.setId(UUID.randomUUID().toString());
         // 게임 방 이름 설정
@@ -124,11 +122,4 @@ public class WaitRoomService {
         waitRoom.setGameType(initGame.getGameType());
         waitRoomRepository.save(waitRoom);
     }
-
-//    // 6. 팀 열기
-//    public WaitRoom openTeam(String openTeams, String roomId) {
-//        WaitRoom waitRoom = gameRoomRepository.findById(roomId).get();
-////        waitRoom.setTeamline(openTeams);
-//        return gameRoomRepository.save(waitRoom);
-//    }
 }

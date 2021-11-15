@@ -18,7 +18,6 @@ export default {
 			let interval = 0;
 
 			const timeMinus = () => {
-				console.log("아무거나");
 				if(this.seconds !== 0){
 					this.seconds--;
 				} else if(this.seconds === 0 & this.minutes !== 0){

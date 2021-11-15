@@ -78,7 +78,7 @@
   margin-top: 3.5%;
   margin-left: 1.4%;
   -webkit-user-drag: none;
-  /* animation: blink-effect 0.5s step-end infinite; */
+  animation: blink-effect 0.5s step-end infinite;
 }
 .question-word {
   position: absolute;

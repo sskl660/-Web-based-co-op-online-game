@@ -6,7 +6,7 @@ import SignUp from '@/views/accounts/SignUp.vue';
 import Rank from '@/views/Rank.vue';
 import Room from '@/views/Room.vue';
 import CreateRoom from '@/views/CreateRoom.vue';
-import SpeakingGame from '@/views/SpeakingGame.vue';
+import SpeakingGame from '@/views/speaking/SpeakingGame.vue';
 import Temp from '@/views/temp/Chat.vue';
 import Chat from '@/views/temp/ChatRoom.vue';
 import SSazipJump from '@/views/SSazipJump.vue';
@@ -14,7 +14,6 @@ import SSazipJumpTemp from '@/views/ssazipjump/SSazipJumpTemp.vue';
 import SSazipJumpSeop from '@/views/ssazipjump/SSazipJumpSeop.vue';
 import SsafyMind from '@/views/ssafymind/SsafyMind.vue';
 import HeeSeop from '@/views/HeeSeop.vue';
-
 
 Vue.use(VueRouter);
 
@@ -40,7 +39,7 @@ const routes = [
     component: Room,
   },
   {
-    path: '/rank',
+    path: '/rank/:roomId',
     name: 'Rank',
     component: Rank,
   },
@@ -50,7 +49,7 @@ const routes = [
     component: CreateRoom,
   },
   {
-    path: '/speaking',
+    path: '/speaking/:roomId',
     name: 'SpeakingGame',
     component: SpeakingGame,
   },
