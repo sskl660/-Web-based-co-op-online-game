@@ -71,7 +71,6 @@ export default {
       answerIdx: 0,
       userAnswer: [],
       userAnswerIdx: 0,
-      doing: '',
       isRecording: false,
       // Socket 정보들
       stompClient: null,
@@ -89,9 +88,6 @@ export default {
     this.onDisconnect();
   },
   watch: {
-    doing() {
-      console.log(this.doing);
-    },
   },
   computed: {
     ...mapGetters(['getUser', 'getRoomId']),
@@ -110,7 +106,6 @@ export default {
       let isRecognizing = false;
       let ignoreEndProcess = false;
       let finalTranscript = '';
-      const doin = document.querySelector('#doin');
 
       const final_span = document.querySelector('#final_span');
       const interim_span = document.querySelector('#interim_span');
@@ -138,7 +133,7 @@ export default {
         }
       };
 
-      speech.onresult = function(event) {
+      speech.onresult = (event) => {
         let interimTranscript = '';
         if (typeof event.results === 'undefined') {
           speech.onend = null;
@@ -157,14 +152,18 @@ export default {
             interimTranscript += transcript;
           }
         }
+        console.log('파이널', finalTranscript);
+        console.log('파이널', interimTranscript);
+        this.stompClient.send(
+          `/speaking/talk/${this.getRoomId}`,
+          {},
+          JSON.stringify({
+            sentence: finalTranscript + interimTranscript
+          })
+        );
         final_span.innerHTML = finalTranscript;
         interim_span.innerHTML = interimTranscript;
-        this.doing = interimTranscript;
-        console.log('doing');
-        doin.innerText = finalTranscript + interimTranscript;
-        console.log('doing');
-        console.log(interimTranscript);
-      };
+      }
 
       speech.onerror = function(event) {
         if (event.error.match(/no-speech|audio-capture|not-allowed/)) {
@@ -172,12 +171,8 @@ export default {
         }
       };
 
-      const record = document.querySelector('#record');
-      console.log(record.src);
-      console.log(record);
-      console.log(record);
-      console.log(record);
-      record.addEventListener('click', () => {
+      const record = document.querySelector("#record");
+      record.addEventListener("click", () => {
         if (this.isRecording) {
           record.src = '/img/mike-off.10e24890.png';
           // record.src = 'http://localhost:3000/img/mike-off.10e24890.png'
@@ -185,20 +180,23 @@ export default {
           //   this.userAnswer.push(finalTranscript);
           // }
           this.stompClient.send(
-            `/pub/speaking/answer/${this.getRoomId}`,
+            `/speaking/answer/${this.getRoomId}`,
             {},
             JSON.stringify({
               name: '안기훈',
               teamNo: 1,
-              message: '제발!!',
+              message: finalTranscript,
+              correct: false,
             })
           );
           finalTranscript = '';
-          doin.innerText = '';
           this.isRecording = false;
           speech.stop();
         } else {
           record.src = '/img/mike-on.d4e34f6f.png';
+          finalTranscript = '';
+          const doin = document.querySelector('#doin');
+          doin.innerText = '';
           this.isRecording = true;
           speech.start();
         }
@@ -310,7 +308,7 @@ export default {
           })
           .catch((err) => {
             console.log('The following error occurred: ' + err);
-          });
+          })
       }
     },
     /**
@@ -340,7 +338,7 @@ export default {
       this.stompClient.subscribe('/speaking/talk/' + this.getRoomId, this.onTalkingMessageReceived);
       // 입장 시 데이터 수신
       this.stompClient.send(
-        '/pub/speaking/enter',
+        '/speaking/enter',
         {},
         JSON.stringify({
           roomId: this.getRoomId,
@@ -349,6 +347,12 @@ export default {
           teamNo: this.getUser.teamNo,
         })
       );
+      console.log(
+          this.getRoomId,
+          this.getUser.id,
+          this.getUser.name,
+          this.getUser.teamNo,
+      )
     },
     onMessageReceived(payload) {
       if (payload.body === 'exit') {
@@ -377,12 +381,17 @@ export default {
       this.$router.push('/room/', this.getRoomId);
     },
     onAnswerMessageReceived(payload) {
-      const data = payload.body;
-      console.log(data);
+      const data = JSON.parse(payload.body);
+      const doin = document.querySelector('#doin');
+      doin.innerText = data.message;
+      // doin.innerText = data.message.replace(/ /g,"");
+      console.log(data)
     },
     onTalkingMessageReceived(payload) {
-      const data = payload.body;
-      console.log(data);
+      const data = JSON.parse(payload.body);
+      const doin = document.querySelector('#doin');
+      doin.innerText = data.sentence;
+      console.log(data.sentence)
     },
     onError() {},
   },

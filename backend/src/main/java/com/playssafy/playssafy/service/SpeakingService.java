@@ -113,18 +113,18 @@ public class SpeakingService {
         Speaking speaking = speakGameRepository.findById(roomId).get();
 
         // 메세지 스택 저장
-        speaking.getChat().add(speakMessage);
-        speakGameRepository.save(speaking);
+        // speaking.getChat().add(speakMessage);
+        // speakGameRepository.save(speaking);
         // 리스트의 마지막 부분 부터 문제 회수
         int lastIndex = speaking.getQuizzes().size() - 1;
         if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage())) {
             // 마지막 문제를 제거하고
             speaking.getQuizzes().remove(lastIndex);
             // 다음 팀으로 옮기고
+            // 다음 팀으로 넘기지 말고 다음 사람으로 넘기기
             speaking.getTeamOrder().remove(0);
-            // 그린 그림 정보 삭제하고
-            // speaking.getPoints().clear();
-            System.out.println(speaking.getQuizzes());
+            // 정답 여부 확인
+            speakMessage.setCorrect(true);
             // 저장한 뒤
             speakGameRepository.save(speaking);
             // 정답
