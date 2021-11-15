@@ -191,7 +191,7 @@ export default {
             JSON.stringify({
               name: '안기훈',
               teamNo: 1,
-              message: '삼성청년소프트웨어아카데미',
+              message: '내가그린기린그림',
               correct: false,
             })
           )
