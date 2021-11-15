@@ -1,5 +1,8 @@
-package com.playssafy.playssafy.dto.ssafymind;
+package com.playssafy.playssafy.dto.speaking;
 
+import com.playssafy.playssafy.dto.ssafymind.MindMessage;
+import com.playssafy.playssafy.dto.ssafymind.Quiz;
+import com.playssafy.playssafy.dto.ssafymind.Team;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,25 +17,21 @@ import java.util.List;
 @Getter
 @ToString
 @AllArgsConstructor
-@RedisHash("ssafyMind")
-public class SsafyMind {
-
+@RedisHash("speaking")
+public class Speaking {
     @Id
-    //@Id 어노테이션은 JPA와 동일한 역할을 수행합니다. "member:{id}"의 위치에 자동으로 generate 값이 들어갑니다.
     private String roomId; // 방 ID
     private String host; // 방장 정보
     private List<Quiz> quizzes; // 퀴즈 정보 - 팀 수의 배수
-    private List<Point> points; // x,y좌표값, 색정보, 굵기
-    private int[] mindScore; // 팀당 점수(배열 형태)
-    private List<MindMessage> chat; // 채팅정보
+    private int[] speakScore; // 팀당 점수(배열 형태)
+    private List<SpeakMessage> chat; // 채팅정보
     private List<Team> teams; // 팀원 구성 정보
     private List<Integer> teamOrder; // 팀 진행 순서
+    private List<Integer> memberOrder; // 팀 진행 순서
     private int curPlayer; // 현재 진행중인 사람
-    private int curTime; // 현재 시간
-    private String timeFlag; // 시간 트리거
     private int curTeamCnt; // 현재 팀 개수
 
-    public SsafyMind() {
+    public Speaking() {
         // 최대 10개 팀에 대응하는 팀 정보를 저장할 리스트 선언해두기
         int teamSize = 11;
         teams = new ArrayList<>();
@@ -42,7 +41,6 @@ public class SsafyMind {
         }
         // 기타 동적 리스트 초기화
         quizzes = new ArrayList<>();
-        points = new ArrayList<>();
         chat = new ArrayList<>();
         teamOrder = new ArrayList<>();
     }
