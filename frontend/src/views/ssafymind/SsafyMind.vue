@@ -10,7 +10,7 @@
       v-bind:teamCnt="room.curTeamCnt"
       v-bind:host="room.host"
       v-on:sendGameStartTrigger="sendGameStartTrigger"
-      @getProgressBar = "getProgressBar"
+      @getProgressBar="getProgressBar"
     />
     <GameAnswerModal
       v-if="answermodal == true"
@@ -38,25 +38,37 @@
       v-bind:teamOrder="room.teamOrder"
       v-bind:teams="room.teams"
       v-bind:curPlayer="room.curPlayer"
-      @getProgressBar = "getProgressBar"
+      v-bind:scores="room.scores"
+      v-bind:curTeam="room.curTeam"
+      v-bind:curTeamCnt="room.curTeamCnt"
+      @getProgressBar="getProgressBar"
     />
     <div class="ssafymind-center">
+<<<<<<< HEAD
       <div v-if="room.quizzes != null">
         <div class="question-word" v-if="user.name == room.host || room.teamOrder[0] == user.teamNo">
         {{ room.quizzes[room.quizzes.length - 1].problem }}
+=======
+      <div class="question-word" v-if="room.quizzes != null">
+        <div v-if="user.name == room.host || room.teamOrder[0] == user.teamNo">
+          {{ room.quizzes[room.quizzes.length - 1].problem }}
+>>>>>>> 75f01a125c4bd2bc9f1a946bc803193fb8f99806
         </div>
       </div>
       <!-- <div class="question-word">{{ 싸집 }}</div> -->
       <Timer v-bind:minutes="minutes" v-bind:seconds="seconds" />
       <!-- <div v-for="(member, idx) in room.teams[room.teamOrder[0]].members" :key="idx"> -->
-        <!-- <div class="turn-notice" v-if="this.getUser.name == member.participantName"> -->
-        <!-- <div class="turn-notice">
+      <!-- <div class="turn-notice" v-if="this.getUser.name == member.participantName"> -->
+      <!-- <div class="turn-notice">
           당신 차례 입니다! 빨리 그리세요!
         </div> -->
-        <!-- <div v-else></div> -->
+      <!-- <div v-else></div> -->
       <!-- </div> -->
       <div v-if="room.teamOrder != null">
-        <div class="turn-notice" v-if="user.name == room.teams[room.teamOrder[0]].members[room.curPlayer].participantName">
+        <div
+          class="turn-notice"
+          v-if="user.name == room.teams[room.teamOrder[0]].members[room.curPlayer].participantName"
+        >
           당신 차례 입니다! 빨리 그리세요!
         </div>
         <div class="turn-notice" v-else></div>
@@ -72,7 +84,10 @@
         v-on:contextmenu="handleCM"
       ></canvas>
       <div v-if="room.teamOrder != null">
-        <div class="controls-stop" v-if="user.name != room.teams[room.teamOrder[0]].members[room.curPlayer].participantName"></div>
+        <div
+          class="controls-stop"
+          v-if="user.name != room.teams[room.teamOrder[0]].members[room.curPlayer].participantName"
+        ></div>
       </div>
       <div class="controls">
         <div class="controls_colors" id="jsColors">
@@ -113,7 +128,7 @@
     <div class="ssafymind-right">
       <div id="chat-box">
         <!-- <div v-if="getUser.name !== room.host || room.teamOrder[0] !== this.getUser.teamNo"> -->
-        <div v-if="room.teamOrder != null">  
+        <div v-if="room.teamOrder != null">
           <input
             type="text"
             placeholder="정답을 입력하세요"
@@ -181,7 +196,7 @@ import '@/css/ssafymind.css';
 import { mapGetters, mapState } from 'vuex';
 import { socketConnect } from '@/util/socket-common.js';
 import '@/components/css/ssafymind/ssafymind-right.css';
-import "@/components/css/ssafymind/progressbar.css";
+import '@/components/css/ssafymind/progressbar.css';
 
 export default {
   name: 'SsafyMind',
@@ -229,13 +244,13 @@ export default {
   },
   computed: {
     ...mapGetters(['getUser', 'getRoomId']),
-    ...mapState(['user'])
+    ...mapState(['user']),
   },
   destroyed() {
     this.onDisconnect();
   },
   updated() {
-    this.scrollDown();//채팅방 자동 스크롤
+    this.scrollDown(); //채팅방 자동 스크롤
   },
   methods: {
     // startTimer(startTime) {
@@ -247,7 +262,7 @@ export default {
     getCloseAnsModal(answermodal) {
       this.answermodal = answermodal;
     },
-    getProgressBar(startProgress){
+    getProgressBar(startProgress) {
       this.startProgress = startProgress;
     },
     stopPainting: function() {
@@ -256,7 +271,8 @@ export default {
     startPainting: function() {
       this.painting = true;
     },
-    onMouseMove: function(event) {//그리기, 보이진 않음
+    onMouseMove: function(event) {
+      //그리기, 보이진 않음
       const canvas = document.getElementById('jsCanvas');
       const ctx = canvas.getContext('2d');
       this.offsetX = event.offsetX;
@@ -308,7 +324,8 @@ export default {
       // ctx.stroke();
       // ctx.closePath();
     },
-    strokePath: function(x, y) {//안씀 통신에 xy 좌표 보내주려 했던 것
+    strokePath: function(x, y) {
+      //안씀 통신에 xy 좌표 보내주려 했던 것
       const canvas = document.getElementById('jsCanvas');
       const ctx = canvas.getContext('2d');
       var color = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
@@ -321,7 +338,8 @@ export default {
       ctx.stroke();
       ctx.strokeStyle = currentColor;
     },
-    drawing: function() {//안씀 통신에 실시간으로 확인하려고 했던 것
+    drawing: function() {
+      //안씀 통신에 실시간으로 확인하려고 했던 것
       // 실시간으로 그려지나 확인
       // ctx.clearRect(0, 0, 1100, 760)
       // console.log("saveData 확인", this.saveData.length)
@@ -362,24 +380,30 @@ export default {
       // ctx.closePath();
       // ctx.restore();
     },
-    mouseEnter: function() {//클릭 하는 순간을 감지
+    mouseEnter: function() {
+      //클릭 하는 순간을 감지
       if (this.clickmouse) {
         this.painting = true;
       } else {
         this.painting = false;
       }
     },
+<<<<<<< HEAD
     isMouseDown: function(event) {// fill 채워주려고 점 찍기
     if(this.getUser.name != this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName){
       return
     }
+=======
+    isMouseDown: function(event) {
+      //아마도 내 그림 그림 보기용
+>>>>>>> 75f01a125c4bd2bc9f1a946bc803193fb8f99806
       // 그리기 시작
       // 내 차례일 때 canDraw == ture, name 비교해서
       // canDraw == false 일때, 다른 사람일 때 그림 못그리게
       // return 시키기
       // for(let idx in this.room.teams[this.room.teamOrder[0]].members){
-        console.log('여기 확인좀======', this.room)
-        console.log(this.ctx)
+      console.log('여기 확인좀======', this.room);
+      console.log(this.ctx);
       // }
       // if(this.room.host == this.getUser.name){
       //   this.clickmouse = false;
@@ -395,7 +419,8 @@ export default {
       this.ctx.stroke();
       this.sendDrawMessage();
     },
-    isMouseUp: function() {//그리기 종료
+    isMouseUp: function() {
+      //그리기 종료
       // 그리기 종료
       this.clickmouse = false;
 
@@ -458,19 +483,27 @@ export default {
         canvas.classList.add(`paintbucket`);
         this.filling = true;
       }
-      console.log('------------------')
-      console.log('지금 문제를 출제하고 있는 사람을 찾아보자')
-      console.log('지금 출제하는 팀원', this.room.teams[this.room.teamOrder[0]].members[0].participantName)
-      console.log('지금 출제하는 팀', this.room.teamOrder[0])
-      console.log('내 팀', this.getUser.teamNo)
-      console.log('------------------------------')
-      console.log(this.user.name == this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName)
-      console.log(this.user.name)
-      console.log(this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName)
-      console.log('------------------------------')
-      console.log(this.room.teamOrder[0])
-      console.log(this.getUser.teamNo)
-      console.log(this.room.teamOrder[0] != this.getUser.teamNo)
+      console.log('------------------');
+      console.log('지금 문제를 출제하고 있는 사람을 찾아보자');
+      console.log(
+        '지금 출제하는 팀원',
+        this.room.teams[this.room.teamOrder[0]].members[0].participantName
+      );
+      console.log('지금 출제하는 팀', this.room.teamOrder[0]);
+      console.log('내 팀', this.getUser.teamNo);
+      console.log('------------------------------');
+      console.log(
+        this.user.name ==
+          this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName
+      );
+      console.log(this.user.name);
+      console.log(
+        this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName
+      );
+      console.log('------------------------------');
+      console.log(this.room.teamOrder[0]);
+      console.log(this.getUser.teamNo);
+      console.log(this.room.teamOrder[0] != this.getUser.teamNo);
     },
     handlePaletteModeClick: function() {
       const canvas = document.getElementById('jsCanvas');
@@ -516,7 +549,8 @@ export default {
       // ctx.lineWidth = 30;
       this.handlePaletteModeClick();
     },
-    handleCM: function(event) {//오른쪽 마우스 클릭 방지
+    handleCM: function(event) {
+      //오른쪽 마우스 클릭 방지
       event.preventDefault();
     },
     handleSave: function() {
@@ -575,6 +609,7 @@ export default {
 
       canvas.addEventListener('click', this.handleCanvasClick);
     },
+<<<<<<< HEAD
     moveProgressBar: function(msg){
       const progress = document.getElementById("progress-bar");
       var width = 100;
@@ -587,6 +622,17 @@ export default {
           clearInterval(id)
         } else{
           width--;
+=======
+    moveProgressBar: function() {
+      const progress = document.getElementById('progress-bar');
+      var width = 1;
+      var id = setInterval(frame, 100);
+      function frame() {
+        if (width >= 100) {
+          clearInterval(id);
+        } else {
+          width++;
+>>>>>>> 75f01a125c4bd2bc9f1a946bc803193fb8f99806
           progress.style.width = width + '%';
         }
       }
@@ -652,8 +698,25 @@ export default {
       }
       const data = JSON.parse(payload.body);
       this.room = data;
-			// console.log('포인트를 알고싶다고')
-      // console.log(data);
+      // 모든 팀의 차례가 끝난 경우
+      if (this.room.teamOrder.length == 0) {
+        alert('게임이 끝났습니다!');
+        // 대기실 점수 갱신(방장만)
+        if (this.getUser.id == this.room.host) {
+          this.stompClient.send(`/pub/ssafymind/end`, {}, this.getRoomId);
+          // setTimeout(function() {
+          //   this.onDisconnect();
+          // }, 1000);
+        }
+        // 연결 종료
+        else {
+          // this.onDisconnect();
+        }
+
+        // 게임 종료 모달
+      }
+      console.log('포인트를 알고싶다고');
+      console.log(data);
       // 여기에 받은 데이터를 기반으로 그리고 있는 그림 초기화하는 로직 구현
       // console.log(data.points)
       // console.log(data.points.length)
@@ -717,7 +780,7 @@ export default {
       // if(data.x == -1){
       //   this.ctx.clearRect(0, 0, canvas.width, canvas.height)
       // }
-      console.log('아니 왜 안되냐고', data)
+      console.log('아니 왜 안되냐고', data);
       this.ctx.lineWidth = data.size;
       this.ctx.strokeStyle = data.color;
       this.ctx.fillStyle = data.color;
@@ -781,6 +844,10 @@ export default {
       // 10초 단위로 서버에 플레이어 변경 메세지 전송
       if (time != 0 && time != 90 && time % 10 == 0 && this.room.host == this.getUser.id)
         this.sendTeamChangeTrigger();
+<<<<<<< HEAD
+=======
+      // this.moveProgressBar();
+>>>>>>> 75f01a125c4bd2bc9f1a946bc803193fb8f99806
       if (time <= 0) {
         // 시간 내에 맞추지 못했다면 다음 문제로
         // alert('아깝습니다!');
@@ -815,6 +882,7 @@ export default {
     },
     // 게임 시작 트리거
     sendGameStartTrigger() {
+      console.log(this.room);
       // 모달 닫기 메세지 전송
       this.sendCloseModalMessage();
       // 타이머 시작
@@ -824,7 +892,7 @@ export default {
       // 캔버스 초기화
       const canvas = document.getElementById('jsCanvas');
       const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     },
     // 전체 모달 닫기
     sendCloseModalMessage() {
