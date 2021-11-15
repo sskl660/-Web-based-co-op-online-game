@@ -27,7 +27,6 @@ public class Speaking {
     private List<SpeakMessage> chat; // 채팅정보
     private List<Team> teams; // 팀원 구성 정보
     private List<Integer> teamOrder; // 팀 진행 순서
-    private List<Integer> memberOrder; // 팀 진행 순서
     private int curPlayer; // 현재 진행중인 사람
     private int curTeamCnt; // 현재 팀 개수
 

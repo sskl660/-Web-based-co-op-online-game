@@ -51,9 +51,21 @@ public class SpeakingController {
     @MessageMapping(value = "/speaking/answer/{roomId}")
     public void answer(@DestinationVariable String roomId, SpeakMessage speakMessage) {
         speakMessage = speakingService.answer(roomId, speakMessage);
-        // 우선 보내주기
+        // 보내주기
         template.convertAndSend("/speaking/answer" + roomId, speakMessage);
-        // 말을 서버에 저장
-        // speakingService.answer(roomId, speakMessage);
+    }
+
+    // 5. 플레이어 변경
+    @MessageMapping(value = "/speaking/change/player")
+    public void changePlayer(String roomId) {
+        int curPlayer = speakingService.changePlayer(roomId);
+        template.convertAndSend("/ssafymind/change/player/" + roomId, curPlayer);
+    }
+
+    // 6. 다음 문제
+    @MessageMapping(value = "/speaking/next/problem")
+    public void nextProblem(String roomId) {
+        Speaking speaking = speakingService.nextProblem(roomId);
+        template.convertAndSend("/speaking/" + roomId, speaking);
     }
 }

@@ -59,12 +59,9 @@ public class SpeakingService {
 
         // 테스트 문제 리스트 ////////
         for(int i = 0; i < 20; i++) {
-            speaking.getQuizzes().add(new Quiz(1, "아미타불", "아미타불"));
-            speaking.getQuizzes().add(new Quiz(1, "원시천존", "원시천존"));
-            speaking.getQuizzes().add(new Quiz(1, "무량수불", "무량수불"));
-            speaking.getQuizzes().add(new Quiz(1, "삼성 청년 소프트웨어 아카데미", "삼성 청년 소프트웨어 아카데미"));
-            speaking.getQuizzes().add(new Quiz(1, "간장공장 공장장", "간장공장 공장장"));
-            speaking.getQuizzes().add(new Quiz(1, "내가 그린 기린 그림", "내가 그린 기린 그림"));
+            speaking.getQuizzes().add(new Quiz(1, "삼성 청년 소프트웨어 아카데미", "삼성청년소프트웨어아카데미"));
+            speaking.getQuizzes().add(new Quiz(1, "간장공장 공장장", "간장공장공장장"));
+            speaking.getQuizzes().add(new Quiz(1, "내가 그린 기린 그림", "내가그린기린그림"));
         }
         // 팀 초기화////////
         speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "1", "김태현1", 1));
@@ -111,20 +108,21 @@ public class SpeakingService {
     // 3. 정답 여부 확인
     public synchronized SpeakMessage answer(String roomId, SpeakMessage speakMessage) {
         Speaking speaking = speakGameRepository.findById(roomId).get();
+        // 정답 여부 기본값을 fasle로 설정
+        speaking.setCorrect(false);
 
-        // 메세지 스택 저장
-        // speaking.getChat().add(speakMessage);
-        // speakGameRepository.save(speaking);
-        // 리스트의 마지막 부분 부터 문제 회수
         int lastIndex = speaking.getQuizzes().size() - 1;
-        if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage())) {
-            // 마지막 문제를 제거하고
-            speaking.getQuizzes().remove(lastIndex);
-            // 다음 팀으로 옮기고
-            // 다음 팀으로 넘기지 말고 다음 사람으로 넘기기
-            speaking.getTeamOrder().remove(0);
-            // 정답 여부 확인
+        if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage().replaceAll("\\s+",""))) {
+            // 정답으로 상태를 바꿔주고
             speakMessage.setCorrect(true);
+            // 다음 플레이어로 넘기고
+            int teamSize = speaking.getTeams().get(speaking.getTeamOrder().get(0)).getMembers().size();
+            // 현재 플레이어 번호
+            int curPlayer = speaking.getCurPlayer();
+            // 다음 플레이어 번호
+            curPlayer = (curPlayer + 1) % teamSize;
+            // 다음 플레이어로 세팅
+            speaking.setCurPlayer(curPlayer);
             // 저장한 뒤
             speakGameRepository.save(speaking);
             // 정답
@@ -132,5 +130,19 @@ public class SpeakingService {
         }
         // 오답
         return speakMessage;
+    }
+
+    // 4. 다음 문제로 이동
+    public synchronized Speaking nextProblem(String roomId) {
+        Speaking speaking = speakGameRepository.findById(roomId).get();
+        int lastIndex = speaking.getQuizzes().size() - 1;
+        // 마지막 문제를 제거하고
+        speaking.getQuizzes().remove(lastIndex);
+        // 다음 팀으로 옮기고
+        speaking.getTeamOrder().remove(0);
+        // 해당 팀의 첫 사람을 가리키는 인덱스 초기화
+        speaking.setCurPlayer(0);
+        // 저장
+        return speakGameRepository.save(speaking);
     }
 }
