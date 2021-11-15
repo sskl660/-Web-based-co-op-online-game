@@ -113,6 +113,7 @@ public class SpeakingService {
 
         int lastIndex = speaking.getQuizzes().size() - 1;
         if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage().replaceAll(" ",""))) {
+            System.out.println("here");
             // 정답으로 상태를 바꿔주고
             speakMessage.setCorrect(true);
             speakGameRepository.save(speaking);
