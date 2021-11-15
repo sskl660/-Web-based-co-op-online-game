@@ -179,7 +179,7 @@ export default {
                 9: [],
                 10: [],
             },
-            curGame: '',
+            curGame: -1,
             totalTeam: 10,
             // socket Client
             stompClient: null,
@@ -195,6 +195,7 @@ export default {
         // 방정보 초기화
         this.room.id = this.getRoomId;
         this.stompClient = socketConnect(this.onConnected, this.onError);
+        this.room.gameType=-1;//게임 비 선택시 값
     },
     // 방 삭제시
     destroyed() {
@@ -221,7 +222,7 @@ export default {
                 this.$router.push('/speaking/' + this.room.id);
             }
             // 싸집이 점프로 이동
-            else {
+            else if (this.curGame == 3) {
                 this.$router.push('/ssazipjump/' + this.room.id);
             }
         },
@@ -423,12 +424,17 @@ export default {
         },
         noParticipantChecker() {
             for (let i = 0; i < 11; i++) {
+              console.log(this.assignTeamNo[i])
                 if (this.assignTeamNo[i] != null) return true;
             }
             return false;
         },
         // 게임 시작
         gameStart() {
+          if(this.room.gameType==-1){
+            console.log("게임이 선택되지 않았습니다.")
+            return;
+          }
             if (!this.noParticipantChecker()) {
                 console.log('참여 팀이 없습니다.');
                 return;
@@ -474,7 +480,7 @@ export default {
                     .catch(() => {});
             }
             // 싸집이 점프
-            else {
+            else if (this.room.gameType == 3) {
                 axios({
                     method: 'post',
                     url: `/game/create/ssazipjump`,

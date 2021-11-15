@@ -2,8 +2,10 @@ package com.playssafy.playssafy.socketcontroller;
 
 
 import com.playssafy.playssafy.dto.play.JumpInfo;
+import com.playssafy.playssafy.dto.ssazipjump.SsazipJump;
 import com.playssafy.playssafy.dto.waitroom.Participant;
 import com.playssafy.playssafy.dto.waitroom.WaitRoom;
+import com.playssafy.playssafy.service.SsazipJumpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -23,11 +25,20 @@ import java.util.TimerTask;
 @RequiredArgsConstructor
 //@RestController
 //@RequestMapping("/")
-public class JumpController {
-//    @Autowired
-//    private JumpService jumpService;
-
+public class SsazipJumpController {
+    @Autowired
+    private SsazipJumpService ssazipJumpService;
     private final SimpMessagingTemplate template;
+
+    //0.룸, 게임 정보 요청
+    @MessageMapping(value = "/game/jump/enter/reqInfoRoomNGame")
+    public void reqInfoRoomNGame(Participant participant) {
+        System.out.println("룸, 게임 정보 요청");
+        // 입장 한 유저의 게임 방 정보 요청
+        SsazipJump ssazipJump = ssazipJumpService.enter(participant);
+        // 게임 방 정보 소켓으로 반환
+        template.convertAndSend("/game/jumpgame/" + participant.getRoomId(), ssazipJump);
+    }
     //1.마스터에게 초기값 요청
     @MessageMapping(value = "/game/jump/enter/reqToMaster")
     public void needEnviroment(JumpInfo jumpInfo) {

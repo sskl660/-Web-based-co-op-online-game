@@ -5,6 +5,7 @@ import com.playssafy.playssafy.dto.waitroom.Participant;
 import com.playssafy.playssafy.dto.waitroom.WaitRoom;
 import com.playssafy.playssafy.service.SpeakingService;
 import com.playssafy.playssafy.service.SsafyMindService;
+import com.playssafy.playssafy.service.SsazipJumpService;
 import com.playssafy.playssafy.service.WaitRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ public class WaitRoomRestController {
     private final WaitRoomService waitRoomService;
     private final SsafyMindService ssafyMindService;
     private final SpeakingService speakingService;
+    private final SsazipJumpService ssazipJumpService;
 
 
     /**
@@ -66,6 +68,6 @@ public class WaitRoomRestController {
         // 현재 게임 방 게임 타입 정보 갱신 로직 추가
         waitRoomService.changeGame(initGame);
         // ssafymind 게임방 생성
-        ssafyMindService.createSsafyMind(initGame);
+        ssazipJumpService.createSsazipJump(initGame);
     }
 }
