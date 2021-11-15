@@ -3,6 +3,11 @@
     <!-- <GameExplainModal
       v-if="explainmodal == false"
     /> -->
+    <SsafymindRankModal
+      v-if="rankmodal == true"
+      @getCloseRankModal="getCloseRankModal"
+      v-bind:host="room.host"
+    />
     <GameOrderModal
       v-if="ordermodal == true"
       @getCloseModal="getCloseModal"
@@ -191,6 +196,7 @@ import { mapGetters, mapState } from 'vuex';
 import { socketConnect } from '@/util/socket-common.js';
 import '@/components/css/ssafymind/ssafymind-right.css';
 import '@/components/css/ssafymind/progressbar.css';
+import SsafymindRankModal from '@/components/ssafymind/SsafymindRankModal'
 
 export default {
   name: 'SsafyMind',
@@ -202,6 +208,7 @@ export default {
     GameOrderModal, // 게임 순서 모달
     GameAnswerModal, // 게임 정답 모달
     // GameExplainModal, // 게임 설명 모달
+    SsafymindRankModal
   },
   data: function() {
     return {
@@ -231,6 +238,8 @@ export default {
       answermodal: false,
       canDraw: true, // 내 차례일때만 그림 그리기
       // explainmodal: false,
+      rankmodal: true,
+      progressbarMsg: 'start',
     };
   },
   created() {
@@ -255,6 +264,9 @@ export default {
     },
     getCloseAnsModal(answermodal) {
       this.answermodal = answermodal;
+    },
+    getCloseRankModal(rankmodal) {
+      this.rankmodal = rankmodal;
     },
     getProgressBar(startProgress) {
       this.startProgress = startProgress;
@@ -598,11 +610,11 @@ export default {
 
       canvas.addEventListener('click', this.handleCanvasClick);
     },
-    moveProgressBar: function(msg){
+    moveProgressBar: function(progressbarMsg){
       const progress = document.getElementById("progress-bar");
       var width = 100;
       var id = setInterval(frame, 100);
-      if(msg == 'stop'){
+      if(progressbarMsg == 'stop'){
         clearInterval(id)
       }
       function frame(){
@@ -613,6 +625,22 @@ export default {
           progress.style.width = width + '%';
         }
       }
+      // const progress = document.getElementById("progress-bar");
+      // var width = 100;
+      // var id = setInterval(frame, 100);
+      // if(progressbarMsg == 'stop'){
+      //   // clearInterval(id)
+      //   console.log('안보여야 하는데')
+      //   progress.style.display = 'block';
+      // }
+      // function frame(){
+      //   if(width <= 0){
+      //     clearInterval(id)
+      //   } else{
+      //     width--;
+      //     progress.style.width = width + '%';
+      //   }
+      // }
     },
     // checkTeamNo: function(idx){
     //   for(let no = 0; no < this.room.chat.length; no++){
@@ -677,6 +705,7 @@ export default {
       this.room = data;
       // 모든 팀의 차례가 끝난 경우
       if (this.room.teamOrder.length == 0) {
+        // this.rankmodal = true;
         alert('게임이 끝났습니다!');
         // 대기실 점수 갱신(방장만)
         if (this.getUser.id == this.room.host) {
@@ -801,6 +830,9 @@ export default {
           this.sendTimeTrigger('stop');
           // 진행바 정지
           this.moveProgressBar('stop');
+          // setTimeout(function() {
+          //   this.moveProgressBar();
+          // }, 1000);
         }
         this.answermodal = true;
         // this.ordermodal = true;
@@ -831,6 +863,9 @@ export default {
           this.sendTimeTrigger('stop');
           // 진행바 정지
           this.moveProgressBar('stop');
+          // setTimeout(function() {
+          //   this.moveProgressBar();
+          // }, 1000);
         }
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         // 문제 모달 띄우기
@@ -847,7 +882,7 @@ export default {
       const curPlayer = JSON.parse(payload.body);
       this.room.curPlayer = curPlayer;
       console.log(curPlayer);
-      this.moveProgressBar();
+      this.moveProgressBar('start');
     },
     // 문제 변경 트리거
     sendNextProblemTrigger() {
@@ -876,7 +911,7 @@ export default {
       const flag = JSON.parse(payload.body);
       this.ordermodal = flag;
       this.answermodal = flag;
-      this.moveProgressBar();
+      this.moveProgressBar('start');
     },
     scrollDown() {
       const scrollbox = document.getElementById('chat-box');
