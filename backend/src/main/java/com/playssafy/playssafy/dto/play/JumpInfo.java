@@ -63,4 +63,24 @@ public class JumpInfo {
 
         return hashCode;
     }
+
+    @Override
+    public String toString() {
+        return "JumpInfo{" +
+                "roomId='" + roomId + '\'' +
+                ", jumpArr1=" + Arrays.toString(jumpArr1) +
+                ", jumpArr2=" + Arrays.toString(jumpArr2) +
+                ", reloadflag=" + reloadflag +
+                ", participantId='" + participantId + '\'' +
+                ", participantName='" + participantName + '\'' +
+                ", teamNo=" + teamNo +
+                ", obstacleflag=" + obstacleflag +
+                ", xbArr=" + Arrays.toString(xbArr) +
+                ", xbArrType=" + Arrays.toString(xbArrType) +
+                ", type=" + type +
+                ", beUserPresent1=" + Arrays.toString(beUserPresent1) +
+                ", beUserPresent2=" + Arrays.toString(beUserPresent2) +
+                ", bGameStopFlag=" + bGameStopFlag +
+                '}';
+    }
 }

@@ -11,6 +11,9 @@ import org.springframework.data.redis.core.RedisHash;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 점핑 게임, 참가자 정보 관리 DTO new
+ */
 @Setter
 @Getter
 @ToString
@@ -36,6 +39,22 @@ public class SsazipJump {
     private int teamIdx1; // 현재 진행 중 팀 1의 팀 인덱스
     private int teamIdx2;
 
+    //from JumpInfo class
+    private boolean[] jumpArr1; // 점프값 어레이
+    private boolean[] jumpArr2;
+    private boolean reloadflag;
+    private String participantId; // 참가자의 고유 ID
+    private String participantName; // 참가자의 이름
+    private int teamNo; // 참가자 소속 팀 번호
+    private boolean obstacleflag;//장애물 시작 플레그
+    private Integer[] xbArr;//장애물 x위치 어레이
+    private Integer[] xbArrType;//장애물 타입 어레이
+    private int type;//데이터 정보 타입
+    //참가 여부 어레이
+    private boolean[] beUserPresent1;
+    private boolean[] beUserPresent2;//참가 여부 어레이
+    private boolean bGameStopFlag;//충돌 시 게임 중단 플레그
+
 
     public SsazipJump() {
         // 최대 10개 팀에 대응하는 팀 정보를 저장할 리스트 선언해두기
@@ -50,4 +69,6 @@ public class SsazipJump {
         teamOrderNext = new ArrayList<>();
         finalScore = new ArrayList<>();
     }
+
+
 }

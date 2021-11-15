@@ -102,7 +102,8 @@ export default {
                 { userId: '차은채', jump: 0 },
                 { userId: '술희원', jump: 0 },
             ],
-
+            //let murangsubul = {userId : this.member, jump : 0
+            //users1.push(murangsubul)
             users2: [
                 { userId: '안기훈', jump: false },
                 { userId: '꼬륵채', jump: false },
@@ -610,16 +611,28 @@ export default {
         /////////////////////////////////// method ///////////////////////////////
         /////////////////////////////////// method ///////////////////////////////
 
-//플레이어 세팅
+        //플레이어 세팅
         setUsers() {
+            console.log('플레이어 세팅');
+
             let teamIdx1 = this.room.teamIdx1;
             let teamIdx2 = this.room.teamIdx2;
-            for (let i = 0; i < this.room.teamsBase[teamIdx1].members.length; i++) {
-                this.user1.push(this.room.teamsBase[teamIdx1].members[i].participantName);
+            console.log(teamIdx1 + ' ' + teamIdx2);
+            if (teamIdx1 != -2) {
+                for (let i = 0; i < this.room.teamsBase[teamIdx1].members.length; i++) {
+                    console.log(i + '번 플레이어');
+                    console.log(this.room.teamsBase[teamIdx1].members[i].participantName);
+                    let mem = { userId: this.room.teamsBase[teamIdx1].members[i].participantName, jump: false };
+                    this.users1.push(mem);
+                }
             }
-            for (let i = 0; i < this.room.teamsBase[teamIdx2].members.length; i++) {
-                this.user1.push(this.room.teamsBase[teamIdx2].members[i].participantName);
+            if (teamIdx2 != -2) {
+                for (let i = 0; i < this.room.teamsBase[teamIdx2].members.length; i++) {
+                    let mem = { userId: this.room.teamsBase[teamIdx2].members[i].participantName, jump: false };
+                    this.users2.push(mem);
+                }
             }
+            this.reqState();
         },
 
         ////////////////////////////////////Socket 요청들/////////////////////////////////////////////////
@@ -627,7 +640,8 @@ export default {
         ////////////////////////////////////Socket 요청들/////////////////////////////////////////////////
         //1.게임 방 입장 : 정보 구독 및 유저 정보 전송
         onConnected() {
-            // 초기 정보 요청
+            //0. 초기 정보 요청
+            console.log('==============this room code is ' + this.getRoomId);
 
             // 구독
             this.stompClient.subscribe('/game/jumpgame/' + this.getRoomId, this.onMessageReceived);
@@ -651,8 +665,10 @@ export default {
                     type: 0, //정보요청 타입
                 })
             );
-
-            //유저들의 장애물과 유저 상태 정보 요청
+            console.log('onconnected');
+        },
+        //1.입장 전//유저들의 장애물과 유저 상태 정보 요청
+        reqState() {
             this.stompClient.send(
                 '/pub/game/jump/enter/reqToMaster',
                 {},
@@ -661,25 +677,39 @@ export default {
                     type: 1, //정보요청 타입
                 })
             );
-            console.log('onconnected');
         },
-        //점프 명령어 전송
-        jumping() {
-            console.log('=======jummping');
-            // console.log(this.jumpSendArr1);
-            // console.log(this.jumpSendArr2);
+
+        //7.현 상태 송출 by master
+        sendState() {
+            console.log('=======sendState');
             this.stompClient.send(
-                '/pub/game/jump/data',
+                '/pub/game/jump/state',
                 {},
                 JSON.stringify({
                     roomId: this.getRoomId,
-                    jumpArr1: this.jumpSendArr1,
-                    jumpArr2: this.jumpSendArr2,
-                    type: 2, //점프 데이터
+                    beUserPresent1: this.userPresent1,
+                    beUserPresent2: this.userPresent2,
+                    obstacleflag: this.drawObFlag,
+                    type: 7,
                 })
             );
         },
-        //재시작 => 마스터 화면은 초기화, 플레이어는 재 접속
+        //5.입장
+        entering() {
+            console.log('=======entering');
+            this.stompClient.send(
+                '/pub/game/jump/enter',
+                {},
+                JSON.stringify({
+                    roomId: this.getRoomId,
+                    beUserPresent1: this.userPresent1,
+                    beUserPresent2: this.userPresent2,
+                    type: 5,
+                })
+            );
+        },
+        ///////////////////////////////////////////////////
+        //3. 재시작 => 마스터 화면은 초기화, 플레이어는 재 접속
         reloading() {
             console.log('=======sending reloading fuc');
             this.reloadFlag = true;
@@ -709,8 +739,8 @@ export default {
                 })
             );
         },
+        // 3.마스터가 새로고침 누를때 플레이어 재 접속
         reloadingPlay() {
-            //마스터가 새로고침 누를때 플레이어 재 접속
             this.reloadFlag = true;
             this.stompClient.send(
                 '/pub/game/jump/data',
@@ -724,7 +754,25 @@ export default {
                 })
             );
         },
-        //장애물 송신
+        ///////////////////////////////////
+        //2. 점프 명령어 전송
+        jumping() {
+            console.log('=======jummping');
+            // console.log(this.jumpSendArr1);
+            // console.log(this.jumpSendArr2);
+            this.stompClient.send(
+                '/pub/game/jump/data',
+                {},
+                JSON.stringify({
+                    roomId: this.getRoomId,
+                    jumpArr1: this.jumpSendArr1,
+                    jumpArr2: this.jumpSendArr2,
+                    type: 2, //점프 데이터
+                })
+            );
+        },
+        /////////////////////////////
+        //4. 장애물 송신
         sendObstaclePosition() {
             console.log('ooooooooooooooooo');
             this.stompClient.send(
@@ -739,20 +787,8 @@ export default {
                 })
             );
         },
-        //입장
-        entering() {
-            console.log('=======entering');
-            this.stompClient.send(
-                '/pub/game/jump/enter',
-                {},
-                JSON.stringify({
-                    roomId: this.getRoomId,
-                    beUserPresent1: this.userPresent1,
-                    beUserPresent2: this.userPresent2,
-                    type: 5,
-                })
-            );
-        },
+        //////////////////////////////////////
+        //6. 게임 정지
         stopGame() {
             console.log('=======gameStopFlag');
             this.gameStopFlag = true;
@@ -767,21 +803,7 @@ export default {
             );
             this.gameStopFlag = false;
         },
-        //7.현 상태 송출
-        sendState() {
-            console.log('=======sendState');
-            this.stompClient.send(
-                '/pub/game/jump/state',
-                {},
-                JSON.stringify({
-                    roomId: this.getRoomId,
-                    beUserPresent1: this.userPresent1,
-                    beUserPresent2: this.userPresent2,
-                    obstacleflag: this.drawObFlag,
-                    type: 7,
-                })
-            );
-        },
+
         ////////////////////// 메세지 수신 ///////////////////
         ////////////////////// 메세지 수신 ///////////////////
         ////////////////////// 메세지 수신 ///////////////////
@@ -793,19 +815,22 @@ export default {
             if (info.type == 0) {
                 console.log('======got mes 방, 게임 정보 수신=========');
                 this.room = info;
+                console.log(this.room);
                 this.hostId = this.room.host;
                 this.setUsers();
             }
 
             //1.정보 요청 수신시 ( 마스터만 )
             if (info.type == 1 && this.masterKeyFlag) {
-                console.log('======got mes 마스터 정보 요청에 대한 수신=========');
+                console.log('======got mes 마스터의 정보 요청에 대한 수신=========');
                 this.sendState();
                 return;
             }
-            //7.현 상태 수신
+            //7.유저 기존 상태 수신 (입장 전 과정)
+            console.log('this.enteredFlag 입장여부');
+            console.log(this.enteredFlag);
             if (info.type == 7 && !this.enteredFlag) {
-                console.log('======got mes 현 상태 마스터로부터 수신=========');
+                console.log('======got mes 기존 상태 마스터로부터 수신=========');
                 this.enteredFlag = true;
                 this.userPresent1 = info.beUserPresent1;
                 this.userPresent2 = info.beUserPresent2;
@@ -815,13 +840,14 @@ export default {
                     if (this.users1[i].userId == this.getUser.name) {
                         this.userPresent1[i] = true; //참가 확인 어레이
                         this.teamIdx = 1; //팀 선정
-                        this.entering();
+
                         // 유저 개인 메세지
                         let idx = 1;
                         for (let i = 0; i < this.userPresent1.length; i++) {
                             if (this.userPresent1[i]) idx++;
                         }
                         console.log('1팀의 ' + idx + '번째 유저입니다');
+                        this.entering();
                     }
                 }
                 if (this.teamIdx == 2) {
@@ -840,17 +866,12 @@ export default {
                     }
                 }
             }
-            //새로운 유저 입장
+
+            //5. 새로운 유저 입장
             if (info.type == 5) {
                 this.userPresent1 = info.beUserPresent1;
                 this.userPresent2 = info.beUserPresent2;
                 this.drawSsazip();
-            }
-
-            //게임 정지
-            if (info.type == 6) {
-                // this.receivedGameStopFlag = info.BgameStopFlag;
-                this.receivedGameStopFlag = true;
             }
 
             //3.리로드
@@ -862,16 +883,8 @@ export default {
                 // this.drawSsazip();
                 return;
             }
-            if (info.type == 4) {
-                //장애물 생성
-                this.receivedArr = info.xbArr;
-                this.receivedArrType = info.xbArrType;
-                return;
-            }
-            if (info.obstacleflag && !this.drawFlag) {
-                this.drawFlag = true;
-            }
 
+            //2. 점핑데이터
             if (info.type == 2) {
                 //점프
                 this.receivedJumpArr1 = info.jumpArr1;
@@ -898,6 +911,23 @@ export default {
                         // this.users2[i].jump = this.jumpsss2[i];
                     }
                 }
+            }
+
+            //4. 장애물
+            if (info.type == 4) {
+                //장애물 생성
+                this.receivedArr = info.xbArr;
+                this.receivedArrType = info.xbArrType;
+                return;
+            }
+            if (info.obstacleflag && !this.drawFlag) {
+                this.drawFlag = true;
+            }
+
+            //6.게임 정지
+            if (info.type == 6) {
+                // this.receivedGameStopFlag = info.BgameStopFlag;
+                this.receivedGameStopFlag = true;
             }
 
             if (payload.body == 'exit') {
@@ -958,7 +988,7 @@ export default {
         // // 소켓 연결
         // this.stompClient = socketConnect(this.onConnected, this.onError);
         // 방정보 초기화
-        this.room.id = this.getRoomId;
+        // this.room.id = this.getRoomId;
         this.masterKeyFlag = this.getIsLogin;
         this.userId = this.getUser.name;
     },
@@ -992,7 +1022,9 @@ export default {
                 }
             }
             //착지해야만 점프가능
-            if (this.startFlag) {
+            console.log('userPlayIdx');
+            console.log(this.userPlayIdx);
+            if (this.startFlag && this.userPlayIdx != -1) {
                 if (this.teamIdx == 1) {
                     if (this.dinos1[this.userPlayIdx].y == 200) {
                         if (e.code === 'Space') {
@@ -1034,18 +1066,24 @@ export default {
 //
 //socket 0. request room data, game data
 //socket 1. request obstacle, player state to master
-//socket 7. response to all -> new user entering
+//socket 7. response to all from master -> user get state before enter
 //socket 5. entering and remake dinos list at all
 //
-//start => button 'a' by master
+//(when reset by master : key 'enter')
+//socket 3. reload(reset) : reset at master, request all player to reEnter
 //
+//(when reload by master)
+//reload(real reload of master) : request reload to all player
 //
+//(when user jump)
 //socket 2. jumping : catch button pushed by player and broadcast
 //    catch jumping signal and jump
 //
-//socket 3. reload(reset) : reset at master, request all player reentering
+//(when master start making obstacle)
+//socket 4.start => button 'a' by master
 //
-//reload(real reload of master) : request reload to all player
+//(when someone crushed obstacle)
+//socket 6. stop => to all
 </script>
 
 <style></style>
