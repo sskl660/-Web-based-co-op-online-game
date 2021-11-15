@@ -20,6 +20,9 @@
       v-bind:teamOrder="room.teamOrder"
       v-bind:teams="room.teams"
       v-bind:curPlayer="room.curPlayer"
+      v-bind:scores="room.scores"
+      v-bind:curTeam="room.curTeam"
+      v-bind:curTeamCnt="room.curTeamCnt"
     />
     <div class="ssafymind-center">
       <div class="question-word" v-if="room.quizzes != null">
@@ -149,7 +152,7 @@ export default {
     this.onDisconnect();
   },
   updated() {
-    this.scrollDown();//채팅방 자동 스크롤
+    this.scrollDown(); //채팅방 자동 스크롤
   },
   methods: {
     // startTimer(startTime) {
@@ -164,7 +167,8 @@ export default {
     startPainting: function() {
       this.painting = true;
     },
-    onMouseMove: function(event) {//그리기, 보이진 않음
+    onMouseMove: function(event) {
+      //그리기, 보이진 않음
       const canvas = document.getElementById('jsCanvas');
       const ctx = canvas.getContext('2d');
       this.offsetX = event.offsetX;
@@ -214,7 +218,8 @@ export default {
       // ctx.stroke();
       // ctx.closePath();
     },
-    strokePath: function(x, y) {//안씀 통신에 xy 좌표 보내주려 했던 것
+    strokePath: function(x, y) {
+      //안씀 통신에 xy 좌표 보내주려 했던 것
       const canvas = document.getElementById('jsCanvas');
       const ctx = canvas.getContext('2d');
       var color = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
@@ -227,7 +232,8 @@ export default {
       ctx.stroke();
       ctx.strokeStyle = currentColor;
     },
-    drawing: function() {//안씀 통신에 실시간으로 확인하려고 했던 것
+    drawing: function() {
+      //안씀 통신에 실시간으로 확인하려고 했던 것
       // 실시간으로 그려지나 확인
       // ctx.clearRect(0, 0, 1100, 760)
       // console.log("saveData 확인", this.saveData.length)
@@ -268,14 +274,16 @@ export default {
       // ctx.closePath();
       // ctx.restore();
     },
-    mouseEnter: function() {//클릭 하는 순간을 감지
+    mouseEnter: function() {
+      //클릭 하는 순간을 감지
       if (this.clickmouse) {
         this.painting = true;
       } else {
         this.painting = false;
       }
     },
-    isMouseDown: function(event) {//아마도 내 그림 그림 보기용
+    isMouseDown: function(event) {
+      //아마도 내 그림 그림 보기용
       // 그리기 시작
       // 내 차례일 때 canDraw == ture, name 비교해서
       // canDraw == false 일때, 다른 사람일 때 그림 못그리게
@@ -290,7 +298,8 @@ export default {
       this.ctx.stroke();
       this.sendDrawMessage();
     },
-    isMouseUp: function() {//그리기 종료
+    isMouseUp: function() {
+      //그리기 종료
       // 그리기 종료
       this.clickmouse = false;
 
@@ -398,7 +407,8 @@ export default {
       // ctx.lineWidth = 30;
       this.handlePaletteModeClick();
     },
-    handleCM: function(event) {//오른쪽 마우스 클릭 방지
+    handleCM: function(event) {
+      //오른쪽 마우스 클릭 방지
       event.preventDefault();
     },
     handleSave: function() {
@@ -511,6 +521,23 @@ export default {
       }
       const data = JSON.parse(payload.body);
       this.room = data;
+      // 모든 팀의 차례가 끝난 경우
+      if (this.room.teamOrder.length == 0) {
+        alert('게임이 끝났습니다!');
+        // 대기실 점수 갱신(방장만)
+        if (this.getUser.id == this.room.host) {
+          this.stompClient.send(`/pub/ssafymind/end`, {}, this.getRoomId);
+          // setTimeout(function() {
+          //   this.onDisconnect();
+          // }, 1000);
+        }
+        // 연결 종료
+        else {
+          // this.onDisconnect();
+        }
+
+        // 게임 종료 모달
+      }
       console.log('포인트를 알고싶다고');
       console.log(data);
       // 여기에 받은 데이터를 기반으로 그리고 있는 그림 초기화하는 로직 구현
@@ -609,7 +636,7 @@ export default {
       const data = JSON.parse(payload.body);
       // 정답인 경우
       if (data.correct) {
-        alert('정답입니다!');
+        // alert('정답입니다!');
         // 시간 정지 메세지 띄우고, 모달 다시 띄우기
         if (this.room.host == this.getUser.id) {
           this.sendNextProblemTrigger();
@@ -661,6 +688,7 @@ export default {
     },
     // 게임 시작 트리거
     sendGameStartTrigger() {
+      console.log(this.room);
       // 모달 닫기 메세지 전송
       this.sendCloseModalMessage();
       // 타이머 시작
