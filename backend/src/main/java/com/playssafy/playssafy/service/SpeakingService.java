@@ -112,12 +112,13 @@ public class SpeakingService {
         speakMessage.setCorrect(false);
 
         int lastIndex = speaking.getQuizzes().size() - 1;
-        speakMessage.setMessage(speaking.getQuizzes().get(lastIndex).getAnswer());
         if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage().replaceAll(" ",""))) {
             // 정답으로 상태를 바꿔주고
             speakMessage.setCorrect(true);
+            speakGameRepository.save(speaking);
             return speakMessage;
         }
+        speakGameRepository.save(speaking);
         // 오답
         return speakMessage;
     }
