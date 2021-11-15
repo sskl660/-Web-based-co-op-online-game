@@ -44,15 +44,9 @@
       @getProgressBar="getProgressBar"
     />
     <div class="ssafymind-center">
-<<<<<<< HEAD
       <div v-if="room.quizzes != null">
         <div class="question-word" v-if="user.name == room.host || room.teamOrder[0] == user.teamNo">
         {{ room.quizzes[room.quizzes.length - 1].problem }}
-=======
-      <div class="question-word" v-if="room.quizzes != null">
-        <div v-if="user.name == room.host || room.teamOrder[0] == user.teamNo">
-          {{ room.quizzes[room.quizzes.length - 1].problem }}
->>>>>>> 75f01a125c4bd2bc9f1a946bc803193fb8f99806
         </div>
       </div>
       <!-- <div class="question-word">{{ 싸집 }}</div> -->
@@ -388,15 +382,10 @@ export default {
         this.painting = false;
       }
     },
-<<<<<<< HEAD
     isMouseDown: function(event) {// fill 채워주려고 점 찍기
     if(this.getUser.name != this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName){
       return
     }
-=======
-    isMouseDown: function(event) {
-      //아마도 내 그림 그림 보기용
->>>>>>> 75f01a125c4bd2bc9f1a946bc803193fb8f99806
       // 그리기 시작
       // 내 차례일 때 canDraw == ture, name 비교해서
       // canDraw == false 일때, 다른 사람일 때 그림 못그리게
@@ -609,7 +598,6 @@ export default {
 
       canvas.addEventListener('click', this.handleCanvasClick);
     },
-<<<<<<< HEAD
     moveProgressBar: function(msg){
       const progress = document.getElementById("progress-bar");
       var width = 100;
@@ -622,17 +610,6 @@ export default {
           clearInterval(id)
         } else{
           width--;
-=======
-    moveProgressBar: function() {
-      const progress = document.getElementById('progress-bar');
-      var width = 1;
-      var id = setInterval(frame, 100);
-      function frame() {
-        if (width >= 100) {
-          clearInterval(id);
-        } else {
-          width++;
->>>>>>> 75f01a125c4bd2bc9f1a946bc803193fb8f99806
           progress.style.width = width + '%';
         }
       }
@@ -844,10 +821,6 @@ export default {
       // 10초 단위로 서버에 플레이어 변경 메세지 전송
       if (time != 0 && time != 90 && time % 10 == 0 && this.room.host == this.getUser.id)
         this.sendTeamChangeTrigger();
-<<<<<<< HEAD
-=======
-      // this.moveProgressBar();
->>>>>>> 75f01a125c4bd2bc9f1a946bc803193fb8f99806
       if (time <= 0) {
         // 시간 내에 맞추지 못했다면 다음 문제로
         // alert('아깝습니다!');
