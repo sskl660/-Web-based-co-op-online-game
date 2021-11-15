@@ -185,7 +185,7 @@ export default {
           console.log(message);
           console.log('-----------------');
 
-          await this.stompClient.send(
+          this.stompClient.send(
             `/pub/speaking/answer/${this.getRoomId}`,
             {},
             JSON.stringify({
@@ -252,8 +252,9 @@ export default {
       // 현재 진행 중인 사람의 문장 전송
       this.stompClient.subscribe('/speaking/talk/' + this.getRoomId, this.onTalkingMessageReceived);
       // 플레이어 변경
+      console.log(this.getRoomId)
       this.stompClient.subscribe(
-        '/speaking/change/player/' + this.getRoomId,
+        `/speaking/change/player/` + this.getRoomId,
         this.onChangePlayerMessageReceived
       );
       // 입장 시 데이터 수신
@@ -301,7 +302,8 @@ export default {
       console.log(data)
       if (data.correct) {
         console.log(data)
-        this.stompClient.send('/pub/speaking/change/player', {}, this.getRoomId);
+        console.log(this.getRoomId)
+        this.stompClient.send('pub/speaking/change/player', {}, this.getRoomId);
       }
     },
     onTalkingMessageReceived(payload) {

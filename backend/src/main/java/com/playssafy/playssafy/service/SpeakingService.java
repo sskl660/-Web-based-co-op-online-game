@@ -73,7 +73,6 @@ public class SpeakingService {
         speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "3", "이장섭3", 2));
         speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "4", "이장섭4", 2));
 
-
         speakGameRepository.save(speaking);
     }
 
