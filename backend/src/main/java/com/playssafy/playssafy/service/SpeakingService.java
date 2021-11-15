@@ -109,29 +109,37 @@ public class SpeakingService {
     public synchronized SpeakMessage answer(String roomId, SpeakMessage speakMessage) {
         Speaking speaking = speakGameRepository.findById(roomId).get();
         // 정답 여부 기본값을 fasle로 설정
+        speakMessage.setCorrect(false);
 
         int lastIndex = speaking.getQuizzes().size() - 1;
-        if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage().replaceAll("\\s+",""))) {
+        speakMessage.setMessage(speaking.getQuizzes().get(lastIndex).getAnswer());
+        if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage().replaceAll(" ",""))) {
             // 정답으로 상태를 바꿔주고
             speakMessage.setCorrect(true);
-            // 다음 플레이어로 넘기고
-            int teamSize = speaking.getTeams().get(speaking.getTeamOrder().get(0)).getMembers().size();
-            // 현재 플레이어 번호
-            int curPlayer = speaking.getCurPlayer();
-            // 다음 플레이어 번호
-            curPlayer = (curPlayer + 1) % teamSize;
-            // 다음 플레이어로 세팅
-            speaking.setCurPlayer(curPlayer);
-            // 저장한 뒤
-            speakGameRepository.save(speaking);
-            // 정답
             return speakMessage;
         }
         // 오답
         return speakMessage;
     }
 
-    // 4. 다음 문제로 이동
+    // 4. 플레이어 변경
+    public synchronized int changePlayer(String roomId) {
+        Speaking speaking = speakGameRepository.findById(roomId).get();
+        // 현재 팀의 인원 수
+        int teamSize = speaking.getTeams().get(speaking.getTeamOrder().get(0)).getMembers().size();
+        // 현재 플레이어 번호
+        int curPlayer = speaking.getCurPlayer();
+        // 다음 플레이어 번호
+        curPlayer = (curPlayer + 1) % teamSize;
+        // 세팅
+        speaking.setCurPlayer(curPlayer);
+        // 저장
+        speakGameRepository.save(speaking);
+        // 번호 전송
+        return curPlayer;
+    }
+
+    // 5. 다음 문제로 이동
     public synchronized Speaking nextProblem(String roomId) {
         Speaking speaking = speakGameRepository.findById(roomId).get();
         int lastIndex = speaking.getQuizzes().size() - 1;
