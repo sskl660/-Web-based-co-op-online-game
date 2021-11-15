@@ -41,8 +41,8 @@
       @getProgressBar = "getProgressBar"
     />
     <div class="ssafymind-center">
-      <div class="question-word" v-if="room.quizzes != null">
-        <div v-if="user.name == room.host || room.teamOrder[0] == user.teamNo">
+      <div v-if="room.quizzes != null">
+        <div class="question-word" v-if="user.name == room.host || room.teamOrder[0] == user.teamNo">
         {{ room.quizzes[room.quizzes.length - 1].problem }}
         </div>
       </div>
@@ -278,7 +278,9 @@ export default {
         // console.log(x, y)
         // this.drawData.push({ x, y, size });
 
-        this.sendDrawMessage();
+        if(this.getUser.name == this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName){
+          this.sendDrawMessage();
+        }
         this.drawing();
         // console.log(this.drawData)
       }
@@ -367,7 +369,10 @@ export default {
         this.painting = false;
       }
     },
-    isMouseDown: function(event) {//아마도 내 그림 그림 보기용
+    isMouseDown: function(event) {// fill 채워주려고 점 찍기
+    if(this.getUser.name != this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName){
+      return
+    }
       // 그리기 시작
       // 내 차례일 때 canDraw == ture, name 비교해서
       // canDraw == false 일때, 다른 사람일 때 그림 못그리게
@@ -570,15 +575,18 @@ export default {
 
       canvas.addEventListener('click', this.handleCanvasClick);
     },
-    moveProgressBar: function(){
+    moveProgressBar: function(msg){
       const progress = document.getElementById("progress-bar");
-      var width = 1;
+      var width = 100;
       var id = setInterval(frame, 100);
+      if(msg == 'stop'){
+        clearInterval(id)
+      }
       function frame(){
-        if(width >= 100){
+        if(width <= 0){
           clearInterval(id)
         } else{
-          width++;
+          width--;
           progress.style.width = width + '%';
         }
       }
@@ -740,7 +748,7 @@ export default {
         })
       );
       this.message = '';
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      // this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     },
     onAnswerMessageReceived(payload) {
       const data = JSON.parse(payload.body);
@@ -751,13 +759,15 @@ export default {
         if (this.room.host == this.getUser.id) {
           this.sendNextProblemTrigger();
           this.sendTimeTrigger('stop');
+          // 진행바 정지
+          this.moveProgressBar('stop');
         }
         this.answermodal = true;
         // this.ordermodal = true;
         this.startProgress = true;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       }
       this.room.chat.push(data);
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     },
     /**
      * 시간 트리거 발동, 수신
@@ -771,16 +781,18 @@ export default {
       // 10초 단위로 서버에 플레이어 변경 메세지 전송
       if (time != 0 && time != 90 && time % 10 == 0 && this.room.host == this.getUser.id)
         this.sendTeamChangeTrigger();
-        // this.moveProgressBar();
       if (time <= 0) {
         // 시간 내에 맞추지 못했다면 다음 문제로
-        alert('아깝습니다!');
+        // alert('아깝습니다!');
         if (this.room.host == this.getUser.id) {
           // 다음 문제 이동
           this.sendNextProblemTrigger();
           // 시간 정지
           this.sendTimeTrigger('stop');
+          // 진행바 정지
+          this.moveProgressBar('stop');
         }
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         // 문제 모달 띄우기
         this.answermodal = true;
       }
@@ -795,6 +807,7 @@ export default {
       const curPlayer = JSON.parse(payload.body);
       this.room.curPlayer = curPlayer;
       console.log(curPlayer);
+      this.moveProgressBar();
     },
     // 문제 변경 트리거
     sendNextProblemTrigger() {
@@ -807,7 +820,7 @@ export default {
       // 타이머 시작
       this.sendTimeTrigger('start');
       // 게임 시작시 왼쪽 화면에 시간 흐르는 JavaSciprt 추가
-      this.moveProgressBar();
+      // this.moveProgressBar();
       // 캔버스 초기화
       const canvas = document.getElementById('jsCanvas');
       const ctx = canvas.getContext('2d');
@@ -816,11 +829,13 @@ export default {
     // 전체 모달 닫기
     sendCloseModalMessage() {
       this.stompClient.send(`/pub/ssafymind/close/modal`, {}, this.getRoomId);
+      // this.moveProgressBar();
     },
     onModalMessageReceived(payload) {
       const flag = JSON.parse(payload.body);
       this.ordermodal = flag;
       this.answermodal = flag;
+      this.moveProgressBar();
     },
     scrollDown() {
       const scrollbox = document.getElementById('chat-box');

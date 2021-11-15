@@ -3,7 +3,17 @@
     <div class="show-team-dialog">
       <div class="show-team-content">
         <div class="modal-body">
-          <div class="show-team-explainbox">
+					<div class="show-team-explainbox" v-if="this.correctTeam == 12 || this.correctTeam == 0">
+						<div class="show-answer-title">아쉽군요!</div>
+							<div class="show-answer">
+								친구야 힘내자^^
+							</div>
+							<span class="team">다음 문제를 맞춰보아요~</span>
+            <button class="start-game-btn" @click="startModal" v-if="host == this.getUser.id">
+              다음
+            </button>
+					</div>
+          <div class="show-team-explainbox" v-else>
             <div class="show-answer-title">정답</div>
 							<div class="show-answer">
 								{{ this.quizAnswer }}
@@ -64,6 +74,8 @@ export default {
 						this.quizAnswer = quiz.answer;
 						this.correctTeam = ans.teamNo;
 						// console.log('정답은', this.quizAnswer)
+					}else{
+						this.correctTeam = 12;
 					}
 				}
 			}
