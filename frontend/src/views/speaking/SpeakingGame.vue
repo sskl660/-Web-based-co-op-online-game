@@ -338,7 +338,7 @@ export default {
       this.stompClient.subscribe('/speaking/talk/' + this.getRoomId, this.onTalkingMessageReceived);
       // 입장 시 데이터 수신
       this.stompClient.send(
-        '/speaking/enter',
+        '/pub/speaking/enter',
         {},
         JSON.stringify({
           roomId: this.getRoomId,
