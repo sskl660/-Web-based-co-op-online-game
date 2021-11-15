@@ -26,9 +26,10 @@
 #progress {
   background-color: white;
   height: 20px;
-  width: 100%;
+  width: 90%;
   position: relative;
   border-radius: 10px;
+  margin-left: 5%;
 }
 #progress-bar {
   position: absolute;

@@ -19,7 +19,21 @@
     <SpeakingTimer v-if="game === 'speak'" />
     <!-- <ProgressBar v-else /> -->
     <div v-else>
-      <div id="progress" v-if="this.getProgressBar == false">
+      <!-- <div v-if="teamOrder != null">
+        <div v-for="(member, idx) in teams[teamOrder[0]].members" :key="idx">
+          <div v-if="idx == curPlayer">
+            <div id="progress" v-if="getProgressBar == false">
+              <div id="progress-bar"></div>
+            </div>
+          </div>
+          <div v-else>
+            <div id="progress" v-if="getProgressBar == true">
+              <div id="progress-bar"></div>
+            </div>
+          </div>
+        </div>
+      </div> -->
+      <div id="progress" v-if="getProgressBar == false">
         <div id="progress-bar"></div>
       </div>
     </div>
@@ -35,7 +49,8 @@
         v-if="teamOrder != null && teamOrder.length > 1"
       />
       <div class="next-team-ready" v-else>
-        끝!
+        <div id="end">마지막 팀 입니다!</div>
+        <img id="ssazip-group" src="~@/assets/ssazip-group.png" alt="" />
       </div>
     </div>
     <div class="ssafymind-score">
