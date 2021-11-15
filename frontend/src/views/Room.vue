@@ -222,7 +222,7 @@ export default {
             }
             // 싸집이 점프로 이동
             else {
-                //
+                this.$router.push('/ssazipjump/' + this.room.id);
             }
         },
     },
@@ -421,8 +421,18 @@ export default {
         changeTeamMessage() {
             this.stompClient.send('/pub/game/change', {}, JSON.stringify(this.room));
         },
+        noParticipantChecker() {
+            for (let i = 0; i < 11; i++) {
+                if (this.assignTeamNo[i] != null) return true;
+            }
+            return false;
+        },
         // 게임 시작
         gameStart() {
+            if (!this.noParticipantChecker()) {
+                console.log('참여 팀이 없습니다.');
+                return;
+            }
             // 싸피마인드
             if (this.room.gameType == 1) {
                 axios({
@@ -467,14 +477,12 @@ export default {
             else {
                 axios({
                     method: 'post',
-                    url: `/game/create/speaking`,
+                    url: `/game/create/ssazipjump`,
                     data: {
                         roomId: this.room.id,
                         host: this.room.host,
                         exist: this.room.teamline,
                         gameType: this.room.gameType,
-                        // 팀당 문제 개수 설정
-                        quizCnt: 3,
                     },
                 })
                     .then(() => {

@@ -45,16 +45,7 @@ public class WaitRoomRestController {
         // ssafymind 게임방 생성
         ssafyMindService.createSsafyMind(initGame);
     }
-    /**
-     * 싸집이 점프 게임 방 생성
-     */
-    @PostMapping(value = "/create/ssazipjump")
-    public void createSsazipJump(@RequestBody InitGame initGame) {
-        // 현재 게임 방 게임 타입 정보 갱신 로직 추가
-        waitRoomService.changeGame(initGame);
-        // ssafymind 게임방 생성
-        ssafyMindService.createSsafyMind(initGame);
-    }
+
 
     /**
      * 또박또박 말해요 게임 방 생성
@@ -70,4 +61,11 @@ public class WaitRoomRestController {
     /**
      * 싸집이 점프 게임 방 생성
      */
+    @PostMapping(value = "/create/ssazipjump")
+    public void createSsazipJump(@RequestBody InitGame initGame) {
+        // 현재 게임 방 게임 타입 정보 갱신 로직 추가
+        waitRoomService.changeGame(initGame);
+        // ssafymind 게임방 생성
+        ssafyMindService.createSsafyMind(initGame);
+    }
 }
