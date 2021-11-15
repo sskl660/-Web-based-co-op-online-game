@@ -54,13 +54,11 @@ public class WaitRoomSocketController {
         template.convertAndSend("/game/room/" + gameRoom.getId(), gameRoom);
     }
 
-    // 4. 게임으로 이동
+    // 4. 게임/결산 페이지로 이동
     @MessageMapping(value = "/game/start/{gameIndex}")
     public void gameStart(String roomId, @DestinationVariable int gameIndex){
         template.convertAndSend("/game/start/" + roomId, gameIndex);
     }
-
-
 //    @MessageMapping(value = "/game/openTeam/{roomId}")
 //    public void openTeam(String openTeams, @DestinationVariable String roomId) {
 //        WaitRoom gameRoom = gameRoomService.openTeam(openTeams, roomId);

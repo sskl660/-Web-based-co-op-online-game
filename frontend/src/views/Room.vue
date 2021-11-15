@@ -7,6 +7,7 @@
       @infoSsafyMind="infoSsafyMind"
       @infoSpeakGame="infoSpeakGame"
       @infoJumpGame="infoJumpGame"
+      v-on:transferNumber="getProblemNumber"
     />
 
     <div class="room-title">
@@ -79,36 +80,24 @@
           <div class="score-line d-flex justify-content-center">
             <p id="score-title">총 누적 점수</p>
             <div style="float:left">
-              <span id="score-team">1팀</span>
-              <span id="score-number">350점</span>
-              <br /><br />
-              <span id="score-team">2팀</span>
-              <span id="score-number">350점</span>
-              <br /><br />
-              <span id="score-team">3팀</span>
-              <span id="score-number">350점</span>
-              <br /><br />
-              <span id="score-team">4팀</span>
-              <span id="score-number">350점</span>
-              <br /><br />
-              <span id="score-team">5팀</span>
-              <span id="score-number">350점</span>
+              <div v-for="(score, idx) in this.room.scores" :key="idx">
+                <div v-if="idx <= 5 && idx >= 1">
+                  <span id="score-team">{{ idx }}팀</span>
+                  <span id="score-number" v-if="room.teamline[idx]">{{ score }}점</span>
+                  <span id="score-number" v-else> - </span>
+                  <br /><br />
+                </div>
+              </div>
             </div>
             <div style="float:right">
-              <span id="score-team">6팀</span>
-              <span id="score-number">350점</span>
-              <br /><br />
-              <span id="score-team">7팀</span>
-              <span id="score-number">350점</span>
-              <br /><br />
-              <span id="score-team">8팀</span>
-              <span id="score-number">350점</span>
-              <br /><br />
-              <span id="score-team">9팀</span>
-              <span id="score-number">350점</span>
-              <br /><br />
-              <span id="score-team">10팀</span>
-              <span id="score-number">350점</span>
+              <div v-for="(score, idx) in this.room.scores" :key="idx">
+                <div v-if="idx >= 6">
+                  <span id="score-team">{{ idx }}팀</span>
+                  <span id="score-number" v-if="room.teamline[idx]">{{ score }}점</span>
+                  <span id="score-number" v-else> - </span>
+                  <br /><br />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -140,7 +129,7 @@
         </div>
         <div>
           <button class="waiting-room-btn select-game" @click="openmodal = true">게임 선택</button>
-          <button class="waiting-room-btn final-score">최종 결과</button>
+          <button class="waiting-room-btn final-score" @click="endGame()">최종 결과</button>
           <i class="fas fa-play-circle play-btn fa-5x" @click="gameStart()"></i>
         </div>
       </div>
@@ -167,15 +156,16 @@ export default {
       speakgame_explain: false,
       jumpgame_explain: false,
       // 방 정보
-      room: {
-        id: '',
-        name: '',
-        host: '',
-        members: [],
-        teamline: [null, false, false, false, false, false, false, false, false, false, false],
-        gameType: 0,
-        gameScore: [],
-      },
+      // room: {
+      //   id: '',
+      //   name: '',
+      //   host: '',
+      //   members: [],
+      //   teamline: [null, false, false, false, false, false, false, false, false, false, false],
+      //   gameType: 0,
+      //   gameScore: [],
+      // },
+      room: {},
       assignTeamNo: {
         0: [],
         1: [],
@@ -193,6 +183,7 @@ export default {
       totalTeam: 10,
       // socket Client
       stompClient: null,
+      pNumber: 3,
     };
   },
   // 방 생성시
@@ -231,8 +222,15 @@ export default {
         this.$router.push('/speaking/' + this.room.id);
       }
       // 싸집이 점프로 이동
-      else {
+      else if (this.curGame == 3) {
         //
+      }
+      // 결산
+      else if (this.curGame == -1) {
+        this.$router.push({
+          path: '/rank/' + this.room.id,
+          query: { rank: this.room.scores, curTeam: this.room.teamline },
+        });
       }
     },
   },
@@ -395,13 +393,14 @@ export default {
       }
 
       let room = JSON.parse(payload.body);
-      console.log(room);
-      this.room.name = room.name;
-      this.room.host = room.host;
-      this.room.members = room.members;
-      if (room.teamline != null) {
-        this.room.teamline = room.teamline;
-      }
+      this.room = room;
+      console.log(this.room);
+      // this.room.name = room.name;
+      // this.room.host = room.host;
+      // this.room.members = room.members;
+      // if (room.teamline != null) {
+      //   this.room.teamline = room.teamline;
+      // }
     },
     // 버튼 클릭 초기화
     setButton() {
@@ -431,6 +430,10 @@ export default {
     changeTeamMessage() {
       this.stompClient.send('/pub/game/change', {}, JSON.stringify(this.room));
     },
+    // 선택한 문제 개수 받기
+    getProblemNumber(pNumber) {
+      this.pNumber = pNumber;
+    },
     // 게임 시작
     gameStart() {
       // 싸피마인드
@@ -444,7 +447,7 @@ export default {
             exist: this.room.teamline,
             gameType: this.room.gameType,
             // 팀당 문제 개수 설정
-            quizCnt: 3,
+            quizCnt: this.pNumber,
           },
         })
           .then(() => {
@@ -464,7 +467,7 @@ export default {
             exist: this.room.teamline,
             gameType: this.room.gameType,
             // 팀당 문제 개수 설정
-            quizCnt: 3,
+            quizCnt: this.pNumber,
           },
         })
           .then(() => {
@@ -493,6 +496,11 @@ export default {
           })
           .catch(() => {});
       }
+    },
+    // 게임 종료
+    endGame() {
+      this.room.gameType = -1;
+      this.stompClient.send(`/pub/game/start/${this.room.gameType}`, {}, this.room.id);
     },
     // 게임 시작 메세지
     startMessageReceived(payload) {
