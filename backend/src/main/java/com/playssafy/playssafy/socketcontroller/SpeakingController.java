@@ -56,11 +56,11 @@ public class SpeakingController {
     }
 
     // 5. 플레이어 변경
-    @MessageMapping(value = "/speaking/change/player")
-    public void changePlayer(String roomId) {
-        int curPlayer = speakingService.changePlayer(roomId);
-        template.convertAndSend("/speaking/change/player/" + roomId, curPlayer);
-    }
+    // @MessageMapping(value = "/speaking/change/player")
+    // public void changePlayer(String roomId) {
+    //     int curPlayer = speakingService.changePlayer(roomId);
+    //     template.convertAndSend("/speaking/change/player/" + roomId, curPlayer);
+    // }
 
     // 6. 다음 문제
     @MessageMapping(value = "/speaking/next/problem")
