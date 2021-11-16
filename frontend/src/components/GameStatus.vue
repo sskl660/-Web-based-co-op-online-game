@@ -6,9 +6,10 @@
       id=""
       :src="require(`../assets/team${teamOrder[0]}.png`)"
       alt=""
-      v-if="teamOrder != null"
+      v-if="teamOrder[0] != null"
     />
-    <div class="team-members-group" v-if="teamOrder != null">
+    <h3 v-else>게임이 종료되었습니다!</h3>
+    <div class="team-members-group" v-if="teamOrder[0] != null">
       <span v-for="(member, idx) in teams[teamOrder[0]].members" :key="idx">
         <span class="team-members myturn" v-if="idx == curPlayer">{{
           member.participantName
@@ -38,7 +39,7 @@
       </div>
     </div>
     <div class="next-team-block">
-      <div class="next-team-ready" v-if="teamOrder != null && teamOrder.length > 1">
+      <div class="next-team-ready" v-if="teamOrder[0] != null && teamOrder.length > 1">
         다음 팀 준비하세요~!
       </div>
       <img
@@ -46,7 +47,7 @@
         id=""
         :src="require(`../assets/team${teamOrder[1]}.png`)"
         alt=""
-        v-if="teamOrder != null && teamOrder.length > 1"
+        v-if="teamOrder[0] != null && teamOrder.length > 1"
       />
       <div class="next-team-ready" v-else>
         <div id="end">마지막 팀 입니다!</div>

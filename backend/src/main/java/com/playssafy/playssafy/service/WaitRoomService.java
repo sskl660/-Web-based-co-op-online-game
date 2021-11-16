@@ -1,5 +1,6 @@
 package com.playssafy.playssafy.service;
 
+import com.playssafy.playssafy.dto.waitroom.ChangeGame;
 import com.playssafy.playssafy.dto.waitroom.InitGame;
 import com.playssafy.playssafy.dto.waitroom.Participant;
 import com.playssafy.playssafy.dto.waitroom.WaitRoom;
@@ -116,10 +117,20 @@ public class WaitRoomService {
         return waitRoomRepository.save(waitRoom);
     }
 
-    // 6. 게임 변경
-    public void changeGame(InitGame initGame) {
+    // 6. 게임 세팅
+    public void setGame(InitGame initGame) {
         WaitRoom waitRoom = waitRoomRepository.findById(initGame.getRoomId()).get();
         waitRoom.setGameType(initGame.getGameType());
         waitRoomRepository.save(waitRoom);
+    }
+
+    // 7. 게임 변경
+    public WaitRoom changeGame(ChangeGame changeGame) {
+        WaitRoom waitRoom = waitRoomRepository.findById(changeGame.getRoomId()).get();
+        waitRoom.setSsafymindExplain(changeGame.isSsafymindExplain());
+        waitRoom.setSpeakgameExplain(changeGame.isSpeakgameExplain());
+        waitRoom.setJumpgameExplain(changeGame.isJumpgameExplain());
+
+        return waitRoomRepository.save(waitRoom);
     }
 }

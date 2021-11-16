@@ -7,6 +7,8 @@
       v-if="rankmodal == true"
       @getCloseRankModal="getCloseRankModal"
       v-bind:host="room.host"
+      v-bind:scores="room.scores"
+      v-bind:curTeam="room.curTeam"
       v-on:sendGoWaitingRoomTrigger="sendGoWaitingRoomTrigger"
     />
     <GameOrderModal
@@ -27,8 +29,8 @@
       v-bind:quizzes="room.quizzes"
       v-bind:chat="room.chat"
       v-on:sendGameStartTrigger="sendGameStartTrigger"
-      v-on:onMesseageReceived="onMesseageReceived"
     />
+    <!-- v-on:onMesseageReceived="onMesseageReceived" -->
     <!-- <div class="room-title">
       <span id="game-title">싸피마인드</span>
     </div> -->
@@ -52,8 +54,11 @@
     />
     <div class="ssafymind-center">
       <div v-if="room.quizzes != null">
-        <div class="question-word" v-if="user.name == room.host || room.teamOrder[0] == user.teamNo">
-        {{ room.quizzes[room.quizzes.length - 1].problem }}
+        <div
+          class="question-word"
+          v-if="user.name == room.host || room.teamOrder[0] == user.teamNo"
+        >
+          {{ room.quizzes[room.quizzes.length - 1].problem }}
         </div>
       </div>
       <!-- <div class="question-word">{{ 싸집 }}</div> -->
@@ -68,7 +73,10 @@
       <div v-if="room.teamOrder != null">
         <div
           class="turn-notice"
-          v-if="user.name == room.teams[room.teamOrder[0]].members[room.curPlayer].participantName"
+          v-if="
+            room.teamOrder[0] != null &&
+              user.name == room.teams[room.teamOrder[0]].members[room.curPlayer].participantName
+          "
         >
           당신 차례 입니다! 빨리 그리세요!
         </div>
@@ -87,7 +95,10 @@
       <div v-if="room.teamOrder != null">
         <div
           class="controls-stop"
-          v-if="user.name != room.teams[room.teamOrder[0]].members[room.curPlayer].participantName"
+          v-if="
+            room.teamOrder[0] != null &&
+              user.name != room.teams[room.teamOrder[0]].members[room.curPlayer].participantName
+          "
         ></div>
       </div>
       <div class="controls">
@@ -136,7 +147,11 @@
             v-model="message"
             @keyup.enter="sendAnswerMessage"
             id="send-ans"
-            v-if="user.name != room.host && room.teamOrder[0] != user.teamNo"
+            v-if="
+              room.teamOrder[0] != null &&
+                user.name != room.host &&
+                room.teamOrder[0] != user.teamNo
+            "
           />
         </div>
         <!-- </div> -->
@@ -198,7 +213,7 @@ import { mapGetters, mapState } from 'vuex';
 import { socketConnect } from '@/util/socket-common.js';
 import '@/components/css/ssafymind/ssafymind-right.css';
 import '@/components/css/ssafymind/progressbar.css';
-import SsafymindRankModal from '@/components/ssafymind/SsafymindRankModal'
+import SsafymindRankModal from '@/components/ssafymind/SsafymindRankModal';
 
 export default {
   name: 'SsafyMind',
@@ -210,7 +225,7 @@ export default {
     GameOrderModal, // 게임 순서 모달
     GameAnswerModal, // 게임 정답 모달
     // GameExplainModal, // 게임 설명 모달
-    SsafymindRankModal
+    SsafymindRankModal,
   },
   data: function() {
     return {
@@ -302,7 +317,10 @@ export default {
         // console.log(x, y)
         // this.drawData.push({ x, y, size });
 
-        if(this.getUser.name == this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName){
+        if (
+          this.getUser.name ==
+          this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName
+        ) {
           this.sendDrawMessage();
         }
         this.drawing();
@@ -396,10 +414,14 @@ export default {
         this.painting = false;
       }
     },
-    isMouseDown: function(event) {// fill 채워주려고 점 찍기
-    if(this.getUser.name != this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName){
-      return
-    }
+    isMouseDown: function(event) {
+      // fill 채워주려고 점 찍기
+      if (
+        this.getUser.name !=
+        this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName
+      ) {
+        return;
+      }
       // 그리기 시작
       // 내 차례일 때 canDraw == ture, name 비교해서
       // canDraw == false 일때, 다른 사람일 때 그림 못그리게
@@ -487,27 +509,27 @@ export default {
         canvas.classList.add(`paintbucket`);
         this.filling = true;
       }
-      console.log('------------------');
-      console.log('지금 문제를 출제하고 있는 사람을 찾아보자');
-      console.log(
-        '지금 출제하는 팀원',
-        this.room.teams[this.room.teamOrder[0]].members[0].participantName
-      );
-      console.log('지금 출제하는 팀', this.room.teamOrder[0]);
-      console.log('내 팀', this.getUser.teamNo);
-      console.log('------------------------------');
-      console.log(
-        this.user.name ==
-          this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName
-      );
-      console.log(this.user.name);
-      console.log(
-        this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName
-      );
-      console.log('------------------------------');
-      console.log(this.room.teamOrder[0]);
-      console.log(this.getUser.teamNo);
-      console.log(this.room.teamOrder[0] != this.getUser.teamNo);
+      // console.log('------------------');
+      // console.log('지금 문제를 출제하고 있는 사람을 찾아보자');
+      // console.log(
+      //   '지금 출제하는 팀원',
+      //   this.room.teams[this.room.teamOrder[0]].members[0].participantName
+      // );
+      // console.log('지금 출제하는 팀', this.room.teamOrder[0]);
+      // console.log('내 팀', this.getUser.teamNo);
+      // console.log('------------------------------');
+      // console.log(
+      //   this.user.name ==
+      //     this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName
+      // );
+      // console.log(this.user.name);
+      // console.log(
+      //   this.room.teams[this.room.teamOrder[0]].members[this.room.curPlayer].participantName
+      // );
+      // console.log('------------------------------');
+      // console.log(this.room.teamOrder[0]);
+      // console.log(this.getUser.teamNo);
+      // console.log(this.room.teamOrder[0] != this.getUser.teamNo);
     },
     handlePaletteModeClick: function() {
       const canvas = document.getElementById('jsCanvas');
@@ -613,45 +635,22 @@ export default {
 
       canvas.addEventListener('click', this.handleCanvasClick);
     },
-    moveProgressBar: function(progressbarMsg){
-      const progress = document.getElementById("progress-bar");
+    moveProgressBar: function(progressbarMsg) {
+      const progress = document.getElementById('progress-bar');
       var width = 100;
       var id = setInterval(frame, 100);
-      if(progressbarMsg == 'stop'){
-        clearInterval(id)
+      if (progressbarMsg == 'stop') {
+        clearInterval(id);
       }
-      function frame(){
-        if(width <= 0){
-          clearInterval(id)
-        } else{
+      function frame() {
+        if (width <= 0) {
+          clearInterval(id);
+        } else {
           width--;
           progress.style.width = width + '%';
         }
       }
-      // const progress = document.getElementById("progress-bar");
-      // var width = 100;
-      // var id = setInterval(frame, 100);
-      // if(progressbarMsg == 'stop'){
-      //   // clearInterval(id)
-      //   console.log('안보여야 하는데')
-      //   progress.style.display = 'block';
-      // }
-      // function frame(){
-      //   if(width <= 0){
-      //     clearInterval(id)
-      //   } else{
-      //     width--;
-      //     progress.style.width = width + '%';
-      //   }
-      // }
     },
-    // checkTeamNo: function(idx){
-    //   for(let no = 0; no < this.room.chat.length; no++){
-    //     console.log('에 확인한번 해볼래')
-    //     console.log(idx)
-    //     console.log
-    //   }
-    // },
     /**
      * 소켓 통신
      */
@@ -693,7 +692,6 @@ export default {
           teamNo: this.getUser.teamNo,
         })
       );
-      // this.test();
     },
     onMesseageReceived(payload) {
       if (payload.body == 'exit') {
@@ -707,26 +705,10 @@ export default {
       const data = JSON.parse(payload.body);
       this.room = data;
       // 모든 팀의 차례가 끝난 경우
-      if (this.room.teamOrder.length == 0) {
-        // this.rankmodal = true;
-        alert('게임이 끝났습니다!');
-        // 대기실 점수 갱신(방장만)
-        if (this.getUser.id == this.room.host) {
-          this.stompClient.send(`/pub/ssafymind/end`, {}, this.getRoomId);
-          // setTimeout(function() {
-          //   this.onDisconnect();
-          // }, 1000);
-        }
-        // 연결 종료
-        else {
-          // this.onDisconnect();
-        }
-
-        // 게임 종료 모달
-        // this.rankmodal = true;
+      if (this.room.teamOrder[0] == null) {
+        // 랭킹 모달 띄우기
+        this.rankmodal = true;
       }
-      console.log('포인트를 알고싶다고');
-      console.log(data);
       // 여기에 받은 데이터를 기반으로 그리고 있는 그림 초기화하는 로직 구현
       // console.log(data.points)
       // console.log(data.points.length)
@@ -804,7 +786,7 @@ export default {
       }
 
       if (data.fillFlag) {
-        if(data.beginPath == false){
+        if (data.beginPath == false) {
           this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
       }
@@ -829,7 +811,11 @@ export default {
       const data = JSON.parse(payload.body);
       // 정답인 경우
       if (data.correct) {
-        // alert('정답입니다!');
+        // 만일 모든 팀의 순서가 끝난 경우
+        // if (this.room.teamOrder.length == 0) {
+        //   this.answermodal = true;
+        //   return;
+        // }
         // 시간 정지 메세지 띄우고, 모달 다시 띄우기
         if (this.room.host == this.getUser.id) {
           this.sendNextProblemTrigger();
@@ -839,6 +825,10 @@ export default {
           // setTimeout(function() {
           //   this.moveProgressBar();
           // }, 1000);
+        }
+        if (this.room.teamOrder.length == 1) {
+          this.room.chat.push(data);
+          return;
         }
         this.answermodal = true;
         // this.ordermodal = true;
@@ -924,51 +914,9 @@ export default {
       scrollbox.scrollTop = scrollbox.scrollHeight;
     },
     // 대기실로 돌아가는 트리거
-    // sendGoWaitingRoomTrigger(){
-    //   this.onMesseageReceived(payload);
-    //   console.log(payload)
-    // },
-    test() {
-      this.stompClient.send(
-        '/pub/ssafymind/enter',
-        {},
-        JSON.stringify({
-          roomId: this.getRoomId,
-          participantId: 1,
-          participantName: '김태현',
-          teamNo: '1',
-        })
-      );
-      this.stompClient.send(
-        '/pub/ssafymind/enter',
-        {},
-        JSON.stringify({
-          roomId: this.getRoomId,
-          participantId: 2,
-          participantName: '김태현2',
-          teamNo: '1',
-        })
-      );
-      this.stompClient.send(
-        '/pub/ssafymind/enter',
-        {},
-        JSON.stringify({
-          roomId: this.getRoomId,
-          participantId: 3,
-          participantName: '김태현3',
-          teamNo: '1',
-        })
-      );
-      this.stompClient.send(
-        '/pub/ssafymind/enter',
-        {},
-        JSON.stringify({
-          roomId: this.getRoomId,
-          participantId: 4,
-          participantName: '김태현4',
-          teamNo: '1',
-        })
-      );
+    sendGoWaitingRoomTrigger() {
+      this.stompClient.send('/ssafymind/end', {}, this.getRoomId);
+      this.onDisconnect();
     },
   },
   mounted: function() {
