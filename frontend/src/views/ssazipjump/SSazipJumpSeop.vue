@@ -993,6 +993,11 @@ export default {
     //////////////////////////////////환경설정//////////////////////////////////////
     created() {
         console.log('=============created');
+        history.pushState(null, null, location.href);
+        window.onpopstate = () => {
+            history.go(1);
+            alert(`게임 내에서는 '뒤로가기'가 불가능합니다.`)
+        }
         // // 소켓 연결
         // this.stompClient = socketConnect(this.onConnected, this.onError);
         // 방정보 초기화
