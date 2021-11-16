@@ -28,20 +28,18 @@
           </div>
           <img :src="micImg[0]" alt="mic img" class="game-mic-default" id="record" />
         </div>
-      </div>
-    </div>
 
-    <!-- 아래는 나중에 사용할 아이들 -->
-    <div style="display:none;">
-      <p>녹음하기</p>
-      <input type="checkbox" id="chk-hear-mic" /><label for="chk-hear-mic">마이크 소리 듣기</label>
-      <!-- <button id="record">녹음</button> -->
-      <!-- <button id="stop">녹음 정지</button> -->
-      <span id="final_span"></span>
-      <span id="interim_span"></span>
-      <div id="sound-clips"></div>
+        <!-- 아래는 나중에 사용할 아이들 -->
+        <div style="display:none;">
+            <p>녹음하기</p>
+            <input type="checkbox" id="chk-hear-mic" /><label for="chk-hear-mic">마이크 소리 듣기</label>
+            <!-- <button id="record">녹음</button> -->
+            <!-- <button id="stop">녹음 정지</button> -->
+            <span id="final_span"></span>
+            <span id="interim_span"></span>
+            <div id="sound-clips"></div>
+        </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -357,9 +355,6 @@ export default {
       // 0번에게 마이크 권한
     },
     onError() {},
-    /*  */
-    // 음성 녹음해 blob 파일로 만들기
-    /*  */
     getAudio: function() {
       this.record = document.getElementById('record');
       this.stop = document.getElementById('stop');
@@ -444,10 +439,10 @@ export default {
               this.chunks.push(e.data);
               console.log(this.chunks);
             };
-          })
-          .catch((err) => {
-            console.log('The following error occurred: ' + err);
-          });
+        })
+        .catch((err) => {
+          console.log('The following error occurred: ' + err);
+        });
       }
     },
   },

@@ -412,149 +412,142 @@ export default {
           teamNo: this.getUser.teamNo,
         })
       );
-    },
-    // 메세지 수신
-    onMessageReceived(payload) {
-      // 방장이 퇴장한 경우
-      if (payload.body == "exit") {
-        // 모든 참가자의 연결을 끊고
-        this.onDisconnect();
-        alert("방장이 퇴장하여 게임이 종료됩니다!");
-        // 모든 참가자 내보내기
-        this.$router.push("/room");
-        return;
-      }
-      let room = JSON.parse(payload.body);
-      this.room = room;
-      console.log(this.room);
-      // this.room.name = room.name;
-      // this.room.host = room.host;
-      // this.room.members = room.members;
-      // if (room.teamline != null) {
-      //   this.room.teamline = room.teamline;
-      // }
-    },
-    // 버튼 클릭 초기화
-    setButton() {
-      for (let idx = 1; idx < 11; idx++) {
-        if (this.room.teamline[idx]) {
-          // 자신을 찾기
-          let btn = document.querySelector(`#btn-${idx}`);
-          btn.classList.add(`btn-${idx}`);
-        }
-      }
-    },
-    onError() {},
-    // 게임 방 퇴장 소켓 연결 해제 및 게임 방 유저 정보 삭제
-    onDisconnect() {
-      // this.stompClient.send(
-      //   '/pub/game/exit',
-      //   {},
-      //   JSON.stringify({
-      //     roomId: this.getRoomId,
-      //     participantId: this.getUser.id,
-      //     participantName: this.getUser.name,
-      //   })
-      // );
-      this.stompClient.disconnect();
-    },
-    // 팀 번호 변경시 소켓 요청
-    changeTeamMessage() {
-      this.stompClient.send("/pub/game/change", {}, JSON.stringify(this.room));
-    },
-    // 선택한 문제 개수 받기
-    getProblemNumber(pNumber) {
-      this.pNumber = pNumber;
-    },
+        },
+        // 메세지 수신
+        onMessageReceived(payload) {
+            // 방장이 퇴장한 경우
+            if (payload.body == 'exit') {
+                // 모든 참가자의 연결을 끊고
+                this.onDisconnect();
+                alert('방장이 퇴장하여 게임이 종료됩니다!');
+                // 모든 참가자 내보내기
+                this.$router.push('/room');
+                return;
+            }
+            let room = JSON.parse(payload.body);
+            this.room = room;
+            console.log(this.room);
+            // this.room.name = room.name;
+            // this.room.host = room.host;
+            // this.room.members = room.members;
+            // if (room.teamline != null) {
+            //   this.room.teamline = room.teamline;
+            // }
+        },
+        // 버튼 클릭 초기화
+        setButton() {
+            for (let idx = 1; idx < 11; idx++) {
+                if (this.room.teamline[idx]) {
+                    // 자신을 찾기
+                    let btn = document.querySelector(`#btn-${idx}`);
+                    btn.classList.add(`btn-${idx}`);
+                }
+            }
+        },
+        onError() {},
+        // 게임 방 퇴장 소켓 연결 해제 및 게임 방 유저 정보 삭제
+        onDisconnect() {
+            // this.stompClient.send(
+            //   '/pub/game/exit',
+            //   {},
+            //   JSON.stringify({
+            //     roomId: this.getRoomId,
+            //     participantId: this.getUser.id,
+            //     participantName: this.getUser.name,
+            //   })
+            // );
+            this.stompClient.disconnect();
+        },
+        // 팀 번호 변경시 소켓 요청
+        changeTeamMessage() {
+            this.stompClient.send('/pub/game/change', {}, JSON.stringify(this.room));
+        },
+        // 선택한 문제 개수 받기
+        getProblemNumber(pNumber) {
+            this.pNumber = pNumber;
+        },
 
-    noParticipantChecker() {
-      for (let i = 0; i < 11; i++) {
-        console.log(this.assignTeamNo[i]);
-        if (this.assignTeamNo[i] != null) return true;
-      }
-      return false;
-    },
-    // 게임 시작
-    gameStart() {
-      // if (this.gameType == -1) {
-      //     console.log('게임이 선택되지 않았습니다.');
-      //     return;
-      // }
-      if (!this.noParticipantChecker()) {
-        console.log("참여 팀이 없습니다.");
-        return;
-      }
-      // 싸피마인드
-      if (this.room.gameType == 1) {
-        axios({
-          method: "post",
-          url: `/game/create/ssafymind`,
-          data: {
-            roomId: this.room.id,
-            host: this.room.host,
-            exist: this.room.teamline,
-            gameType: this.room.gameType,
-            // 팀당 문제 개수 설정
-            quizCnt: 3,
-          },
-        })
-          .then(() => {
-            // 방에 있는 모든 참가자 게임방으로 옮기기
-            this.stompClient.send(
-              `/pub/game/start/${this.room.gameType}`,
-              {},
-              this.room.id
-            );
-          })
-          .catch(() => {});
-      }
-      // 또박또박말해요
-      else if (this.room.gameType == 2) {
-        axios({
-          method: "post",
-          url: `/game/create/speaking`,
-          data: {
-            roomId: this.room.id,
-            host: this.room.host,
-            exist: this.room.teamline,
-            gameType: this.room.gameType,
-            // 팀당 문제 개수 설정
-            quizCnt: 3,
-          },
-        })
-          .then(() => {
-            // 방에 있는 모든 참가자 게임방으로 옮기기
-            this.stompClient.send(
-              `/pub/game/start/${this.room.gameType}`,
-              {},
-              this.room.id
-            );
-          })
-          .catch(() => {});
-      }
-      // 싸집이 점프
-      else if (this.room.gameType == 3) {
-        axios({
-          method: "post",
-          url: `/game/create/ssazipjump`,
-          data: {
-            roomId: this.room.id,
-            host: this.room.host,
-            exist: this.room.teamline,
-            gameType: this.room.gameType,
-          },
-        })
-          .then(() => {
-            // 방에 있는 모든 참가자 게임방으로 옮기기
-            this.stompClient.send(
-              `/pub/game/start/${this.room.gameType}`,
-              {},
-              this.room.id
-            );
-          })
-          .catch(() => {});
-      }
-    },
+        noParticipantChecker() {
+            for (let i = 0; i < 11; i++) {
+                console.log(this.assignTeamNo[i]);
+                if (this.assignTeamNo[i] != null) return true;
+            }
+            return false;
+        },
+        // 게임 시작
+        gameStart() {
+            // if (this.gameType == -1) {
+            //     console.log('게임이 선택되지 않았습니다.');
+            //     return;
+            // }
+            //방장만 시작 가능
+            if(this.getUser.name != this.room.host){
+                console.log("방장이 아닙니다")
+                return;
+            }
+            if (!this.noParticipantChecker()) {
+                console.log('참여 팀이 없습니다.');
+                return;
+            }
+            // 싸피마인드
+            if (this.room.gameType == 1) {
+                axios({
+                    method: 'post',
+                    url: `/game/create/ssafymind`,
+                    data: {
+                        roomId: this.room.id,
+                        host: this.room.host,
+                        exist: this.room.teamline,
+                        gameType: this.room.gameType,
+                        // 팀당 문제 개수 설정
+                        quizCnt: 3,
+                    },
+                })
+                    .then(() => {
+                        // 방에 있는 모든 참가자 게임방으로 옮기기
+                        this.stompClient.send(`/pub/game/start/${this.room.gameType}`, {}, this.room.id);
+                    })
+                    .catch(() => {});
+            }
+            // 또박또박말해요
+            else if (this.room.gameType == 2) {
+                axios({
+                    method: 'post',
+                    url: `/game/create/speaking`,
+                    data: {
+                        roomId: this.room.id,
+                        host: this.room.host,
+                        exist: this.room.teamline,
+                        gameType: this.room.gameType,
+                        // 팀당 문제 개수 설정
+                        quizCnt: 3,
+                    },
+                })
+                    .then(() => {
+                        // 방에 있는 모든 참가자 게임방으로 옮기기
+                        this.stompClient.send(`/pub/game/start/${this.room.gameType}`, {}, this.room.id);
+                    })
+                    .catch(() => {});
+            }
+            // 싸집이 점프
+            else if (this.room.gameType == 3) {
+                axios({
+                    method: 'post',
+                    url: `/game/create/ssazipjump`,
+                    data: {
+                        roomId: this.room.id,
+                        host: this.room.host,
+                        exist: this.room.teamline,
+                        gameType: this.room.gameType,
+                    },
+                })
+                    .then(() => {
+                        // 방에 있는 모든 참가자 게임방으로 옮기기
+                        this.stompClient.send(`/pub/game/start/${this.room.gameType}`, {}, this.room.id);
+                    })
+                    .catch(() => {});
+            }
+        },
 
     // 게임 종료
     endGame() {
