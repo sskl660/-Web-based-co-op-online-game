@@ -188,7 +188,7 @@ export default {
             isRegistryed: false, //db 등록여부 파악
 
             // guideModalOpen: true, //게임시작시 첫시작 소개모달
-            guideModalOpen: false,
+            guideModalOpen: true,
             startModalOpen: false, //게임시작시 게임방법 안내 모달
             roundModalOpen: false, //다음 팀 대전표 안내 모달
             rankModalOpen: false, //종료 결산 모달
