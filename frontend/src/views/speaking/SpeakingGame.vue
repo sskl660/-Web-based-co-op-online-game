@@ -393,51 +393,57 @@ export default {
               this.mediaRecorder.start();
               console.log(this.mediaRecorder.state);
             };
-            this.stop.onclick = () => {
-              this.mediaRecorder.stop();
-              console.log(this.mediaRecorder.state);
+
+            speech.onend = function() {
+                isRecognizing = false;
+                console.log(isRecognizing);
+
+                if (ignoreEndProcess) {
+                    return false;
+                }
+
+                if (!finalTranscript) {
+                    return false;
+                }
             };
 
-            this.mediaRecorder.onstop = () => {
-              console.log('data available after MediaRecorder.stop() called.');
+            speech.onresult = (event) => {
+                let interimTranscript = '';
+                this.interimTranscript = '';
+                if (typeof event.results === 'undefined') {
+                    speech.onend = null;
+                    speech.stop();
+                    return;
+                }
 
-              const clipName = prompt('오디오 파일 제목을 입력하세요.', new Date());
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    const transcript = event.results[i][0].transcript;
 
-              const clipContainer = document.createElement('article');
-              const clipLabel = document.createElement('p');
-              const audio = document.createElement('audio');
-              const deleteButton = document.createElement('button');
-
-              clipContainer.classList.add('clip');
-              audio.setAttribute('controls', '');
-              deleteButton.innerHTML = '삭제';
-              clipLabel.innerHTML = clipName;
-
-              clipContainer.appendChild(audio);
-              clipContainer.appendChild(clipLabel);
-              clipContainer.appendChild(deleteButton);
-              this.soundClips.appendChild(clipContainer);
-              audio.controls = true;
-              const blob = new Blob(this.chunks, {
-                type: 'audio/ogg codecs=opus',
-                // type: 'audio/wav; codecs=0'
-              });
-              console.log(blob);
-              this.chunks = [];
-              const audioURL = URL.createObjectURL(blob);
-              audio.src = audioURL;
-              console.log(audio);
-              console.log('recorder stopped');
-
-              deleteButton.onclick = (e) => {
-                const evtTgt = e.target;
-                evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);
-              };
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                        this.finalTranscript += transcript;
+                        console.log('파이널', finalTranscript);
+                        console.log('파이널', transcript);
+                    } else {
+                        interimTranscript += transcript;
+                        this.interimTranscript += transcript;
+                    }
+                }
+                console.log('파이널', finalTranscript);
+                console.log('파이널', interimTranscript);
+                this.stompClient.send(
+                    `/pub/speaking/talk/${this.getRoomId}`,
+                    {},
+                    JSON.stringify({
+                        sentence: finalTranscript + interimTranscript,
+                    })
+                );
             };
 
-            this.mediaRecorder.ondataavailable = (e) => {
-              this.chunks.push(e.data);
-              console.log(this.chunks);
+            speech.onerror = function(event) {
+                if (event.error.match(/no-speech|audio-capture|not-allowed/)) {
+                    ignoreEndProcess = true;
+                }
             };
         })
         .catch((err) => {
@@ -445,8 +451,6 @@ export default {
         });
       }
     },
-  },
-};
+  }
+}
 </script>
-
-<style></style>
