@@ -64,14 +64,14 @@ public class SpeakingService {
             speaking.getQuizzes().add(new Quiz(1, "내가 그린 기린 그림", "내가그린기린그림"));
         }
         // 팀 초기화////////
-        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "1", "김태현1", 1));
-        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "2", "김태현2", 1));
-        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "3", "김태현3", 1));
-        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "4", "김태현4", 1));
-        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "1", "이장섭1", 2));
-        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "2", "이장섭2", 2));
-        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "3", "이장섭3", 2));
-        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "4", "이장섭4", 2));
+//        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "1", "김태현1", 1));
+//        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "2", "김태현2", 1));
+//        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "3", "김태현3", 1));
+//        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "4", "김태현4", 1));
+//        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "1", "이장섭1", 2));
+//        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "2", "이장섭2", 2));
+//        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "3", "이장섭3", 2));
+//        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "4", "이장섭4", 2));
 
 
         speakGameRepository.save(speaking);
@@ -112,17 +112,23 @@ public class SpeakingService {
         speakMessage.setCorrect(false);
 
         int lastIndex = speaking.getQuizzes().size() - 1;
+<<<<<<< HEAD
         speakMessage.setMessage(speaking.getQuizzes().get(lastIndex).getAnswer());
 
         System.out.println("==================");
             System.out.println(speaking.getQuizzes().get(lastIndex).getAnswer());
         System.out.println(speakMessage.getMessage().replaceAll(" ",""));
+=======
+>>>>>>> a26706f07aa27e94679496b559b1d943bf260c57
         if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage().replaceAll(" ",""))) {
+            System.out.println("here");
             // 정답으로 상태를 바꿔주고
             System.out.println("뚜둥");
             speakMessage.setCorrect(true);
+            speakGameRepository.save(speaking);
             return speakMessage;
         }
+        speakGameRepository.save(speaking);
         // 오답
         return speakMessage;
     }
@@ -144,8 +150,8 @@ public class SpeakingService {
         return curPlayer;
     }
 
-    // 5. 다음 문제로 이동
-    public synchronized Speaking nextProblem(String roomId) {
+    // 5. 다음 팀으로 이동
+    public synchronized Speaking nextTeam(String roomId) {
         Speaking speaking = speakGameRepository.findById(roomId).get();
         int lastIndex = speaking.getQuizzes().size() - 1;
         // 마지막 문제를 제거하고
