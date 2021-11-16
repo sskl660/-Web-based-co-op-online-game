@@ -113,8 +113,13 @@ public class SpeakingService {
 
         int lastIndex = speaking.getQuizzes().size() - 1;
         speakMessage.setMessage(speaking.getQuizzes().get(lastIndex).getAnswer());
+
+        System.out.println("==================");
+            System.out.println(speaking.getQuizzes().get(lastIndex).getAnswer());
+        System.out.println(speakMessage.getMessage().replaceAll(" ",""));
         if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage().replaceAll(" ",""))) {
             // 정답으로 상태를 바꿔주고
+            System.out.println("뚜둥");
             speakMessage.setCorrect(true);
             return speakMessage;
         }
