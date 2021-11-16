@@ -163,6 +163,7 @@ export default {
             sentence: finalTranscript + interimTranscript,
           })
         );
+        this.stompClient.send('/pub/speaking/change/player', {}, this.getRoomId);
       };
 
       speech.onerror = function(event) {
@@ -255,7 +256,7 @@ export default {
       console.log(this.getRoomId)
       this.stompClient.subscribe(
         `/speaking/change/player/` + this.getRoomId,
-        this.onChangePlayerMessageReceived
+        this.onChangePlayer
       );
       // 입장 시 데이터 수신
       this.stompClient.send(
@@ -300,10 +301,10 @@ export default {
       const doin = document.querySelector('#doin');
       doin.innerText = data.message;
       console.log(data)
-      if (data.correct) {
+      if (data.correct && this.getUser.name === "aaaa") {
         console.log(data)
         console.log(this.getRoomId)
-        this.stompClient.send('pub/speaking/change/player', {}, this.getRoomId);
+        // this.stompClient.send('pub/speaking/change/player', {}, this.getRoomId);
       }
     },
     onTalkingMessageReceived(payload) {
@@ -315,13 +316,13 @@ export default {
         console.log(data.sentence);
       }
     },
-    onChangePlayerMessageReceived(payload) {
-      console.log(payload)
-      console.log(payload)
-      console.log(payload)
-      console.log(payload)
-      console.log(payload)
+    onChangePlayer(payload) {
       const data = JSON.parse(payload.body);
+      console.log(payload)
+      console.log(payload)
+      console.log(payload)
+      console.log(payload)
+      console.log(payload)
       console.log(data);
       console.log(data);
       console.log(data);
