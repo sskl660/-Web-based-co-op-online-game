@@ -98,6 +98,7 @@ export default {
       talkFinish: false,
       quiz: null,
       lastTeamLen: 0,
+      talker: 0,
     };
   },
   created() {
@@ -384,8 +385,14 @@ export default {
       }
     },
     onTalkingMessageReceived(payload) {
-      if (this.finalTranscript) return
+      console.log('talking 시작')
+      console.log(this.talker)
+      console.log(this.answerIdx)
+      if (this.talker !== this.answerIdx) return
       const data = JSON.parse(payload.body);
+      this.talker = data.talker;
+      console.log(data.sentence);
+      console.log('talking 끝')
       if (data.sentence === '') {
         this.talkFinish = false;
       }
