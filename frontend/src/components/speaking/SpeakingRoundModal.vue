@@ -6,11 +6,7 @@
 					<div class="show-team-explainbox">
 						<div class="welcome">다음 팀은 경기를 준비해주세요.</div>
 						<div class="round-team-container">
-							<div>
-								<img class="round-team-individual" :src="require(`@/assets/team${battleTeam1}.png`)" alt="" />
-							</div>
-							<div class="vs">VS</div>  
-							<img class="round-team-individual" :src="require(`@/assets/team${battleTeam2}.png`)" alt="" />
+							<img class="round-team-individual" :src="require(`@/assets/team${battleTeam1}.png`)" alt="" />
 						</div>
 						<button v-if="userId==hostId" class="ssazip-start-game-btn" @click="startModal">시작</button>
 						<button v-if="userId!=hostId" class="ssazip-start-game-btn">준비!!</button>

@@ -10,4 +10,5 @@ import lombok.ToString;
 public class Talking {
     // 나중에 따로 빼줄 것
     private String sentence; // 말하는 중
+    private String talker; // 말한 사람
 }
