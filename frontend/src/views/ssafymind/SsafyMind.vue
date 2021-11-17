@@ -225,10 +225,16 @@ export default {
       answermodal: false,
       canDraw: true, // 내 차례일때만 그림 그리기
       rankmodal: false, // 대기실로 돌아가기 위한 랭킹 모달
-      progressbarMsg: 'start',
+      // progressbarMsg: 'start',
+      progressbar: null,
     };
   },
   created() {
+    history.pushState(null, null, location.href);
+    window.onpopstate = () => {
+      history.go(1);
+      alert(`게임 내에서는 '뒤로가기'가 불가능합니다.`);
+    };
     this.stompClient = socketConnect(this.onConnected, this.onError);
     this.stompClient.debug = function() {};
   },
@@ -382,7 +388,6 @@ export default {
       ctx.lineWidth = size;
     },
     handlePaintModeClick: function() {
-      this.rankmodal = true;
       const canvas = document.getElementById('jsCanvas');
       if (this.filling === false) {
         canvas.classList.remove(`paintbrush`);
@@ -469,18 +474,21 @@ export default {
     moveProgressBar: function(progressbarMsg) {
       const progress = document.getElementById('progress-bar');
       var width = 100;
-      var id = setInterval(frame, 100);
-      if (progressbarMsg == 'stop') {
-        clearInterval(id);
+      if (progressbarMsg == 'start') {
+        clearInterval(this.progressbar);
+        this.progressbar = setInterval(() => frame(), 100);
+      } else if (progressbarMsg == 'stop') {
+        clearInterval(this.progressbar);
+        progress.style.width = '100%';
       }
-      function frame() {
+      const frame = () => {
         if (width <= 0) {
-          clearInterval(id);
+          clearInterval(this.progressbar);
         } else {
           width--;
           progress.style.width = width + '%';
         }
-      }
+      };
     },
     /**
      * 소켓 통신
@@ -611,6 +619,8 @@ export default {
       const data = JSON.parse(payload.body);
       // 정답인 경우
       if (data.correct) {
+        // 진행바 정지
+        this.moveProgressBar('stop');
         // 시간 정지 메세지 띄우고, 모달 다시 띄우기
         if (this.room.host == this.getUser.id) {
           this.sendNextProblemTrigger();
