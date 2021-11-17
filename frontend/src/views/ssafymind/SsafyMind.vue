@@ -7,6 +7,7 @@
       v-if="rankmodal == true"
       @getCloseRankModal="getCloseRankModal"
       v-bind:host="room.host"
+      v-on:sendGoWaitingRoomTrigger="sendGoWaitingRoomTrigger"
     />
     <GameOrderModal
       v-if="ordermodal == true"
@@ -26,6 +27,7 @@
       v-bind:quizzes="room.quizzes"
       v-bind:chat="room.chat"
       v-on:sendGameStartTrigger="sendGameStartTrigger"
+      v-on:onMesseageReceived="onMesseageReceived"
     />
     <!-- <div class="room-title">
       <span id="game-title">싸피마인드</span>
@@ -238,8 +240,9 @@ export default {
       answermodal: false,
       canDraw: true, // 내 차례일때만 그림 그리기
       // explainmodal: false,
-      rankmodal: true,
-      progressbarMsg: 'start',
+      rankmodal: false, // 대기실로 돌아가기 위한 랭킹 모달
+      // progressbarMsg: 'start',
+      progressbar: null,
     };
   },
   created() {
@@ -613,34 +616,25 @@ export default {
     moveProgressBar: function(progressbarMsg){
       const progress = document.getElementById("progress-bar");
       var width = 100;
-      var id = setInterval(frame, 100);
-      if(progressbarMsg == 'stop'){
-        clearInterval(id)
+      // var id = setInterval(frame, 100);
+      if(progressbarMsg == 'start'){
+        clearInterval(this.progressbar)
+        this.progressbar = setInterval(() => frame(), 100);
+      }else if(progressbarMsg == 'stop'){
+        clearInterval(this.progressbar)
+        console.log('시간아 멈춰라')
+        progress.style.width = '100%';
       }
-      function frame(){
+      const frame = () =>{
         if(width <= 0){
-          clearInterval(id)
+          // console.log('얘는 왜 또 문제?')
+          // console.log("안찍히나", this.progressbar)
+          clearInterval(this.progressbar)
         } else{
           width--;
           progress.style.width = width + '%';
         }
       }
-      // const progress = document.getElementById("progress-bar");
-      // var width = 100;
-      // var id = setInterval(frame, 100);
-      // if(progressbarMsg == 'stop'){
-      //   // clearInterval(id)
-      //   console.log('안보여야 하는데')
-      //   progress.style.display = 'block';
-      // }
-      // function frame(){
-      //   if(width <= 0){
-      //     clearInterval(id)
-      //   } else{
-      //     width--;
-      //     progress.style.width = width + '%';
-      //   }
-      // }
     },
     // checkTeamNo: function(idx){
     //   for(let no = 0; no < this.room.chat.length; no++){
@@ -720,6 +714,7 @@ export default {
         }
 
         // 게임 종료 모달
+        // this.rankmodal = true;
       }
       console.log('포인트를 알고싶다고');
       console.log(data);
@@ -800,7 +795,9 @@ export default {
       }
 
       if (data.fillFlag) {
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        if(data.beginPath == false){
+          this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
       }
     },
     /**
@@ -824,12 +821,14 @@ export default {
       // 정답인 경우
       if (data.correct) {
         // alert('정답입니다!');
+        // 진행바 정지
+        this.moveProgressBar('stop');
         // 시간 정지 메세지 띄우고, 모달 다시 띄우기
         if (this.room.host == this.getUser.id) {
           this.sendNextProblemTrigger();
           this.sendTimeTrigger('stop');
           // 진행바 정지
-          this.moveProgressBar('stop');
+          // this.moveProgressBar('stop');
           // setTimeout(function() {
           //   this.moveProgressBar();
           // }, 1000);
@@ -917,6 +916,11 @@ export default {
       const scrollbox = document.getElementById('chat-box');
       scrollbox.scrollTop = scrollbox.scrollHeight;
     },
+    // 대기실로 돌아가는 트리거
+    // sendGoWaitingRoomTrigger(){
+    //   this.onMesseageReceived(payload);
+    //   console.log(payload)
+    // },
     test() {
       this.stompClient.send(
         '/pub/ssafymind/enter',
