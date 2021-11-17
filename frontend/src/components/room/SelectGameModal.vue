@@ -15,7 +15,6 @@
             </div>
           </div>
           <div class="wr-explainbox">
-            <!-- <img id="ssazip-img-modal" src="~@/assets/images/ssazip-create.png" alt=""> -->
             <div
               class="wr-explain-ssafygame-title"
               v-if="

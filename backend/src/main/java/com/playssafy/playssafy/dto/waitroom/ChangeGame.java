@@ -10,4 +10,5 @@ public class ChangeGame {
     private boolean ssafymindExplain;
     private boolean speakgameExplain;
     private boolean jumpgameExplain;
+    private int gameType;
 }

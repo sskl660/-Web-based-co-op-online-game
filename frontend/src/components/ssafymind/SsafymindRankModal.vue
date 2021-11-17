@@ -23,7 +23,9 @@
               </div>
             </div>
           </div>
-          <button class="ssazip-rank-game-btn" @click="closeModal">대기실로</button>
+          <button class="ssazip-rank-game-btn" @click="closeModal" v-if="host == getUser.id">
+            대기실로
+          </button>
         </div>
       </div>
     </div>
@@ -51,9 +53,6 @@ export default {
   methods: {
     closeModal() {
       this.$emit('getCloseRankModal', this.rankmodal);
-      this.$emit('onMesseageReceived');
-      // console.log('onMesseageReceived')
-      console.log('모달 왜 안닫히노');
       this.$emit('sendGoWaitingRoomTrigger');
     },
     setScores() {

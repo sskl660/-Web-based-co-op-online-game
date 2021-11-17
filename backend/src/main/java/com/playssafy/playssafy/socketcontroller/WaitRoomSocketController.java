@@ -39,7 +39,7 @@ public class WaitRoomSocketController {
         // 퇴장하는 유저 방에서 제거해주기
         WaitRoom waitRoom = waitRoomService.exitRoom(participant);
         // 방장이 퇴장한 경우 종료 메세지 뿌려주기
-        if (waitRoom == null) {
+        if (waitRoom == null && participant.isHost()) {
             template.convertAndSend("/game/room/" + participant.getRoomId(), "exit");
             return;
         }
@@ -67,10 +67,4 @@ public class WaitRoomSocketController {
     public void gameStart(String roomId, @DestinationVariable int gameIndex){
         template.convertAndSend("/game/start/" + roomId, gameIndex);
     }
-//    @MessageMapping(value = "/game/openTeam/{roomId}")
-//    public void openTeam(String openTeams, @DestinationVariable String roomId) {
-//        WaitRoom gameRoom = gameRoomService.openTeam(openTeams, roomId);
-//        // 바뀐 상태 다시 뿌려주기
-//        template.convertAndSend("/game/room/" + roomId, gameRoom);
-//    }
 }

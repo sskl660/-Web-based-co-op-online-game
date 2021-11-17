@@ -1,6 +1,5 @@
 package com.playssafy.playssafy.service;
 
-
 import com.playssafy.playssafy.dto.ssafymind.*;
 import com.playssafy.playssafy.dto.waitroom.InitGame;
 import com.playssafy.playssafy.dto.waitroom.Participant;
@@ -89,6 +88,12 @@ public class SsafyMindService {
         // 방장이라면 방 자체를 삭제 후 종료
         if (ssafyMind.getHost().equals(participant.getParticipantId())) {
             ssafyMindRepository.deleteById(participant.getRoomId());
+            // 게임이 진행중이었던 경우 게임 진행 여부 초기화
+            WaitRoom waitRoom = waitRoomRepository.findById(participant.getRoomId()).get();
+            if(waitRoom.isProgress()) {
+                waitRoom.setProgress(false);
+                waitRoomRepository.save(waitRoom);
+            }
             return null;
         }
         // 방장이 아니라면 유저 정보만 삭제
@@ -191,16 +196,11 @@ public class SsafyMindService {
     public synchronized void end(String roomId) {
         // 기존 방의 점수 갱신
         WaitRoom waitRoom = waitRoomRepository.findById(roomId).get();
-        System.out.println("first");
         SsafyMind ssafyMind = ssafyMindRepository.findById(roomId).get();
         for(int i = 1; i < ssafyMind.getScores().length; i++) {
             waitRoom.getScores()[i] += ssafyMind.getScores()[i];
         }
         // 저장
         waitRoomRepository.save(waitRoom);
-        
-        // 싸피마인드 방 삭제
-        System.out.println("here");
-        ssafyMindRepository.deleteById(roomId);
     }
 }

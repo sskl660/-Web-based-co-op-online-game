@@ -23,6 +23,7 @@ public class WaitRoom {
     private boolean ssafymindExplain;
     private boolean speakgameExplain;
     private boolean jumpgameExplain;
+    private boolean progress; // 현재 게임이 진행중인지 여부
 
     // 테스트용 멤버 초기화
     public WaitRoom() {

@@ -9,7 +9,7 @@
               친구야 힘내자^^
             </div>
             <span class="team">다음 문제를 맞춰보아요~</span>
-            <button class="start-game-btn" @click="startModal" v-if="host == getUser.id">
+            <button class="start-game-btn" @click="startModal">
               다음
             </button>
           </div>
@@ -26,17 +26,8 @@
               @click="startModal"
               v-if="teamOrder[0] != null && host == this.getUser.id"
             >
-              다음{{ this.teamOrder.length }}
+              다음
             </button>
-            <!-- <div v-if="teamOrder.length == 0"> -->
-            <!-- <button
-              class="start-game-btn"
-              @click="goBackModal"
-              v-if="teamOrder[0] == null && host == this.getUser.id"
-            >
-              결과
-            </button> -->
-            <!-- </div> -->
           </div>
         </div>
       </div>
@@ -64,9 +55,11 @@ export default {
   methods: {
     startModal() {
       this.$emit('getCloseAnsModal', this.answermodal);
-      this.$emit('startTimer', this.startTime);
-      this.$emit('sendGameStartTrigger');
-      this.$emit('getProgressBar', this.getProgressBar);
+      if (this.host == this.getUser.id) {
+        this.$emit('startTimer', this.startTime);
+        this.$emit('sendGameStartTrigger');
+        this.$emit('getProgressBar', this.getProgressBar);
+      }
     },
     goBackModal() {
       this.$emit('getCloseAnsModal', this.answermodal);
