@@ -8,7 +8,8 @@
           <div class="game-explain-content">
             <div class="modal-body">
               <div class="game-explain-explainbox">
-                <img src="~@/assets/ssafymindBeforeStart.png" id="ssafymind-explain-img" alt="">
+                <img v-if="gameType" img src="@/assets/images/mike.png" id="ssafymind-explain-img" alt="">
+                <img v-else src="~@/assets/ssafymindBeforeStart.png" id="ssafymind-explain-img" alt="">
                 <button class="understand-btn" @click="closeExplainModal">
                   알겠습니다!
                 </button>
@@ -58,7 +59,7 @@ export default {
   components:{
     // GameExplainModal
   },
-  props: ['teamOrder', 'teamCnt', 'host'],
+  props: ['teamOrder', 'teamCnt', 'host', 'gameType'],
   data: function() {
     return {
       ordermodal: false,
@@ -75,7 +76,6 @@ export default {
       this.$emit('getCloseModal', this.ordermodal);
       this.$emit('startTimer', this.startTime);
       this.$emit('sendGameStartTrigger');
-      this.$emit('getProgressBar', this.getProgressBar);
     },
     // closeImg: function(){
     //   console.log('나 안보이니?')

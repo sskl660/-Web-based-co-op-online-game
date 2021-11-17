@@ -46,7 +46,7 @@ export default {
       // 로그아웃 상태로 전환
       this.changeLoginState(false);
       // 메인페이지로 이동
-      this.$router.push('/login');
+      this.$router.push('/');
     },
     // 게임 방 만들기
     createGameRoom() {
