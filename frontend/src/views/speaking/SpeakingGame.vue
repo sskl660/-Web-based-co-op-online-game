@@ -5,6 +5,7 @@
       v-bind:teamOrder="room.teamOrder"
       v-bind:teamCnt="room.curTeamCnt"
       v-bind:host="room.host"
+      v-bind:user="getUser.id"
       v-on:sendGameStartTrigger="sendGameStartTrigger"
       :gameType="'speaking'"
     />
@@ -340,7 +341,7 @@ export default {
       // 플레이어 변경
       this.stompClient.subscribe(`/speaking/change/player/` + this.getRoomId, this.onChangePlayer);
       // 다음 팀으로
-      this.stompClient.subscribe(`/speaking/next/team/` + this.getRoomId, this.onChangeTeam);
+      // this.stompClient.subscribe(`/speaking/next/team/` + this.getRoomId, this.onChangeTeam);
       // 모달 정보 교환
       this.stompClient.subscribe(
         '/ssafymind/close/modal/' + this.getRoomId,
@@ -360,6 +361,18 @@ export default {
       );
     },
     async onMessageReceived(payload) {
+      if (payload.body == 'exit') {
+        this.$router.push('/room/' + this.getRoomId).catch(() => {});
+        this.stompClient.disconnect();
+        swal({
+          title: "방장이 퇴장하여 게임이 종료됩니다!",
+          icon: "/img/ssazip-logo.png",
+          buttons: {
+            text: '확인',
+          },
+        })
+        return;
+      }
       // if (payload.body == 'exit') {
       //   // 모든 참가자의 연결을 끊고
       //   this.onDisconnect();
@@ -371,6 +384,7 @@ export default {
       const data = JSON.parse(payload.body);
       this.room = data;
       this.quiz = data.quizzes[data.quizzes.length - 1].problem;
+      this.answerIdx = 0;
       await this.setTeamMembers();
       if (this.getUser.name === data.teams[data.teamOrder[0]].members[0].participantName) {
         // 마이크 권한 주기
@@ -379,8 +393,26 @@ export default {
         this.setMic(2);
         console.log('hi!!');
       }
+      // span 싹 지워주기
+      const sentences = document.querySelectorAll('.sentence-board > .sentence-board-child > .member-sentence > span');
+      console.log(sentences);
+      sentences.forEach(sentence => console.log(sentence));
     },
     onDisconnect() {
+      let isHost;
+      if (this.room.host == this.getUser.id) isHost = true;
+      else isHost = false;
+      this.stompClient.send(
+        '/pub/ssafymind/exit',
+        {},
+        JSON.stringify({
+          roomId: this.getRoomId,
+          participantId: this.getUser.id,
+          participantName: this.getUser.name,
+          host: isHost,
+        })
+      );
+    },
       // this.stompClient.send(
       //   '/pub/speaking/exit',
       //   {},
@@ -392,7 +424,6 @@ export default {
       // );
       // this.stompClient.disconnect();
       // this.$router.push('/room/', this.getRoomId);
-    },
     async onAnswerMessageReceived(payload) {
       this.talkFinish = true;
       const data = JSON.parse(payload.body);
@@ -405,13 +436,7 @@ export default {
         speakImg[this.answerIdx].src = this.speakImg[3];
         this.setMic(0);
         this.removeMic();
-        if (
-          this.getUser.name ===
-          this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName
-        ) {
-          console.log('이거 혹시 되냐???');
-          console.log('이거 혹시 되냐???');
-          console.log('이거 혹시 되냐???');
+        if (this.getUser.name === this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName) {
           this.stompClient.send('/pub/speaking/change/player', {}, this.getRoomId);
         }
       } else {
@@ -419,9 +444,6 @@ export default {
       }
     },
     onTalkingMessageReceived(payload) {
-      console.log('talking 시작');
-      console.log(this.talker);
-      console.log(this.answerIdx);
       const data = JSON.parse(payload.body);
       if (
         this.talker !== this.answerIdx &&
@@ -431,9 +453,6 @@ export default {
         this.talker = data.talker;
         return;
       }
-      console.log(data.talker);
-      console.log(data.sentence);
-      console.log('talking 끝');
       if (data.sentence === '') {
         this.talkFinish = false;
       }
@@ -452,6 +471,7 @@ export default {
       this.talkFinish = false;
       console.log('------------------change player--------------');
       console.log(data);
+      console.log(this.answerIdx);
       console.log(this.room.teams[this.room.teamOrder[0]].members.length);
       console.log('------------------change player--------------');
       // 다음 팀으로 넘겨야 하는 경우
@@ -486,14 +506,15 @@ export default {
     },
     onChangeTeam(payload) {
       const data = JSON.parse(payload.body);
+      // 팀원들 싹 다시 뿌려주기
       this.room = data;
       this.setMic(2); // 이전 사람과 이번 팀의 index
-      this.answerIdx = 0;
-      console.log('===================onTeamChange==================');
-      console.log('==================onTeamChange===================');
       // answerIdx 바꿔주기
-      // 팀원들 싹 다시 뿌려주기
+      this.answerIdx = 0;
       // span 싹 지워주기
+      const sentences = document.querySelectorAll('.sentence-board > .sentence-board-child > .member-sentence > span');
+      console.log(sentences);
+      sentences.forEach(sentence => console.log(sentence));
       // 0번에게 마이크 권한
     },
     onModalMessageReceived(payload) {
@@ -504,6 +525,6 @@ export default {
     sendGameStartTrigger: function() {
       this.stompClient.send(`/pub/ssafymind/close/modal`, {}, this.getRoomId);
     },
-  },
-};
+  }
+}
 </script>
