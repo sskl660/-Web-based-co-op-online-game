@@ -120,7 +120,8 @@
                 <div>
                     <button class="waiting-room-btn select-game" @click="openmodal = true">게임 선택</button>
                     <button class="waiting-room-btn final-score" @click="endGame()">최종 결과</button>
-                    <i class="fas fa-play-circle play-btn fa-5x" @click="gameStart()"></i>
+                    <!-- <i class="fas fa-play-circle play-btn fa-5x" @click="gameStart()"></i> -->
+                    <img class="play-btn" src="~@/assets/play-button.png" @click="gameStart()" alt="" />
                 </div>
             </div>
         </div>
