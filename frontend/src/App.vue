@@ -29,6 +29,10 @@ export default {
   },
   created() {
     this.path = this.$route.path
+    // window.addEventListener('beforeunload', (event) => {
+    //   event.preventDefault();
+    //   event.returnValue = '';
+    // })
   },
   mounted() {
   },
