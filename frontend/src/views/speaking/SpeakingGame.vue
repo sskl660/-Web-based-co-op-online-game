@@ -9,7 +9,7 @@
       v-on:sendGameStartTrigger="sendGameStartTrigger"
       :gameType="'speaking'"
     />
-    <Header v-bind:gameTitle="'또박또박 말해요'" :host="getUser.id" />
+    <Header v-bind:gameTitle="'또박또박 말해요'" :host="getUser.id" @onDisconnect="onDisconnect" />
     <div class="game-screen">
       <GameStatus game="speak" />
       <div class="game-board">
@@ -403,7 +403,7 @@ export default {
       if (this.room.host == this.getUser.id) isHost = true;
       else isHost = false;
       this.stompClient.send(
-        '/pub/ssafymind/exit',
+        '/pub/speaking/exit',
         {},
         JSON.stringify({
           roomId: this.getRoomId,
