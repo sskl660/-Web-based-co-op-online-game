@@ -156,6 +156,7 @@ import SSazipjumpGuideModal from '@/components/ssazipjump/SSazipjumpGuideModal.v
 import SSazipjumpStartModal from '@/components/ssazipjump/SSazipjumpStartModal.vue';
 import SSazipjumpRoundModal from '@/components/ssazipjump/SSazipjumpRoundModal.vue';
 import SSazipjumpRankModal from '@/components/ssazipjump/SSazipjumpRankModal.vue';
+import swal from 'sweetalert';
 
 export default {
     name: 'SSazipJump',
@@ -238,7 +239,7 @@ export default {
             finalScore: [], //최종 결산용
 
             // guideModalOpen: true, //게임시작시 첫시작 소개모달
-            guideModalOpenFlag: true,
+            guideModalOpenFlag: false,
             startModalOpenFlag: false, //게임시작시 게임방법 안내 모달
             roundModalOpenFlag: false, //다음 팀 대전표 안내 모달
             rankModalOpenFlag: false, //종료 결산 모달
@@ -248,6 +249,7 @@ export default {
             // win2: false,
             showResult: false, //걸린이 표시
             roundCnt: 0,
+            checkCollisionOnFlag: false, //단발성 충돌 감지용 플레그
         };
     },
     components: {
@@ -428,7 +430,10 @@ export default {
 
                 //마스터 요청시 장애물 생성
                 if (this.getIsLogin && this.obstacleflag) {
+                    
                     if (cntTime > this.time) {
+                        document.getElementById('ssazipbg').style.animationPlayState = 'running';
+            document.getElementById('ssazipbg2').style.animationPlayState = 'running'
                         this.time++;
                         if (this.xArr.length == 0) {
                             this.xArr.push(1200); //장애물 배열 생성
@@ -590,13 +595,13 @@ export default {
                     const ssazipbg2 = document.getElementById('ssazipbg2');
                     cancelAnimationFrame(animation);
                     this.animationOnFlag = false;
-                    ssazipbg.style.animation = 'paused';
-                    ssazipbg2.style.animation = 'paused';
+                    ssazipbg.style.animationPlayState = 'paused';
+                    ssazipbg2.style.animationPlayState = 'paused';
                     // if (this.masterKeyFlag) {
                     //     //마스터 재시작
                     //     setTimeout(() => {
                     //         // this.showResult = false;
-                    //         console.log('next start');
+                    //         console.log('next start');ㅁㅁㄴㅇ
                     //         this.xArr = [];
                     //         this.xArrType = [];
                     //         this.startObstacle();
@@ -617,7 +622,7 @@ export default {
                 let xDiff = cactus.x - (dino.x + dino.width);
                 let yDiff = cactus.y - (dino.y + dino.height);
                 if (dino.x <= cactus.x + cactus.width) {
-                    if (xDiff < -10 && yDiff < -10) {
+                    if (xDiff < -10 && yDiff < -10 && !this.checkCollisionOnFlag) {
                         console.log('=======충돌');
                         console.log('=======충돌');
                         console.log(dino.name);
@@ -762,19 +767,19 @@ export default {
             this.receivedArr = [];
             this.receivedArrType = [];
             this.receivedGameStopFlag = false;
-            if (!this.animationOnFlag) {
-                this.drawSsazipgameStart();
-            }
             this.obstacleflag = true;
             document.getElementById('ssazipbg').style.animationPlayState = 'running';
             document.getElementById('ssazipbg2').style.animationPlayState = 'running';
+            if (!this.animationOnFlag) {
+                this.drawSsazipgameStart();
+            }
         },
         showRound() {
-            console.log("sssssssssssssssssssssssssssrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
-                        console.log("sssssssssssssssssssssssssssrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
-            console.log("sssssssssssssssssssssssssssrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
-            console.log("sssssssssssssssssssssssssssrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
-            console.log("sssssssssssssssssssssssssssrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
+            console.log('sssssssssssssssssssssssssssrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr');
+            console.log('sssssssssssssssssssssssssssrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr');
+            console.log('sssssssssssssssssssssssssssrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr');
+            console.log('sssssssssssssssssssssssssssrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr');
+            console.log('sssssssssssssssssssssssssssrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr');
 
             //시작 전 라운드와 1, 2, 3 표시
             //round 표시함수
@@ -843,10 +848,10 @@ export default {
         },
 
         closeRoundModal() {
-            console.log("closeRoundModalcloseRoundModal")
-            console.log("closeRoundModalcloseRoundModal")
-            console.log("closeRoundModalcloseRoundModal")
-            console.log("closeRoundModalcloseRoundModal")
+            console.log('closeRoundModalcloseRoundModal');
+            console.log('closeRoundModalcloseRoundModal');
+            console.log('closeRoundModalcloseRoundModal');
+            console.log('closeRoundModalcloseRoundModal');
             this.closeRoundModalReqSending();
             // this.roundModalOpen = open;
             // this.showRound();
@@ -856,6 +861,7 @@ export default {
             console.log('게임이 시작됩니다');
             document.querySelector('.round1').style.opacity = 0;
             document.querySelector('.round2').style.opacity = 0;
+
             this.showResult = false;
             console.log('초기화 완료, 애니메이트 시작');
 
@@ -875,6 +881,7 @@ export default {
         ///////////////동작 순으로 배치
         //13. 가이드모달 시작시 필요 여부 확인 통신
         checkNeedGuideModalSending() {
+            console.log("checkNeedGuideModalSending")
             this.stompClient.send(
                 '/pub/game/jump/modal/checker',
                 {},
@@ -979,67 +986,63 @@ export default {
         },
         //4. close modal
         closeGuideModalReqSending() {
-            if(this.masterKeyFlag){
-            console.log('41 ' + this.getRoomId);
-            this.stompClient.send(
-                '/pub/game/jump/closemodal',
-                {},
-                JSON.stringify({
-                    roomId: this.getRoomId,
-                    type: 41, //정보요청 타입
-                })
-            );
+            if (this.masterKeyFlag) {
+                console.log('41 ' + this.getRoomId);
+                this.stompClient.send(
+                    '/pub/game/jump/closemodal',
+                    {},
+                    JSON.stringify({
+                        roomId: this.getRoomId,
+                        type: 41, //정보요청 타입
+                    })
+                );
             }
         },
         closeStartModalReqSending() {
-                        if(this.masterKeyFlag){
-
-            console.log('42 ' + this.getRoomId);
-            this.stompClient.send(
-                '/pub/game/jump/closemodal',
-                {},
-                JSON.stringify({
-                    roomId: this.getRoomId,
-                    type: 42, //정보요청 타입
-                })
-            );
-                        }
+            if (this.masterKeyFlag) {
+                console.log('42 ' + this.getRoomId);
+                this.stompClient.send(
+                    '/pub/game/jump/closemodal',
+                    {},
+                    JSON.stringify({
+                        roomId: this.getRoomId,
+                        type: 42, //정보요청 타입
+                    })
+                );
+            }
         },
         closeRoundModalReqSending() {
-                        if(this.masterKeyFlag){
-
-            console.log('43');
-            console.log('43');
-            console.log('43');
-            console.log('43');
-            this.stompClient.send(
-                '/pub/game/jump/closemodal',
-                {},
-                JSON.stringify({
-                    roomId: this.getRoomId,
-                    type: 43, //정보요청 타입
-                })
-            );
-                        }
+            if (this.masterKeyFlag) {
+                console.log('43');
+                console.log('43');
+                console.log('43');
+                console.log('43');
+                this.stompClient.send(
+                    '/pub/game/jump/closemodal',
+                    {},
+                    JSON.stringify({
+                        roomId: this.getRoomId,
+                        type: 43, //정보요청 타입
+                    })
+                );
+            }
         },
         openRoundModalReq() {
-                        if(this.masterKeyFlag){
+            if (this.masterKeyFlag) {
+                console.log('44 재시작 전체 전송');
+                console.log('44 재시작 전체 전송');
+                console.log('44 재시작 전체 전송');
+                console.log('44 재시작 전체 전송');
 
-            console.log('44 재시작 전체 전송');
-                        console.log('44 재시작 전체 전송');
-            console.log('44 재시작 전체 전송');
-            console.log('44 재시작 전체 전송');
-
-
-            this.stompClient.send(
-                '/pub/game/jump/closemodal',
-                {},
-                JSON.stringify({
-                    roomId: this.getRoomId,
-                    type: 44, //정보요청 타입
-                })
-            );
-                        }
+                this.stompClient.send(
+                    '/pub/game/jump/closemodal',
+                    {},
+                    JSON.stringify({
+                        roomId: this.getRoomId,
+                        type: 44, //정보요청 타입
+                    })
+                );
+            }
         },
 
         // //1. 방 세팅, 장애물 생성, 새 유저 입장, 정지 시 유저에게 송출
@@ -1183,11 +1186,12 @@ export default {
         },
         //61. 게임 정지 다음 팀 간 배틀 시작 혹은 결산
         stopGameNBattleSendingByMaster() {
-            //다음 게임 시작
-            setTimeout(() => {
-                console.log('re start');
-                this.openRoundModalReq();
-            }, 4000);
+            console.log('배틀 중지 다음 게임 탐색');
+            console.log(this.remainRound);
+            console.log(this.nextRemainRound);
+            console.log(this.teamOrder);
+            console.log(this.teamOrderNext);
+
             //공통 초기화
             this.obstacleflag = false;
             this.nowRoundNum = 1;
@@ -1208,6 +1212,7 @@ export default {
                 //next level
                 //게임 종료 상황
                 if (this.nextRemainRound == 0) {
+                    console.log("게임종료")
                     // isFinalGameFlag=true;
                     //더 이상 다음 레벨은 없습니다.
                     //결산 배열 제작
@@ -1324,6 +1329,11 @@ export default {
                     })
                 );
             }
+            //다음 게임 시작
+            setTimeout(() => {
+                console.log('re start');
+                this.openRoundModalReq();
+            }, 4000);
         },
 
         ////////////////////// 메세지 수신 /////////////////////
@@ -1473,17 +1483,31 @@ export default {
             if (info == null) {
                 //방장 퇴장
                 this.onDisconnect();
-                alert('방장이 퇴장하여 게임이 종료됩니다!');
+                swal({
+                    // className:'alert',
+                    title: '방장이 퇴장하여 게임이 종료됩니다!',
+                    icon: "/img/ssazip-logo.png",
+                    buttons: {
+                    text: '확인',
+                },
+                })
                 // 모든 참가자 내보내기
-                this.$router.push('/room');
+                this.$router.push('/');
                 return;
             }
             if (info.type == 400) {
                 //방장 퇴장
                 this.onDisconnect();
-                alert('알 수 없는 오류로 게임이 종료됩니다!');
+                swal({
+                    // className:'alert',
+                    title: '알 수 없는 오류로 게임이 종료됩니다!',
+                    icon: "/img/ssazip-logo.png",
+                    buttons: {
+                    text: '확인',
+                },
+                })
                 // 모든 참가자 내보내기
-                this.$router.push('/room');
+                this.$router.push('/');
                 return;
             }
 
@@ -1503,10 +1527,10 @@ export default {
             }
             //round close
             if (info.type == 43) {
-                console.log("4333333333333333333333333333333")
-                                console.log("4333333333333333333333333333333")
-                console.log("4333333333333333333333333333333")
-                console.log("4333333333333333333333333333333")
+                console.log('4333333333333333333333333333333');
+                console.log('4333333333333333333333333333333');
+                console.log('4333333333333333333333333333333');
+                console.log('4333333333333333333333333333333');
 
                 this.roundModalOpenFlag = false;
                 this.showRound();
@@ -1572,6 +1596,7 @@ export default {
 
             //6.게임 알반 정지
             if (info.type == 6) {
+                this.checkCollisionOnFlag = false;
                 this.receivedGameStopFlag = info.beGameStopFlag;
                 this.loser = info.loser;
                 this.loseTeam = info.loseTeam;
@@ -1589,6 +1614,8 @@ export default {
             }
             // 61 62 게임 정지 다음 단계
             if (info.type == 62) {
+                this.checkCollisionOnFlag = false;
+
                 //모든 게임 종료, 결산
                 console.log('결산 명령 수신 완료');
                 this.receivedGameStopFlag = info.beGameStopFlag;
@@ -1637,10 +1664,12 @@ export default {
                     console.log('will end');
                     console.log('will end');
 
-                    this.onDisconnectByMaster();
+                    this.onDisconnect();
                 }, 2000);
             }
             if (info.type == 61) {
+                this.checkCollisionOnFlag = false;
+
                 //다음 팀간 배틀
                 this.receivedGameStopFlag = info.beGameStopFlag;
 
@@ -1839,7 +1868,14 @@ export default {
         history.pushState(null, null, location.href);
         window.onpopstate = () => {
             history.go(1);
-            alert(`게임 내에서는 '뒤로가기'가 불가능합니다.`)
+            swal({
+                // className:'alert',
+                title: "게임 내에서는 뒤로가기가 불가합니다.",
+                icon: "/img/ssazip-logo.png",
+                buttons: {
+                text: '확인',
+                },
+            })
         }
         // // 소켓 연결
         // this.stompClient = socketConnect(this.onConnected, this.onError);
