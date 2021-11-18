@@ -619,7 +619,7 @@ export default {
             frame();
             // 충돌체크함수 by master
             const checkCollision = (dino, cactus) => {
-                this.showRoundOnFlag=true;
+                
                 let xDiff = cactus.x - (dino.x + dino.width);
                 let yDiff = cactus.y - (dino.y + dino.height);
                 if (dino.x <= cactus.x + cactus.width) {
@@ -853,6 +853,7 @@ export default {
         },
 
         roundModal() {
+            this.showRoundOnFlag=true;
             this.roundModalOpenFlag = true;
         },
 
@@ -1995,7 +1996,8 @@ export default {
             }
             //착지해야만 점프가능
 
-            if (this.startFlag && this.userPlayIdx != -1) {
+            // if (this.startFlag && this.userPlayIdx != -1) {
+            if ( this.userPlayIdx != -1) {
                 if (this.teamOneOrTwo == 1) {
                     if (this.dinos1[this.userPlayIdx].y == 200) {
                         if (e.code === 'Space') {
