@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,7 +37,9 @@ public class SsazipJump {
     private List<Integer> teamOrder; // 팀 진행 순서 => 봇은 teamNo =-2
     private List<Integer> teamOrderNext; // 현 라운드에서 승리하여 다음라운드로 올라간 팀
     private List<Integer> finalScore; // 최종 점수(배열 형태) {1등 팀 번호, 2등 , 3등, 3등}
-    private int remainRound;//현재 라운드 계산 값
+    private int remainRound;//현재 라운드 계산 값 => 강
+    private int nextRemainRound;//다음 라운드 계산 값 => 다음 강
+
     private int teamIdx1; // 현재 진행 중 팀 1의 팀 인덱스
     private int teamIdx2;
     private boolean masterCreatedFlag;//마스터의 선 입장 확인용
@@ -60,6 +63,15 @@ public class SsazipJump {
     private boolean[] beUserPresent2;//참가 여부 어레이
     private boolean beGameStopFlag;//충돌 시 게임 중단 플레그
     private String lastEntering;//최근 입장자
+    private String loser;//걸린이
+    private String loseTeam;//걸린 팀
+    private int nowRoundNum;//현 게임의 몇 판 째인지
+
+    //modal flag
+    private boolean guideModalFlag;
+    private boolean startModalFlag;
+    private boolean roundModalFlag;
+
 
 
     public SsazipJump() {
@@ -77,4 +89,42 @@ public class SsazipJump {
     }
 
 
+    @Override
+    public String toString() {
+        return "SsazipJump{" +
+                "roomId='" + roomId + '\'' +
+                ", type=" + type +
+                ", host='" + host + '\'' +
+                ", gameScore1=" + gameScore1 +
+                ", gameScore2=" + gameScore2 +
+                ", teamOrder=" + teamOrder +
+                ", teamOrderNext=" + teamOrderNext +
+                ", finalScore=" + finalScore +
+                ", remainRound=" + remainRound +
+                ", nextRemainRound=" + nextRemainRound +
+                ", teamIdx1=" + teamIdx1 +
+                ", teamIdx2=" + teamIdx2 +
+                ", masterCreatedFlag=" + masterCreatedFlag +
+                ", jumpArr1=" + Arrays.toString(jumpArr1) +
+                ", jumpArr2=" + Arrays.toString(jumpArr2) +
+                ", reloadflag=" + reloadflag +
+                ", participantId='" + participantId + '\'' +
+                ", participantName='" + participantName + '\'' +
+                ", teamNo=" + teamNo +
+                ", obstacleflag=" + obstacleflag +
+                ", xbArr=" + Arrays.toString(xbArr) +
+                ", xbArrType=" + Arrays.toString(xbArrType) +
+
+                ", beUserPresent1=" + Arrays.toString(beUserPresent1) +
+                ", beUserPresent2=" + Arrays.toString(beUserPresent2) +
+                ", beGameStopFlag=" + beGameStopFlag +
+                ", lastEntering='" + lastEntering + '\'' +
+                ", loser='" + loser + '\'' +
+                ", loseTeam='" + loseTeam + '\'' +
+                ", nowRoundNum=" + nowRoundNum +
+                ", guideModalFlag=" + guideModalFlag +
+                ", startModalFlag=" + startModalFlag +
+                ", roundModalFlag=" + roundModalFlag +
+                '}';
+    }
 }

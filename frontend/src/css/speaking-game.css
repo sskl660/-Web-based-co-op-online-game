@@ -21,17 +21,16 @@
 }
 
 .game-screen > .game-board > .sentence-board {
-  
 }
 
 .game-screen > .game-board > .sentence-board > .member-left, .game-screen > .game-board > .sentence-board > .member-right {
   display: flex;
-  justify-content: space-between;
   height: 10vh;
 }
 
 .game-screen > .game-board > .sentence-board > .member-left {
   float: left;
+  width: 100%;
 }
 
 .game-screen > .game-board > .sentence-board > .member-right {
@@ -103,26 +102,45 @@
   border-color: transparent white transparent transparent;
 }
 
-.game-board > .game-mike {
-  width: 10%;
-  height: 20%;
+.game-board > .game-mic-default {
+  border-radius: 10px;
+  width: 8%;
+  height: 15%;
   position: absolute;
-  bottom: 0;
+  bottom: 3%;
   left: 50%;
   transform: translate(-50%, 0);
-  box-shadow: 1px 1px 1px black, 1px 1px 1px white inset;
+  opacity: 50%;
 }
 
-.game-board > .game-mike-off {
-  width: 10%;
-  height: 20%;
-  position: absolute;
-  bottom: 0;
-  left: 60%;
-  transform: translate(-50%, 0);
+.game-board > .game-mic-on {
+  background: rgb(170, 223, 90);
   box-shadow: 1px 1px 1px black, 1px 1px 1px white inset;
+  width: 8%;
+  height: 15%;
+  opacity: 100%;
 }
 
-.game-board > .game-mike:active {
+.game-board > .game-mic-on:active {
+  background: rgb(157, 206, 84);
   box-shadow: 1px 1px 1px black inset, 1px 1px 1px white;
+  width: 8%;
+  height: 15%;
+  opacity: 100%;
+}
+
+.game-board > .game-mic-off {
+  background: rgb(184, 79, 65);
+  box-shadow: 1px 1px 1px black, 1px 1px 1px white inset;
+  width: 8%;
+  height: 15%;
+  opacity: 100%;
+}
+
+.game-board > .game-mic-off:active {
+  background: rgb(167, 71, 59);
+  box-shadow: 1px 1px 1px black inset, 1px 1px 1px white;
+  width: 8%;
+  height: 15%;
+  opacity: 100%;
 }

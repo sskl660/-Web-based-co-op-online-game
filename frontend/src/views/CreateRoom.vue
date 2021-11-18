@@ -11,7 +11,12 @@
         alt="ssazip-create-img"
         class="ssazip-create-img"
       />
-      <input type="text" placeholder="방 제목을 설정해주세요" v-model="roomName" @enter="createGameRoom"/>
+      <input
+        type="text"
+        placeholder="방 제목을 설정해주세요"
+        v-model="roomName"
+        @enter="createGameRoom"
+      />
       <button @click="createGameRoom">방 만들기</button>
     </div>
   </div>
@@ -21,6 +26,7 @@
 import '@/css/create-room.css';
 import axios from '@/util/http-common.js';
 import { mapActions, mapGetters } from 'vuex';
+import swal from 'sweetalert';
 
 export default {
   name: 'CreateRoom',
@@ -46,10 +52,23 @@ export default {
       // 로그아웃 상태로 전환
       this.changeLoginState(false);
       // 메인페이지로 이동
-      this.$router.push('/login');
+      this.$router.push('/');
     },
     // 게임 방 만들기
     createGameRoom() {
+      // 방 이름은 최소 1글자 이상, 15글자 이하로 한다
+      if (this.roomName.length < 1 || this.roomName.length > 15) {
+        swal({
+          // className:'alert',
+          title: '방 이름은 1글자 이상,',
+          text: '15글자 이하로 입력해주세요',
+          icon: '/img/ssazip-logo.png',
+          buttons: {
+            text: '확인',
+          },
+        });
+        return;
+      }
       axios({
         method: 'post',
         url: `/game/create/${this.roomName}`,
@@ -62,7 +81,6 @@ export default {
         .then((res) => {
           // room 정보 받기
           let room = res.data;
-          console.log(room);
           // 방장이 참가중인 방 갱신
           this.joinRoom(room.id);
           // 방으로 이동

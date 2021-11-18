@@ -1,9 +1,9 @@
 package com.playssafy.playssafy.service;
 
-
 import com.playssafy.playssafy.dto.ssafymind.*;
 import com.playssafy.playssafy.dto.waitroom.InitGame;
 import com.playssafy.playssafy.dto.waitroom.Participant;
+import com.playssafy.playssafy.dto.waitroom.Quiz;
 import com.playssafy.playssafy.dto.waitroom.WaitRoom;
 import com.playssafy.playssafy.repository.SsafyMindRepository;
 import com.playssafy.playssafy.repository.WaitRoomRepository;
@@ -61,21 +61,26 @@ public class SsafyMindService {
         ssafyMind.setCurTeamCnt(teams.size());
 
         // 테스트 문제 리스트 ////////
-        for(int i = 0; i < 20; i++) {
-            ssafyMind.getQuizzes().add(new Quiz(1, "아미타불", "아미타불"));
-            ssafyMind.getQuizzes().add(new Quiz(1, "원시천존", "원시천존"));
-            ssafyMind.getQuizzes().add(new Quiz(1, "무량수불", "무량수불"));
+        for(int i = 0; i < 10; i++) {
+            ssafyMind.getQuizzes().add(new Quiz(1, "싸피", "싸피"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "도커", "도커"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "프로님", "프로님"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "5기", "5기"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "삼성", "삼성"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "해피하우스", "해피하우스"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "유튜브", "유튜브"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "포크레인", "포크레인"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "우거지국", "우거지국"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "삼국시대", "삼국시대"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "오징어게임", "오징어게임"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "자바", "자바"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "아이유", "아이유"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "대한민국", "대한민국"));
+            ssafyMind.getQuizzes().add(new Quiz(1, "코로나", "코로나"));
         }
-        // 팀 초기화////////
-        ssafyMind.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "1", "김태현1", 1));
-        ssafyMind.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "2", "김태현2", 1));
-        ssafyMind.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "3", "김태현3", 1));
-        ssafyMind.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "4", "김태현4", 1));
-        ssafyMind.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "1", "이장섭1", 2));
-        ssafyMind.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "2", "이장섭2", 2));
-        ssafyMind.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "3", "이장섭3", 2));
-        ssafyMind.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "4", "이장섭4", 2));
-
+        for(int i = 0; i < 3; i++) {
+            ssafyMind.getQuizzes().add(new Quiz(1, "개발", "개발"));
+        }
         ssafyMindRepository.save(ssafyMind);
     }
 
@@ -98,8 +103,13 @@ public class SsafyMindService {
 
         // 방장이라면 방 자체를 삭제 후 종료
         if (ssafyMind.getHost().equals(participant.getParticipantId())) {
-            System.out.println("exit");
             ssafyMindRepository.deleteById(participant.getRoomId());
+            // 게임이 진행중이었던 경우 게임 진행 여부 초기화
+            WaitRoom waitRoom = waitRoomRepository.findById(participant.getRoomId()).get();
+            if(waitRoom.isProgress()) {
+                waitRoom.setProgress(false);
+                waitRoomRepository.save(waitRoom);
+            }
             return null;
         }
         // 방장이 아니라면 유저 정보만 삭제
@@ -142,12 +152,7 @@ public class SsafyMindService {
         return mindMessage;
     }
 
-    // 5. 방을 순수하게 읽어오는 로직
-    public SsafyMind read(String roomId) {
-        return ssafyMindRepository.findById(roomId).get();
-    }
-
-    // 6. 1초마다 시간을 갱신하는 로직
+    // 5. 1초마다 시간을 갱신하는 로직
     public synchronized boolean time(String roomId, int cnt) {
         SsafyMind ssafyMind = ssafyMindRepository.findById(roomId).get();
         if(ssafyMind.getTimeFlag().equals("stop"))
@@ -157,7 +162,7 @@ public class SsafyMindService {
         return true;
     }
 
-    // 6 - 1. 시간 정지
+    // 6. 시간 정지
     public synchronized void timeStop(String roomId, String flag){
         SsafyMind ssafyMind = ssafyMindRepository.findById(roomId).get();
         ssafyMind.setTimeFlag(flag);
@@ -189,6 +194,9 @@ public class SsafyMindService {
         ssafyMind.getQuizzes().remove(lastIndex);
         // 다음 팀으로 옮기고
         ssafyMind.getTeamOrder().remove(0);
+        // 만일, 팀 개수가 0개라면 null 넣어주기
+        if(ssafyMind.getTeamOrder().size() == 0)
+            ssafyMind.getTeamOrder().add(null);
         // 해당 팀의 첫 사람을 가리키는 인덱스 초기화
         ssafyMind.setCurPlayer(0);
         // 저장
@@ -199,16 +207,11 @@ public class SsafyMindService {
     public synchronized void end(String roomId) {
         // 기존 방의 점수 갱신
         WaitRoom waitRoom = waitRoomRepository.findById(roomId).get();
-        System.out.println("first");
         SsafyMind ssafyMind = ssafyMindRepository.findById(roomId).get();
         for(int i = 1; i < ssafyMind.getScores().length; i++) {
             waitRoom.getScores()[i] += ssafyMind.getScores()[i];
         }
         // 저장
         waitRoomRepository.save(waitRoom);
-        
-        // 싸피마인드 방 삭제
-        System.out.println("here");
-        ssafyMindRepository.deleteById(roomId);
     }
 }
