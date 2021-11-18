@@ -43,8 +43,8 @@
             </div>
           </div>
         </div>
-        <img v-if="mic" src="@/assets/images/mic-enabled.png" alt="mic img" class="game-mic-default" id="record" />
-        <img v-else src="@/assets/images/mic-disabled.png" alt="mic img" class="game-mic-default" id="record" />
+        <img v-if="showMic" :src="micImg[1]" alt="mic img" class="game-mic-default" id="record" />
+        <img v-else :src="micImg[0]" alt="mic img" class="game-mic-default" id="record" />
       </div>
 
       <!-- 아래는 나중에 사용할 아이들 -->
@@ -109,7 +109,7 @@ export default {
       quiz: null,
       lastTeamLen: 0,
       talker: 0,
-      mic: false,
+      showMic: false,
     };
   },
   created() {
@@ -314,7 +314,7 @@ export default {
     setMic: function(background) {
       const record = document.querySelector('#record');
       // record.src = require(this.micImg[1]);
-      this.mic = true;
+      this.showMic = true;
       if (background === 0) {
         return;
       } else if (background === 1) {
