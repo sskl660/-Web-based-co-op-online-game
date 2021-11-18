@@ -2,11 +2,11 @@ package com.playssafy.playssafy.service;
 
 import com.playssafy.playssafy.dto.speaking.SpeakMessage;
 import com.playssafy.playssafy.dto.speaking.Speaking;
-import com.playssafy.playssafy.dto.ssafymind.Quiz;
-import com.playssafy.playssafy.dto.ssafymind.Team;
 import com.playssafy.playssafy.dto.waitroom.InitGame;
 import com.playssafy.playssafy.dto.waitroom.Participant;
+import com.playssafy.playssafy.dto.waitroom.WaitRoom;
 import com.playssafy.playssafy.repository.SpeakGameRepository;
+import com.playssafy.playssafy.repository.WaitRoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -89,11 +89,18 @@ public class SpeakingService {
 
     // 2. 게임방 퇴장 메서드
     public synchronized Speaking exit(Participant participant) {
+        if(speakGameRepository.findById(participant.getRoomId()).isEmpty())
+            return null;
         Speaking speaking = speakGameRepository.findById(participant.getRoomId()).get();
 
         // 방장이라면 방 자체를 삭제 후 종료
         if (speaking.getHost().equals(participant.getParticipantId())) {
             speakGameRepository.deleteById(participant.getRoomId());
+            WaitRoom waitRoom = waitRoomRepository.findById(participant.getRoomId()).get();
+            if(waitRoom.isProgress()) {
+                waitRoom.setProgress(false);
+                waitRoomRepository.save(waitRoom);
+            }
             return null;
         }
         // 방장이 아니라면 유저 정보만 삭제

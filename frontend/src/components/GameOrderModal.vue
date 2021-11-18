@@ -40,7 +40,7 @@
                 alt=""
               />
             </span>
-            <button class="start-game-btn" @click="startModal">
+            <button v-if="host===user" class="start-game-btn" @click="startModal">
               시작
             </button>
           </div>
@@ -55,7 +55,7 @@ import '@/components/css/gameExplainModal.css';
 import { mapGetters } from 'vuex';
 export default {
   name: 'GameOrderModal',
-  props: ['teamOrder', 'teamCnt', 'host', 'gameType'],
+  props: ['teamOrder', 'teamCnt', 'host', 'gameType', 'user'],
   data: function() {
     return {
       ordermodal: false,
