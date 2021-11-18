@@ -110,7 +110,7 @@
   bottom: 3%;
   left: 50%;
   transform: translate(-50%, 0);
-  opacity: 50%;
+  opacity: 80%;
 }
 
 .game-board > .game-mic-on {

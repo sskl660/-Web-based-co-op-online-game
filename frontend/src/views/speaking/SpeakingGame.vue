@@ -45,7 +45,6 @@
         </div>
         <img v-if="showMic" :src="micImg[1]" alt="mic img" class="game-mic-default" id="record" />
         <img v-else :src="micImg[0]" alt="mic img" class="game-mic-default" id="record" />
-        <img src="@/assets/bronze-place.png" alt="mic img" class="game-mic-default" id="record1" />
       </div>
 
       <!-- 아래는 나중에 사용할 아이들 -->
