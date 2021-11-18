@@ -94,7 +94,7 @@ export default {
         '/img/speak/speak-fail.png',
         '/img/speak/speak-success.png',
       ],
-      micImg: ['/img/mic/mic-disabled.png', '/img/mic/mic-off.png', '/img/mic/mic-on.png'],
+      micImg: ['/img/mic/mic-disabled.png', '/img/mic/mic-enabled.png'],
       talkFinish: false,
       quiz: null,
       lastTeamLen: 0,
@@ -300,10 +300,18 @@ export default {
       this.userAnswerIdx++;
       this.answerIdx++;
     },
-    setMic: function(micNum) {
+    setMic: function(background) {
       const record = document.querySelector('#record');
-      record.src = this.micImg[micNum];
-      record.classList.add('game-mic');
+      record.src = this.micImg[1];
+      if (background === 0) {
+        return
+      } else if (background === 1) {
+        record.className = 'game-mic-default game-mic-off';
+        return
+      } else if (background === 2) {
+        record.className = 'game-mic-default game-mic-on';
+        return
+      }
       // before
       // game-mic 클래스 없애주기
       // 사진 mic[0]으로
@@ -315,7 +323,8 @@ export default {
     removeMic: function() {
       const record = document.querySelector('#record');
       record.src = this.micImg[0];
-      record.classList.remove('game-mic');
+      record.classList.remove('game-mic-on');
+      record.classList.remove('game-mic-off');
     },
     setAudio: function() {
 
