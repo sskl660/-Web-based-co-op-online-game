@@ -1,16 +1,16 @@
 <template>
     <div>
-        <SSazipjumpGuideModal v-if="guideModalOpenFlag == true" :userId="userId" :hostId="hostId" @guideModal="guideModal" />
-        <SSazipjumpStartModal v-if="startModalOpenFlag == true" :userId="userId" :hostId="hostId" @getCloseModal="closeStartModal" />
+        <SSazipjumpGuideModal v-if="guideModalOpenFlag == true" :userId="getUser.id" :hostId="hostId" @guideModal="guideModal" />
+        <SSazipjumpStartModal v-if="startModalOpenFlag == true" :userId="getUser.id" :hostId="hostId" @getCloseModal="closeStartModal" />
         <SSazipjumpRoundModal
             v-if="roundModalOpenFlag == true"
             :battleTeam1="battleTeam1"
             :battleTeam2="battleTeam2"
-            :userId="userId"
+            :userId="getUser.id"
             :hostId="hostId"
             @getCloseModal="closeRoundModal"
         />
-        <SSazipjumpRankModal v-if="rankModalOpenFlag == true" :userId="userId" :hostId="hostId" :finalScore="finalScore" @getCloseModal="closeStartModal" />
+        <SSazipjumpRankModal v-if="rankModalOpenFlag == true" :userId="getUser.id" :hostId="hostId" :finalScore="finalScore" @getCloseModal="closeStartModal" />
         <Header v-bind:gameTitle="'싸집이 점프 게임'" :host="getUser.id" />
         <!-- <button @click="showRound()">dd</button> -->
         <div style="display:flex; justify-content:center">
@@ -38,13 +38,13 @@
                             <img id="obstacle1" src="@/assets/obstacle1.png" />
                         </div>
                         <div style="display:none;">
-                            <img id="obstacle2" src="@/assets/logo.png" />
+                            <img id="obstacle2" src="@/assets/obstacle2.png" />
                         </div>
                         <div style="display:none;">
-                            <img id="obstacle3" src="@/assets/eraser.png" />
+                            <img id="obstacle3" src="@/assets/obstacle3.png" />
                         </div>
                         <div style="display:none;">
-                            <img id="obstacle4" src="@/assets/team1.png" />
+                            <img id="obstacle4" src="@/assets/obstacle4.png" />
                         </div>
                     </div>
                     <!-- 아랫팀 -->
@@ -68,13 +68,13 @@
                             <img id="obstacle12" src="@/assets/obstacle1.png" />
                         </div>
                         <div style="display:none;">
-                            <img id="obstacle22" src="@/assets/logo.png" />
+                            <img id="obstacle22" src="@/assets/obstacle2.png" />
                         </div>
                         <div style="display:none;">
-                            <img id="obstacle32" src="@/assets/eraser.png" />
+                            <img id="obstacle32" src="@/assets/obstacle3.png" />
                         </div>
                         <div style="display:none;">
-                            <img id="obstacle42" src="@/assets/team1.png" />
+                            <img id="obstacle42" src="@/assets/obstacle4.png" />
                         </div>
                     </div>
                 </div>
@@ -189,13 +189,14 @@ export default {
             userPresent2: [false, false, false, false, false, false],
             dinos1: [], //싸집이 정보 배열
             dinos2: [],
-            userId: '안기훈',
+            // userId: '안기훈',
             userIdx: -1, //팀 내 순서
             userPlayIdx: -1, //실 참가 인원 중 순서
             status: true,
             obstacle1: document.getElementById('obstacle1'),
             obstacle2: document.getElementById('obstacle2'),
             obstacle3: document.getElementById('obstacle3'),
+            obstacle4: document.getElementById('obstacle4'),
             stompClient: null,
             // 방 정보
             roomNgameInfo: {},
@@ -301,8 +302,8 @@ export default {
                         teamNo: 1,
                         // 캐릭터 그리기 함수(생성)
                         draw() {
-                            ctx.fillStyle = 'green';
-                            ctx.fillRect(this.x, this.y, this.width, this.height); //위치, 크기
+                            // ctx.fillStyle = 'green';
+                            // ctx.fillRect(this.x, this.y, this.width, this.height); //위치, 크기
                             if (this.me == 0) {
                                 ctx.drawImage(ssazip, this.x, this.y, this.width, this.height);
                             } else {
@@ -340,8 +341,8 @@ export default {
                         teamNo: 2,
                         // 캐릭터 그리기 함수(생성)
                         draw() {
-                            ctx2.fillStyle = 'green';
-                            ctx2.fillRect(this.x, this.y, this.width, this.height); //위치, 크기
+                            // ctx2.fillStyle = 'green';
+                            // ctx2.fillRect(this.x, this.y, this.width, this.height); //위치, 크기
                             if (this.me == 0) {
                                 ctx2.drawImage(ssazip2, this.x, this.y, this.width, this.height);
                             } else {
@@ -400,11 +401,11 @@ export default {
                 }
                 draw() {
                     if (this.type != 0) {
-                        ctx.fillStyle = 'red';
-                        ctx.fillRect(this.x, this.y, this.width, this.height);
+                        // ctx.fillStyle = 'red';
+                        // ctx.fillRect(this.x, this.y, this.width, this.height);
                         ctx.drawImage(eval('obstacle' + this.type), this.x, this.y, this.width, this.height);
-                        ctx2.fillStyle = 'red';
-                        ctx2.fillRect(this.x, this.y, this.width, this.height);
+                        // ctx2.fillStyle = 'red';
+                        // ctx2.fillRect(this.x, this.y, this.width, this.height);
                         ctx2.drawImage(eval('obstacle' + this.type), this.x, this.y, this.width, this.height);
                     }
                 }
@@ -430,10 +431,9 @@ export default {
 
                 //마스터 요청시 장애물 생성
                 if (this.getIsLogin && this.obstacleflag) {
-                    
                     if (cntTime > this.time) {
                         document.getElementById('ssazipbg').style.animationPlayState = 'running';
-            document.getElementById('ssazipbg2').style.animationPlayState = 'running'
+                        document.getElementById('ssazipbg2').style.animationPlayState = 'running';
                         this.time++;
                         if (this.xArr.length == 0) {
                             this.xArr.push(1200); //장애물 배열 생성
@@ -481,7 +481,8 @@ export default {
                         var cactus = new Cactus();
                         cactus.x = this.receivedArr[i]; //장애물 위치
                         cactus.type = this.receivedArrType[i]; //장애물 타입 배열 이용
-                        if (this.masterKeyFlag && !this.receivedGameStopFlag) {
+                        // if (this.masterKeyFlag && !this.receivedGameStopFlag) {
+                        if (this.getIsLogin && !this.receivedGameStopFlag) {
                             this.dinos1.forEach((dino) => {
                                 checkCollision(dino, cactus); //모든 장애물과 충돌확인
                             });
@@ -694,7 +695,8 @@ export default {
 
             //
             // //마스터가 아니라면  플레이어 여부 확인과 등록 필요
-            if (!this.masterKeyFlag) {
+            // if (!this.masterKeyFlag) {
+            if (!this.getIsLogin) {
                 this.isPlayer();
             } else {
                 this.drawSsazip();
@@ -881,7 +883,7 @@ export default {
         ///////////////동작 순으로 배치
         //13. 가이드모달 시작시 필요 여부 확인 통신
         checkNeedGuideModalSending() {
-            console.log("checkNeedGuideModalSending")
+            console.log('checkNeedGuideModalSending');
             this.stompClient.send(
                 '/pub/game/jump/modal/checker',
                 {},
@@ -901,7 +903,8 @@ export default {
             this.checkNeedGuideModalSending(); //해당 방에 가이드 모달이 필요한지 type 12
             // db 정보 요청 (master act)
             //0.mount : 마스터의 룸, 게임 정보 요청
-            if (this.masterKeyFlag) {
+            if (this.getIsLogin) {
+            // if (this.masterKeyFlag) {
                 this.stompClient.send(
                     '/pub/game/jump/enter/reqInfoRoomNGame',
                     {},
@@ -928,7 +931,8 @@ export default {
                 );
             }
             //마스터 새로고침시, 입장 시 플레이어도 새로고침
-            if (this.masterKeyFlag) {
+            // if (this.masterKeyFlag) {
+            if (this.getIsLogin) {
                 //마스터가 생성시 나머지 새로고침 요청
                 this.reloadingPlay();
             }
@@ -953,7 +957,7 @@ export default {
         //1. 게임 방 퇴장 소켓 연결 해제 및 게임 방 유저 정보 삭제
         onDisconnect() {
             this.stompClient.send(
-                '/pub/jump/exit',
+                '/pub/game/jump/exit',
                 {},
                 JSON.stringify({
                     roomId: this.getRoomId,
@@ -981,12 +985,13 @@ export default {
                     }
                 }
             }
-            this.stompClient.disconnect();
-            this.$router.push('/room/' + this.getRoomId);
+            // this.stompClient.disconnect();
+            // this.$router.push('/room/' + this.getRoomId);
         },
         //4. close modal
         closeGuideModalReqSending() {
-            if (this.masterKeyFlag) {
+            // if (this.masterKeyFlag) {
+            if (this.getIsLogin) {
                 console.log('41 ' + this.getRoomId);
                 this.stompClient.send(
                     '/pub/game/jump/closemodal',
@@ -999,7 +1004,8 @@ export default {
             }
         },
         closeStartModalReqSending() {
-            if (this.masterKeyFlag) {
+            // if (this.masterKeyFlag) {
+            if (this.getIsLogin) {
                 console.log('42 ' + this.getRoomId);
                 this.stompClient.send(
                     '/pub/game/jump/closemodal',
@@ -1012,7 +1018,8 @@ export default {
             }
         },
         closeRoundModalReqSending() {
-            if (this.masterKeyFlag) {
+            // if (this.masterKeyFlag) {
+            if (this.getIsLogin) {
                 console.log('43');
                 console.log('43');
                 console.log('43');
@@ -1028,7 +1035,8 @@ export default {
             }
         },
         openRoundModalReq() {
-            if (this.masterKeyFlag) {
+            if (this.getIsLogin) {
+            // if (this.masterKeyFlag) {
                 console.log('44 재시작 전체 전송');
                 console.log('44 재시작 전체 전송');
                 console.log('44 재시작 전체 전송');
@@ -1212,7 +1220,7 @@ export default {
                 //next level
                 //게임 종료 상황
                 if (this.nextRemainRound == 0) {
-                    console.log("게임종료")
+                    console.log('게임종료');
                     // isFinalGameFlag=true;
                     //더 이상 다음 레벨은 없습니다.
                     //결산 배열 제작
@@ -1344,6 +1352,12 @@ export default {
         ////////////////////// 메세지 수신 ///////////////////
         ////////////////////// 메세지 수신 ///////////////////
         onMessageReceived(payload) {
+            console.log(payload)
+            if(payload.body=="exit"){
+                console.log("eeeeeeeeeee");
+                this.rankModalOpenFlag = true;
+                return;
+            }
             let info = JSON.parse(payload.body);
             console.log('======got mes=========');
             console.log(info);
@@ -1383,9 +1397,33 @@ export default {
                 // this.teamOrderNext = info.teamOrderNext;
                 this.teamIdx1 = info.teamIdx1;
                 this.teamIdx2 = info.teamIdx2;
-                if (this.teamOrder.length > 2) {
-                    this.nextBattleTeam1 = info.teamOrder[info.teamIdx1 + 2];
-                    this.nextBattleTeam2 = info.teamOrder[info.teamIdx1 + 2];
+                //다음 경기 출력을 위한 계산
+                //다음판이 다음 강 일때
+                if (this.remainRound != this.nextRemainRound) {
+                    if (this.nextRemainRound == 1) {
+                        //현재 판이 결승
+                        //결산 호출
+                        this.nextBattleTeam1 = 20;
+                        this.nextBattleTeam2 = 20;
+                    } else {
+                        //다음 강의 번호
+                        this.nextBattleTeam1 = info.teamOrderNext[0];
+                        if (info.teamOrderNext.length == 1) {
+                            //현재가 3강이라면 아직 이라
+                            this.nextBattleTeam2 = 30;
+                        } else {
+                            this.nextBattleTeam2 = info.teamOrderNext[1];
+                        }
+                    }
+                }
+                //다음 판이 현재 강 일때
+                else {
+                    if (this.teamOrder.length > info.teamIdx1 + 2) {
+                        this.nextBattleTeam1 = info.teamOrder[info.teamIdx1 + 2];
+                    }
+                    if (this.teamOrder.length > info.teamIdx2 + 2) {
+                        this.nextBattleTeam2 = info.teamOrder[info.teamIdx2 + 2];
+                    }
                 }
                 // this.setUsersByMaster();
                 this.setUsers();
@@ -1418,10 +1456,6 @@ export default {
                 this.teamOrderNext = info.teamOrderNext;
                 this.teamIdx1 = info.teamIdx1;
                 this.teamIdx2 = info.teamIdx2;
-                if (this.teamOrder.length > 2) {
-                    this.nextBattleTeam1 = info.teamOrder[info.teamIdx1 + 2];
-                    this.nextBattleTeam2 = info.teamOrder[info.teamIdx1 + 2];
-                }
 
                 //다음 경기 출력을 위한 계산
                 //다음판이 다음 강 일때
@@ -1434,16 +1468,22 @@ export default {
                     } else {
                         //다음 강의 번호
                         this.nextBattleTeam1 = info.teamOrderNext[0];
-                        if (info.teamOrderNext.length != 1) {
+                        if (info.teamOrderNext.length == 1) {
                             //현재가 3강이라면 아직 이라
+                            this.nextBattleTeam2 = 30;
+                        } else {
                             this.nextBattleTeam2 = info.teamOrderNext[1];
                         }
                     }
                 }
                 //다음 판이 현재 강 일때
                 else {
-                    this.nextBattleTeam1 = info.teamOrder[info.teamIdx1 + 2];
-                    this.nextBattleTeam2 = info.teamOrder[info.teamIdx2 + 2];
+                    if (this.teamOrder.length > info.teamIdx1 + 2) {
+                        this.nextBattleTeam1 = info.teamOrder[info.teamIdx1 + 2];
+                    }
+                    if (this.teamOrder.length > info.teamIdx2 + 2) {
+                        this.nextBattleTeam2 = info.teamOrder[info.teamIdx2 + 2];
+                    }
                 }
                 this.setUsers();
             }
@@ -1473,16 +1513,43 @@ export default {
                 this.teamOrderNext = info.teamOrderNext;
                 this.teamIdx1 = info.teamIdx1;
                 this.teamIdx2 = info.teamIdx2;
-                if (this.teamOrder.length > 2) {
+                //다음 경기 출력을 위한 계산
+                //다음판이 다음 강 일때
+                if (this.remainRound != this.nextRemainRound) {
+                    if (this.nextRemainRound == 1) {
+                        //현재 판이 결승
+                        //결산 호출
+                        this.nextBattleTeam1 = 20;
+                        this.nextBattleTeam2 = 20;
+                    } else {
+                        //다음 강의 번호
+                        this.nextBattleTeam1 = info.teamOrderNext[0];
+                        if (info.teamOrderNext.length == 1) {
+                            //현재가 3강이라면 아직 이라
+                            this.nextBattleTeam2 = 30;
+                        } else {
+                            this.nextBattleTeam2 = info.teamOrderNext[1];
+                        }
+                    }
+                }
+                //다음 판이 현재 강 일때
+                else {
+                                    if (this.teamOrder.length > info.teamIdx1 + 2) {
                     this.nextBattleTeam1 = info.teamOrder[info.teamIdx1 + 2];
-                    this.nextBattleTeam2 = info.teamOrder[info.teamIdx1 + 2];
+                }
+                if (this.teamOrder.length > info.teamIdx2 + 2) {
+                    this.nextBattleTeam2 = info.teamOrder[info.teamIdx2 + 2];
+                }
                 }
                 this.drawSsazip();
             }
             //1. 방장 종료
-            if (info == null) {
+            if (info == 'exit') {
+                //랭크 표현
+                this.rankModalOpenFlag = true;
                 //방장 퇴장
-                this.onDisconnect();
+                
+                // this.onDisconnect();
                 swal({
                     // className:'alert',
                     title: '방장이 퇴장하여 게임이 종료됩니다!',
@@ -1492,7 +1559,9 @@ export default {
                 },
                 })
                 // 모든 참가자 내보내기
-                this.$router.push('/');
+                // this.$router.push('/');
+                // this.$router.push('/room/' + this.getRoomId).catch(() => {});
+
                 return;
             }
             if (info.type == 400) {
@@ -1507,7 +1576,9 @@ export default {
                 },
                 })
                 // 모든 참가자 내보내기
-                this.$router.push('/');
+                        this.$router.push('/room/' + this.getRoomId).catch(() => {});
+
+                // this.$router.push('/');
                 return;
             }
 
@@ -1546,7 +1617,8 @@ export default {
             //3.리로드
             if (info.reloadflag && info.type == 3) {
                 this.reloadFlag = false;
-                if (!this.masterKeyFlag) this.$router.go();
+                // if (!this.masterKeyFlag) this.$router.go();
+                if (!this.getIsLogin) this.$router.go();
                 // this.userPresent1 = info.beUserPresent1;
                 // this.userPresent2 = info.beUserPresent2;
                 // this.drawSsazip();
@@ -1883,12 +1955,13 @@ export default {
         // this.room.id = this.getRoomId;
         this.masterKeyFlag = this.getIsLogin;
         this.userId = this.getUser.name;
-        this.masterKeyFlag = this.getIsLogin;
+        // this.masterKeyFlag = this.getIsLogin;
     },
     mounted() {
         console.log('=============mounted');
         console.log('==========start i am ' + this.getUser.name);
-        if (this.masterKeyFlag) {
+        // if (this.masterKeyFlag) {
+        if (this.getIsLogin) {
             this.guideModalOpenFlag = true;
         }
         // 소켓 연결
@@ -1896,7 +1969,7 @@ export default {
         this.stompClient = socketConnect(this.onConnected, this.onError);
 
         // 캔버스 반복 생성 시작
-        if (!this.startFlag) {
+        if (!this.startFlag&&!this.animationOnFlag) {
             this.startFlag = true;
             this.drawSsazipgameStart();
         }
@@ -1904,7 +1977,8 @@ export default {
         //플레이어 조작
         document.addEventListener('keydown', (e) => {
             //장애물 생성 요청
-            if (e.code === 'KeyA' && !this.obstacleflag && this.masterKeyFlag) {
+            // if (e.code === 'KeyA' && !this.obstacleflag && this.masterKeyFlag) {
+            if (e.code === 'KeyA' && !this.obstacleflag && this.getIsLogin) {
                 this.obstacleflag = true;
                 this.showResult = false;
                 document.getElementById('ssazipbg').style.animationPlayState = 'running';
