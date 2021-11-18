@@ -11,7 +11,16 @@
     />
     <Header v-bind:gameTitle="'또박또박 말해요'" :host="getUser.id" @onDisconnect="onDisconnect" />
     <div class="game-screen">
-      <GameStatus game="speak" />
+      <GameStatus
+        game="speak"
+        v-bind:teamOrder="room.teamOrder"
+        v-bind:teams="room.teams"
+        v-bind:curPlayer="room.curPlayer"
+        v-bind:scores="room.scores"
+        v-bind:curTeam="room.curTeam"
+        v-bind:curTeamCnt="room.curTeamCnt"
+        v-if="room != null"
+      />
       <div class="game-board">
         <p class="sentence">"{{ quiz }}"</p>
         <div v-for="(member, i) in teamMember" :key="i" class="sentence-board" id="sentence-board">
@@ -34,7 +43,8 @@
             </div>
           </div>
         </div>
-        <img :src="micImg[0]" alt="mic img" class="game-mic-default" id="record" />
+        <img v-if="showMic" :src="micImg[1]" alt="mic img" class="game-mic-default" id="record" />
+        <img v-else :src="micImg[0]" alt="mic img" class="game-mic-default" id="record" />
       </div>
 
       <!-- 아래는 나중에 사용할 아이들 -->
@@ -94,11 +104,12 @@ export default {
         '/img/speak/speak-fail.png',
         '/img/speak/speak-success.png',
       ],
-      micImg: ['/img/mic/mic-disabled.png', '/img/mic/mic-off.png', '/img/mic/mic-on.png'],
+      micImg: ['/img/mic/mic-disabled.png', '/img/mic/mic-enabled.png'],
       talkFinish: false,
       quiz: null,
       lastTeamLen: 0,
       talker: 0,
+      showMic: false,
     };
   },
   created() {
@@ -106,14 +117,14 @@ export default {
     window.onpopstate = () => {
       history.go(1);
       swal({
-          // className:'alert',
-          title: "게임 내에서는 뒤로가기가 불가능합니다.",
-          icon: "/img/ssazip-logo.png",
-          buttons: {
+        // className:'alert',
+        title: '게임 내에서는 뒤로가기가 불가능합니다.',
+        icon: '/img/ssazip-logo.png',
+        buttons: {
           text: '확인',
         },
-      })
-    }
+      });
+    };
     this.stompClient = socketConnect(this.onConnected, this.onError);
   },
   mounted() {
@@ -136,12 +147,12 @@ export default {
       if (typeof webkitSpeechRecognition !== 'function') {
         swal({
           // className:'alert',
-          title: "크롬에서만 동작합니다.",
-          icon: "/img/ssazip-logo.png",
+          title: '크롬에서만 동작합니다.',
+          icon: '/img/ssazip-logo.png',
           buttons: {
-          text: '확인',
-        },
-      })
+            text: '확인',
+          },
+        });
         return false;
       }
       const speech = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -150,6 +161,8 @@ export default {
       let ignoreEndProcess = false;
       let finalTranscript = '';
 
+      // 오류를 막기 위한 console
+      console.log(isRecognizing);
       // 원하는 언어를 앞으로 뺴라(해당 언어만 지원)
       // 비어있으면 영어, 한국어 둘 다 지원(한국어 우선)
       speech.lang = ['ko-KR', 'en-US'];
@@ -162,7 +175,6 @@ export default {
 
       speech.onend = function() {
         isRecognizing = false;
-        console.log(isRecognizing);
 
         if (ignoreEndProcess) {
           return false;
@@ -189,8 +201,8 @@ export default {
           if (event.results[i].isFinal) {
             finalTranscript += transcript;
             this.finalTranscript += transcript;
-            console.log('파이널', finalTranscript);
-            console.log('파이널', transcript);
+            // console.log('파이널', finalTranscript);
+            // console.log('파이널', transcript);
           } else {
             interimTranscript += transcript;
             this.interimTranscript += transcript;
@@ -221,9 +233,6 @@ export default {
             this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName &&
           !this.isRecording
         ) {
-          console.log(
-            this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName
-          );
           this.isRecording = true;
           return;
         } else if (
@@ -242,16 +251,13 @@ export default {
             if (finalTranscript === this.finalTranscript) {
               message = this.finalTranscript + this.interimTranscript;
             }
-            console.log('-----------------');
-            console.log(message);
-            console.log('-----------------');
 
             this.stompClient.send(
               `/pub/speaking/answer/${this.getRoomId}`,
               {},
               JSON.stringify({
-                name: '안기훈',
-                teamNo: 1,
+                name: this.getUser.name,
+                teamNo: this.getUser.teamNo,
                 message: message,
                 correct: false,
               })
@@ -305,10 +311,19 @@ export default {
       this.userAnswerIdx++;
       this.answerIdx++;
     },
-    setMic: function(micNum) {
+    setMic: function(background) {
       const record = document.querySelector('#record');
-      record.src = this.micImg[micNum];
-      record.classList.add('game-mic');
+      // record.src = require(this.micImg[1]);
+      this.showMic = true;
+      if (background === 0) {
+        return;
+      } else if (background === 1) {
+        record.className = 'game-mic-default game-mic-off';
+        return;
+      } else if (background === 2) {
+        record.className = 'game-mic-default game-mic-on';
+        return;
+      }
       // before
       // game-mic 클래스 없애주기
       // 사진 mic[0]으로
@@ -319,12 +334,12 @@ export default {
     },
     removeMic: function() {
       const record = document.querySelector('#record');
-      record.src = this.micImg[0];
-      record.classList.remove('game-mic');
+      // record.src = 'https://k5a302.p.ssafy.io/img/mic/mic-disabled.png';
+      this.mic = false;
+      record.classList.remove('game-mic-on');
+      record.classList.remove('game-mic-off');
     },
-    setAudio: function() {
-      console.log('');
-    },
+    setAudio: function() {},
     /**
      * 소켓 통신
      */
@@ -365,12 +380,12 @@ export default {
         this.$router.push('/room/' + this.getRoomId).catch(() => {});
         this.stompClient.disconnect();
         swal({
-          title: "방장이 퇴장하여 게임이 종료됩니다!",
-          icon: "/img/ssazip-logo.png",
+          title: '방장이 퇴장하여 게임이 종료됩니다!',
+          icon: '/img/ssazip-logo.png',
           buttons: {
             text: '확인',
           },
-        })
+        });
         return;
       }
       // if (payload.body == 'exit') {
@@ -383,20 +398,24 @@ export default {
       // }
       const data = JSON.parse(payload.body);
       this.room = data;
+      console.log(this.room);
       this.quiz = data.quizzes[data.quizzes.length - 1].problem;
       this.answerIdx = 0;
       await this.setTeamMembers();
-      if (this.getUser.name === data.teams[data.teamOrder[0]].members[0].participantName) {
+      if (
+        data.teams[data.teamOrder[0]].members.length != 0 &&
+        this.getUser.name === data.teams[data.teamOrder[0]].members[0].participantName
+      ) {
         // 마이크 권한 주기
         this.setAudio(); // 이전 사람과 이번 턴의 index
         // 마이크 아이콘 변경
         this.setMic(2);
-        console.log('hi!!');
       }
       // span 싹 지워주기
-      const sentences = document.querySelectorAll('.sentence-board > .sentence-board-child > .member-sentence > span');
-      console.log(sentences);
-      sentences.forEach(sentence => console.log(sentence));
+      const sentences = document.querySelectorAll(
+        '.sentence-board > .sentence-board-child > .member-sentence > span'
+      );
+      sentences.forEach((sentence) => (sentence.innerText = ''));
     },
     onDisconnect() {
       let isHost;
@@ -413,17 +432,17 @@ export default {
         })
       );
     },
-      // this.stompClient.send(
-      //   '/pub/speaking/exit',
-      //   {},
-      //   JSON.stringify({
-      //     roomId: this.getRoomId,
-      //     participantId: this.getUser.id,
-      //     participantName: this.getUser.name,
-      //   })
-      // );
-      // this.stompClient.disconnect();
-      // this.$router.push('/room/', this.getRoomId);
+    // this.stompClient.send(
+    //   '/pub/speaking/exit',
+    //   {},
+    //   JSON.stringify({
+    //     roomId: this.getRoomId,
+    //     participantId: this.getUser.id,
+    //     participantName: this.getUser.name,
+    //   })
+    // );
+    // this.stompClient.disconnect();
+    // this.$router.push('/room/', this.getRoomId);
     async onAnswerMessageReceived(payload) {
       this.talkFinish = true;
       const data = JSON.parse(payload.body);
@@ -436,7 +455,10 @@ export default {
         speakImg[this.answerIdx].src = this.speakImg[3];
         this.setMic(0);
         this.removeMic();
-        if (this.getUser.name === this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName) {
+        if (
+          this.getUser.name ===
+          this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName
+        ) {
           this.stompClient.send('/pub/speaking/change/player', {}, this.getRoomId);
         }
       } else {
@@ -469,15 +491,10 @@ export default {
       const data = JSON.parse(payload.body);
       this.isRecording = false;
       this.talkFinish = false;
-      console.log('------------------change player--------------');
-      console.log(data);
-      console.log(this.answerIdx);
-      console.log(this.room.teams[this.room.teamOrder[0]].members.length);
-      console.log('------------------change player--------------');
       // 다음 팀으로 넘겨야 하는 경우
       if (
-        data === 0 &&
-        this.answerIdx + 1 === this.room.teams[this.room.teamOrder[0]].members.length
+        data === 0
+        // && this.answerIdx + 1 === this.room.teams[this.room.teamOrder[0]].members.length
       ) {
         if (
           this.getUser.name ===
@@ -504,19 +521,17 @@ export default {
         }
       }
     },
-    onChangeTeam(payload) {
-      const data = JSON.parse(payload.body);
-      // 팀원들 싹 다시 뿌려주기
-      this.room = data;
-      this.setMic(2); // 이전 사람과 이번 팀의 index
-      // answerIdx 바꿔주기
-      this.answerIdx = 0;
-      // span 싹 지워주기
-      const sentences = document.querySelectorAll('.sentence-board > .sentence-board-child > .member-sentence > span');
-      console.log(sentences);
-      sentences.forEach(sentence => console.log(sentence));
-      // 0번에게 마이크 권한
-    },
+    // onChangeTeam(payload) {
+    //   const data = JSON.parse(payload.body);
+    //   // 팀원들 싹 다시 뿌려주기
+    //   this.room = data;
+    //   this.setMic(2); // 이전 사람과 이번 팀의 index
+    //   // answerIdx 바꿔주기
+    //   this.answerIdx = 0;
+    //   // span 싹 지워주기
+    //   const sentences = document.querySelectorAll('.sentence-board > .sentence-board-child > .member-sentence > span');
+    //   // 0번에게 마이크 권한
+    // },
     onModalMessageReceived(payload) {
       const flag = JSON.parse(payload.body);
       this.ordermodal = flag;
@@ -525,6 +540,6 @@ export default {
     sendGameStartTrigger: function() {
       this.stompClient.send(`/pub/ssafymind/close/modal`, {}, this.getRoomId);
     },
-  }
-}
+  },
+};
 </script>

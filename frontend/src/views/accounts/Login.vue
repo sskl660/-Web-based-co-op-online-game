@@ -19,12 +19,12 @@
       <router-link to="/signup">
         <button class="button-signup">회원가입하기</button>
       </router-link>
-      <p>소설 로그인</p>
+      <!-- <p>소설 로그인</p>
       <div>
         <div id="naverIdLogin" />
         <button @click="kakaoLogin">카카오 로그인</button>
         <button>구글 로그인</button>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
