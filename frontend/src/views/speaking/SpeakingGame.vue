@@ -43,7 +43,8 @@
             </div>
           </div>
         </div>
-        <img src="https://k5a302.p.ssafy.io/img/mic/mic-disabled.png" alt="mic img" class="game-mic-default" id="record" />
+        <img v-if="mic" src="@/assets/images/mic-enabled.png" alt="mic img" class="game-mic-default" id="record" />
+        <img v-else src="@/assets/images/mic-disabled.png" alt="mic img" class="game-mic-default" id="record" />
       </div>
 
       <!-- 아래는 나중에 사용할 아이들 -->
@@ -103,11 +104,12 @@ export default {
         '/img/speak/speak-fail.png',
         '/img/speak/speak-success.png',
       ],
-      micImg: ['../../../public/img/mic/mic-disabled.png', '../../../public/img/mic/mic-enabled.png'],
+      micImg: ['/img/mic/mic-disabled.png', '/img/mic/mic-enabled.png'],
       talkFinish: false,
       quiz: null,
       lastTeamLen: 0,
       talker: 0,
+      mic: false,
     };
   },
   created() {
@@ -312,7 +314,7 @@ export default {
     setMic: function(background) {
       const record = document.querySelector('#record');
       // record.src = require(this.micImg[1]);
-      record.src = 'https://k5a302.p.ssafy.io/img/mic/mic-enabled.png';
+      this.mic = true;
       if (background === 0) {
         return;
       } else if (background === 1) {
@@ -332,7 +334,8 @@ export default {
     },
     removeMic: function() {
       const record = document.querySelector('#record');
-      record.src = 'https://k5a302.p.ssafy.io/img/mic/mic-disabled.png';
+      // record.src = 'https://k5a302.p.ssafy.io/img/mic/mic-disabled.png';
+      this.mic = false;
       record.classList.remove('game-mic-on');
       record.classList.remove('game-mic-off');
     },
