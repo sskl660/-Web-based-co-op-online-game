@@ -380,9 +380,6 @@ export default {
         this.setMic(0);
         this.removeMic();
         if (this.getUser.name === this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName) {
-          console.log('이거 혹시 되냐???')
-          console.log('이거 혹시 되냐???')
-          console.log('이거 혹시 되냐???')
           this.stompClient.send('/pub/speaking/change/player', {}, this.getRoomId);
         }
       } else {
@@ -390,17 +387,11 @@ export default {
       }
     },
     onTalkingMessageReceived(payload) {
-      console.log('talking 시작')
-      console.log(this.talker)
-      console.log(this.answerIdx)
       const data = JSON.parse(payload.body);
       if (this.talker !== this.answerIdx && data.talker !== this.answerIdx && this.talker !== data.talker) {
         this.talker = data.talker;
         return
       }
-      console.log(data.talker);
-      console.log(data.sentence);
-      console.log('talking 끝')
       if (data.sentence === '') {
         this.talkFinish = false;
       }
