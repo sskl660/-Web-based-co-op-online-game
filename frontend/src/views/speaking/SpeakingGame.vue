@@ -254,8 +254,8 @@ export default {
               `/pub/speaking/answer/${this.getRoomId}`,
               {},
               JSON.stringify({
-                name: '안기훈',
-                teamNo: 1,
+                name: this.getUser.name,
+                teamNo: this.getUser.teamNo,
                 message: message,
                 correct: false,
               })
@@ -489,8 +489,8 @@ export default {
       this.talkFinish = false;
       // 다음 팀으로 넘겨야 하는 경우
       if (
-        data === 0 &&
-        this.answerIdx + 1 === this.room.teams[this.room.teamOrder[0]].members.length
+        data === 0
+        // && this.answerIdx + 1 === this.room.teams[this.room.teamOrder[0]].members.length
       ) {
         if (
           this.getUser.name ===
