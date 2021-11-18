@@ -108,10 +108,9 @@ export default {
       alert(`게임 내에서는 '뒤로가기'가 불가능합니다.`)
     }
     this.stompClient = socketConnect(this.onConnected, this.onError);
-    
   },
   mounted() {
-    this.stompClient.debug = function() {};
+    // this.stompClient.debug = function() {};
     // this.getAudio();
     this.translate();
   },
@@ -162,6 +161,7 @@ export default {
 
 
       speech.onresult = (event) => {
+        const talker = this.answerIdx;
         let interimTranscript = '';
         this.interimTranscript = '';
         if (typeof event.results === 'undefined') {
@@ -183,14 +183,16 @@ export default {
             this.interimTranscript += transcript;
           }
         }
-        this.stompClient.send(
-          `/pub/speaking/talk/${this.getRoomId}`,
-          {},
-          JSON.stringify({
-            sentence: finalTranscript + interimTranscript,
-            talker: this.answerIdx,
-          })
-        );
+        if(this.isRecording) {
+          this.stompClient.send(
+            `/pub/speaking/talk/${this.getRoomId}`,
+            {},
+            JSON.stringify({
+              sentence: finalTranscript + interimTranscript,
+              talker: talker,
+            })
+          );
+        }
       };
 
       speech.onerror = function(event) {
@@ -267,7 +269,6 @@ export default {
       // const stop = document.querySelector('#stop');
       // console.log(stop.src);
       // stop.addEventListener("click", () => {
-
       // })
 
       speech.addEventListener('result', (event) => {
@@ -376,8 +377,12 @@ export default {
       sentenceBox.innerText = await data.message;
       if (data.correct) {
         speakImg[this.answerIdx].src = this.speakImg[3];
+        this.setMic(0);
+        this.removeMic();
         if (this.getUser.name === this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName) {
-          this.removeMic();
+          console.log('이거 혹시 되냐???')
+          console.log('이거 혹시 되냐???')
+          console.log('이거 혹시 되냐???')
           this.stompClient.send('/pub/speaking/change/player', {}, this.getRoomId);
         }
       } else {
@@ -388,9 +393,12 @@ export default {
       console.log('talking 시작')
       console.log(this.talker)
       console.log(this.answerIdx)
-      if (this.talker !== this.answerIdx) return
       const data = JSON.parse(payload.body);
-      this.talker = data.talker;
+      if (this.talker !== this.answerIdx && data.talker !== this.answerIdx && this.talker !== data.talker) {
+        this.talker = data.talker;
+        return
+      }
+      console.log(data.talker);
       console.log(data.sentence);
       console.log('talking 끝')
       if (data.sentence === '') {
@@ -407,9 +415,15 @@ export default {
       const data = JSON.parse(payload.body);
       this.isRecording = false;
       this.talkFinish = false;
+      console.log('------------------change player--------------')
+      console.log(data)
+      console.log(this.room.teams[this.room.teamOrder[0]].members.length)
+      console.log('------------------change player--------------')
       // 다음 팀으로 넘겨야 하는 경우
-      if (data === this.room.teams[this.room.teamOrder[0]].members.length) {
-        this.stompClient.send('/pub/speaking/next/team', {}, this.getRoomId);
+      if (data === 0 && this.answerIdx + 1 === this.room.teams[this.room.teamOrder[0]].members.length) {
+        if (this.getUser.name === this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName) {
+          this.stompClient.send('/pub/speaking/next/team', {}, this.getRoomId);
+        }
       // 다른 선수로 넘겨야 하는 경우
       } else {
         this.answerIdx = data;
@@ -428,6 +442,8 @@ export default {
       this.room = data;
       this.setMic(2); // 이전 사람과 이번 팀의 index
       this.answerIdx = 0;
+      console.log('===================onTeamChange==================')
+      console.log('==================onTeamChange===================')
       // answerIdx 바꿔주기
       // 팀원들 싹 다시 뿌려주기
       // span 싹 지워주기
