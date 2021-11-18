@@ -45,6 +45,7 @@
         </div>
         <img v-if="showMic" :src="micImg[1]" alt="mic img" class="game-mic-default" id="record" />
         <img v-else :src="micImg[0]" alt="mic img" class="game-mic-default" id="record" />
+        <img src="@/assets/bronze-place.png" alt="mic img" class="game-mic-default" id="record1" />
       </div>
 
       <!-- 아래는 나중에 사용할 아이들 -->
@@ -104,7 +105,7 @@ export default {
         '/img/speak/speak-fail.png',
         '/img/speak/speak-success.png',
       ],
-      micImg: ['/img/mic/mic-disabled.png', '/img/mic/mic-enabled.png'],
+      micImg: ['/img/mic/mic-di.png', '/img/mic/mic-en.png'],
       talkFinish: false,
       quiz: null,
       lastTeamLen: 0,
