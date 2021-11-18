@@ -43,7 +43,7 @@
             </div>
           </div>
         </div>
-        <img :src="require('../../../public/img/mic/mic-disabled.png')" alt="mic img" class="game-mic-default" id="record" />
+        <img src="https://k5a302.p.ssafy.io/img/mic/mic-disabled.png" alt="mic img" class="game-mic-default" id="record" />
       </div>
 
       <!-- 아래는 나중에 사용할 아이들 -->
@@ -312,7 +312,7 @@ export default {
     setMic: function(background) {
       const record = document.querySelector('#record');
       // record.src = require(this.micImg[1]);
-      record.src = require('../../../public/img/mic/mic-enabled.png');
+      record.src = 'https://k5a302.p.ssafy.io/img/mic/mic-enabled.png';
       if (background === 0) {
         return;
       } else if (background === 1) {
@@ -332,7 +332,7 @@ export default {
     },
     removeMic: function() {
       const record = document.querySelector('#record');
-      record.src = require('../../../public/img/mic/mic-disabled.png');
+      record.src = 'https://k5a302.p.ssafy.io/img/mic/mic-disabled.png';
       record.classList.remove('game-mic-on');
       record.classList.remove('game-mic-off');
     },
