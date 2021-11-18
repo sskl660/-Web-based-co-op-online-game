@@ -156,6 +156,7 @@ import SSazipjumpGuideModal from '@/components/ssazipjump/SSazipjumpGuideModal.v
 import SSazipjumpStartModal from '@/components/ssazipjump/SSazipjumpStartModal.vue';
 import SSazipjumpRoundModal from '@/components/ssazipjump/SSazipjumpRoundModal.vue';
 import SSazipjumpRankModal from '@/components/ssazipjump/SSazipjumpRankModal.vue';
+import swal from 'sweetalert';
 
 export default {
     name: 'SSazipJump',
@@ -1473,7 +1474,14 @@ export default {
             if (info == null) {
                 //방장 퇴장
                 this.onDisconnect();
-                alert('방장이 퇴장하여 게임이 종료됩니다!');
+                swal({
+                    // className:'alert',
+                    title: '방장이 퇴장하여 게임이 종료됩니다!',
+                    icon: "/img/ssazip-logo.png",
+                    buttons: {
+                    text: '확인',
+                },
+                })
                 // 모든 참가자 내보내기
                 this.$router.push('/room');
                 return;
@@ -1481,7 +1489,14 @@ export default {
             if (info.type == 400) {
                 //방장 퇴장
                 this.onDisconnect();
-                alert('알 수 없는 오류로 게임이 종료됩니다!');
+                swal({
+                    // className:'alert',
+                    title: '알 수 없는 오류로 게임이 종료됩니다!',
+                    icon: "/img/ssazip-logo.png",
+                    buttons: {
+                    text: '확인',
+                },
+                })
                 // 모든 참가자 내보내기
                 this.$router.push('/room');
                 return;
@@ -1839,7 +1854,14 @@ export default {
         history.pushState(null, null, location.href);
         window.onpopstate = () => {
             history.go(1);
-            alert(`게임 내에서는 '뒤로가기'가 불가능합니다.`)
+            swal({
+                // className:'alert',
+                title: "게임 내에서는 뒤로가기가 불가합니다.",
+                icon: "/img/ssazip-logo.png",
+                buttons: {
+                text: '확인',
+                },
+            })
         }
         // // 소켓 연결
         // this.stompClient = socketConnect(this.onConnected, this.onError);
