@@ -150,6 +150,8 @@ export default {
       let ignoreEndProcess = false;
       let finalTranscript = '';
 
+      // 오류를 막기 위한 console
+      console.log(isRecognizing);
       // 원하는 언어를 앞으로 뺴라(해당 언어만 지원)
       // 비어있으면 영어, 한국어 둘 다 지원(한국어 우선)
       speech.lang = ['ko-KR', 'en-US'];
@@ -162,7 +164,6 @@ export default {
 
       speech.onend = function() {
         isRecognizing = false;
-        console.log(isRecognizing);
 
         if (ignoreEndProcess) {
           return false;
@@ -189,8 +190,8 @@ export default {
           if (event.results[i].isFinal) {
             finalTranscript += transcript;
             this.finalTranscript += transcript;
-            console.log('파이널', finalTranscript);
-            console.log('파이널', transcript);
+            // console.log('파이널', finalTranscript);
+            // console.log('파이널', transcript);
           } else {
             interimTranscript += transcript;
             this.interimTranscript += transcript;
@@ -221,9 +222,6 @@ export default {
             this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName &&
           !this.isRecording
         ) {
-          console.log(
-            this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName
-          );
           this.isRecording = true;
           return;
         } else if (
@@ -242,9 +240,6 @@ export default {
             if (finalTranscript === this.finalTranscript) {
               message = this.finalTranscript + this.interimTranscript;
             }
-            console.log('-----------------');
-            console.log(message);
-            console.log('-----------------');
 
             this.stompClient.send(
               `/pub/speaking/answer/${this.getRoomId}`,
@@ -323,7 +318,7 @@ export default {
       record.classList.remove('game-mic');
     },
     setAudio: function() {
-      console.log('');
+
     },
     /**
      * 소켓 통신
@@ -391,12 +386,10 @@ export default {
         this.setAudio(); // 이전 사람과 이번 턴의 index
         // 마이크 아이콘 변경
         this.setMic(2);
-        console.log('hi!!');
       }
       // span 싹 지워주기
       const sentences = document.querySelectorAll('.sentence-board > .sentence-board-child > .member-sentence > span');
-      console.log(sentences);
-      sentences.forEach(sentence => console.log(sentence));
+      sentences.forEach(sentence => sentence.innerText = '');
     },
     onDisconnect() {
       let isHost;
@@ -469,11 +462,6 @@ export default {
       const data = JSON.parse(payload.body);
       this.isRecording = false;
       this.talkFinish = false;
-      console.log('------------------change player--------------');
-      console.log(data);
-      console.log(this.answerIdx);
-      console.log(this.room.teams[this.room.teamOrder[0]].members.length);
-      console.log('------------------change player--------------');
       // 다음 팀으로 넘겨야 하는 경우
       if (
         data === 0 &&
@@ -504,19 +492,17 @@ export default {
         }
       }
     },
-    onChangeTeam(payload) {
-      const data = JSON.parse(payload.body);
-      // 팀원들 싹 다시 뿌려주기
-      this.room = data;
-      this.setMic(2); // 이전 사람과 이번 팀의 index
-      // answerIdx 바꿔주기
-      this.answerIdx = 0;
-      // span 싹 지워주기
-      const sentences = document.querySelectorAll('.sentence-board > .sentence-board-child > .member-sentence > span');
-      console.log(sentences);
-      sentences.forEach(sentence => console.log(sentence));
-      // 0번에게 마이크 권한
-    },
+    // onChangeTeam(payload) {
+    //   const data = JSON.parse(payload.body);
+    //   // 팀원들 싹 다시 뿌려주기
+    //   this.room = data;
+    //   this.setMic(2); // 이전 사람과 이번 팀의 index
+    //   // answerIdx 바꿔주기
+    //   this.answerIdx = 0;
+    //   // span 싹 지워주기
+    //   const sentences = document.querySelectorAll('.sentence-board > .sentence-board-child > .member-sentence > span');
+    //   // 0번에게 마이크 권한
+    // },
     onModalMessageReceived(payload) {
       const flag = JSON.parse(payload.body);
       this.ordermodal = flag;

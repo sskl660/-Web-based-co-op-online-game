@@ -9,7 +9,7 @@
                 <img
                   v-if="gameType"
                   img
-                  src="@/assets/images/mike.png"
+                  src="@/assets/images/ssazip-home.png"
                   id="ssafymind-explain-img"
                   alt=""
                 />
