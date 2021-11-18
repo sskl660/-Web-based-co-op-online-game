@@ -429,10 +429,9 @@ export default {
 
                 //마스터 요청시 장애물 생성
                 if (this.getIsLogin && this.obstacleflag) {
-                    
                     if (cntTime > this.time) {
                         document.getElementById('ssazipbg').style.animationPlayState = 'running';
-            document.getElementById('ssazipbg2').style.animationPlayState = 'running'
+                        document.getElementById('ssazipbg2').style.animationPlayState = 'running';
                         this.time++;
                         if (this.xArr.length == 0) {
                             this.xArr.push(1200); //장애물 배열 생성
@@ -880,7 +879,7 @@ export default {
         ///////////////동작 순으로 배치
         //13. 가이드모달 시작시 필요 여부 확인 통신
         checkNeedGuideModalSending() {
-            console.log("checkNeedGuideModalSending")
+            console.log('checkNeedGuideModalSending');
             this.stompClient.send(
                 '/pub/game/jump/modal/checker',
                 {},
@@ -1211,7 +1210,7 @@ export default {
                 //next level
                 //게임 종료 상황
                 if (this.nextRemainRound == 0) {
-                    console.log("게임종료")
+                    console.log('게임종료');
                     // isFinalGameFlag=true;
                     //더 이상 다음 레벨은 없습니다.
                     //결산 배열 제작
@@ -1382,9 +1381,33 @@ export default {
                 // this.teamOrderNext = info.teamOrderNext;
                 this.teamIdx1 = info.teamIdx1;
                 this.teamIdx2 = info.teamIdx2;
-                if (this.teamOrder.length > 2) {
-                    this.nextBattleTeam1 = info.teamOrder[info.teamIdx1 + 2];
-                    this.nextBattleTeam2 = info.teamOrder[info.teamIdx1 + 2];
+                //다음 경기 출력을 위한 계산
+                //다음판이 다음 강 일때
+                if (this.remainRound != this.nextRemainRound) {
+                    if (this.nextRemainRound == 1) {
+                        //현재 판이 결승
+                        //결산 호출
+                        this.nextBattleTeam1 = 20;
+                        this.nextBattleTeam2 = 20;
+                    } else {
+                        //다음 강의 번호
+                        this.nextBattleTeam1 = info.teamOrderNext[0];
+                        if (info.teamOrderNext.length == 1) {
+                            //현재가 3강이라면 아직 이라
+                            this.nextBattleTeam2 = 30;
+                        } else {
+                            this.nextBattleTeam2 = info.teamOrderNext[1];
+                        }
+                    }
+                }
+                //다음 판이 현재 강 일때
+                else {
+                    if (this.teamOrder.length > info.teamIdx1 + 2) {
+                        this.nextBattleTeam1 = info.teamOrder[info.teamIdx1 + 2];
+                    }
+                    if (this.teamOrder.length > info.teamIdx2 + 2) {
+                        this.nextBattleTeam2 = info.teamOrder[info.teamIdx2 + 2];
+                    }
                 }
                 // this.setUsersByMaster();
                 this.setUsers();
@@ -1417,10 +1440,6 @@ export default {
                 this.teamOrderNext = info.teamOrderNext;
                 this.teamIdx1 = info.teamIdx1;
                 this.teamIdx2 = info.teamIdx2;
-                if (this.teamOrder.length > 2) {
-                    this.nextBattleTeam1 = info.teamOrder[info.teamIdx1 + 2];
-                    this.nextBattleTeam2 = info.teamOrder[info.teamIdx1 + 2];
-                }
 
                 //다음 경기 출력을 위한 계산
                 //다음판이 다음 강 일때
@@ -1433,16 +1452,22 @@ export default {
                     } else {
                         //다음 강의 번호
                         this.nextBattleTeam1 = info.teamOrderNext[0];
-                        if (info.teamOrderNext.length != 1) {
+                        if (info.teamOrderNext.length == 1) {
                             //현재가 3강이라면 아직 이라
+                            this.nextBattleTeam2 = 30;
+                        } else {
                             this.nextBattleTeam2 = info.teamOrderNext[1];
                         }
                     }
                 }
                 //다음 판이 현재 강 일때
                 else {
-                    this.nextBattleTeam1 = info.teamOrder[info.teamIdx1 + 2];
-                    this.nextBattleTeam2 = info.teamOrder[info.teamIdx2 + 2];
+                    if (this.teamOrder.length > info.teamIdx1 + 2) {
+                        this.nextBattleTeam1 = info.teamOrder[info.teamIdx1 + 2];
+                    }
+                    if (this.teamOrder.length > info.teamIdx2 + 2) {
+                        this.nextBattleTeam2 = info.teamOrder[info.teamIdx2 + 2];
+                    }
                 }
                 this.setUsers();
             }
@@ -1472,9 +1497,33 @@ export default {
                 this.teamOrderNext = info.teamOrderNext;
                 this.teamIdx1 = info.teamIdx1;
                 this.teamIdx2 = info.teamIdx2;
-                if (this.teamOrder.length > 2) {
+                //다음 경기 출력을 위한 계산
+                //다음판이 다음 강 일때
+                if (this.remainRound != this.nextRemainRound) {
+                    if (this.nextRemainRound == 1) {
+                        //현재 판이 결승
+                        //결산 호출
+                        this.nextBattleTeam1 = 20;
+                        this.nextBattleTeam2 = 20;
+                    } else {
+                        //다음 강의 번호
+                        this.nextBattleTeam1 = info.teamOrderNext[0];
+                        if (info.teamOrderNext.length == 1) {
+                            //현재가 3강이라면 아직 이라
+                            this.nextBattleTeam2 = 30;
+                        } else {
+                            this.nextBattleTeam2 = info.teamOrderNext[1];
+                        }
+                    }
+                }
+                //다음 판이 현재 강 일때
+                else {
+                                    if (this.teamOrder.length > info.teamIdx1 + 2) {
                     this.nextBattleTeam1 = info.teamOrder[info.teamIdx1 + 2];
-                    this.nextBattleTeam2 = info.teamOrder[info.teamIdx1 + 2];
+                }
+                if (this.teamOrder.length > info.teamIdx2 + 2) {
+                    this.nextBattleTeam2 = info.teamOrder[info.teamIdx2 + 2];
+                }
                 }
                 this.drawSsazip();
             }
