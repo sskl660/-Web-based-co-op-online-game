@@ -7,9 +7,9 @@
             <div class="modal-body">
               <div class="game-explain-explainbox">
                 <img
-                  v-if="gameType"
+                  v-if="gameType === 'speaking'"
                   img
-                  src="@/assets/images/ssazip-home.png"
+                  src="@/assets/images/speaking-modal.png"
                   id="ssafymind-explain-img"
                   alt=""
                 />
@@ -19,7 +19,10 @@
                   id="ssafymind-explain-img"
                   alt=""
                 />
-                <button class="understand-btn" @click="closeExplainModal">
+                <button v-if="gameType === 'speaking'" class="speaking-understand-btn" @click="closeExplainModal">
+                  알겠습니다!
+                </button>
+                <button v-else class="understand-btn" @click="closeExplainModal">
                   알겠습니다!
                 </button>
               </div>
