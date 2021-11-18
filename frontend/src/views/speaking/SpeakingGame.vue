@@ -11,7 +11,16 @@
     />
     <Header v-bind:gameTitle="'또박또박 말해요'" :host="getUser.id" @onDisconnect="onDisconnect" />
     <div class="game-screen">
-      <GameStatus game="speak" />
+      <GameStatus
+        game="speak"
+        v-bind:teamOrder="room.teamOrder"
+        v-bind:teams="room.teams"
+        v-bind:curPlayer="room.curPlayer"
+        v-bind:scores="room.scores"
+        v-bind:curTeam="room.curTeam"
+        v-bind:curTeamCnt="room.curTeamCnt"
+        v-if="room != null"
+      />
       <div class="game-board">
         <p class="sentence">"{{ quiz }}"</p>
         <div v-for="(member, i) in teamMember" :key="i" class="sentence-board" id="sentence-board">
@@ -106,14 +115,14 @@ export default {
     window.onpopstate = () => {
       history.go(1);
       swal({
-          // className:'alert',
-          title: "게임 내에서는 뒤로가기가 불가능합니다.",
-          icon: "/img/ssazip-logo.png",
-          buttons: {
+        // className:'alert',
+        title: '게임 내에서는 뒤로가기가 불가능합니다.',
+        icon: '/img/ssazip-logo.png',
+        buttons: {
           text: '확인',
         },
-      })
-    }
+      });
+    };
     this.stompClient = socketConnect(this.onConnected, this.onError);
   },
   mounted() {
@@ -136,12 +145,12 @@ export default {
       if (typeof webkitSpeechRecognition !== 'function') {
         swal({
           // className:'alert',
-          title: "크롬에서만 동작합니다.",
-          icon: "/img/ssazip-logo.png",
+          title: '크롬에서만 동작합니다.',
+          icon: '/img/ssazip-logo.png',
           buttons: {
-          text: '확인',
-        },
-      })
+            text: '확인',
+          },
+        });
         return false;
       }
       const speech = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -365,12 +374,12 @@ export default {
         this.$router.push('/room/' + this.getRoomId).catch(() => {});
         this.stompClient.disconnect();
         swal({
-          title: "방장이 퇴장하여 게임이 종료됩니다!",
-          icon: "/img/ssazip-logo.png",
+          title: '방장이 퇴장하여 게임이 종료됩니다!',
+          icon: '/img/ssazip-logo.png',
           buttons: {
             text: '확인',
           },
-        })
+        });
         return;
       }
       // if (payload.body == 'exit') {
@@ -383,10 +392,14 @@ export default {
       // }
       const data = JSON.parse(payload.body);
       this.room = data;
+      console.log(this.room);
       this.quiz = data.quizzes[data.quizzes.length - 1].problem;
       this.answerIdx = 0;
       await this.setTeamMembers();
-      if (this.getUser.name === data.teams[data.teamOrder[0]].members[0].participantName) {
+      if (
+        data.teams[data.teamOrder[0]].members.length != 0 &&
+        this.getUser.name === data.teams[data.teamOrder[0]].members[0].participantName
+      ) {
         // 마이크 권한 주기
         this.setAudio(); // 이전 사람과 이번 턴의 index
         // 마이크 아이콘 변경
@@ -394,9 +407,11 @@ export default {
         console.log('hi!!');
       }
       // span 싹 지워주기
-      const sentences = document.querySelectorAll('.sentence-board > .sentence-board-child > .member-sentence > span');
+      const sentences = document.querySelectorAll(
+        '.sentence-board > .sentence-board-child > .member-sentence > span'
+      );
       console.log(sentences);
-      sentences.forEach(sentence => console.log(sentence));
+      sentences.forEach((sentence) => console.log(sentence));
     },
     onDisconnect() {
       let isHost;
@@ -413,17 +428,17 @@ export default {
         })
       );
     },
-      // this.stompClient.send(
-      //   '/pub/speaking/exit',
-      //   {},
-      //   JSON.stringify({
-      //     roomId: this.getRoomId,
-      //     participantId: this.getUser.id,
-      //     participantName: this.getUser.name,
-      //   })
-      // );
-      // this.stompClient.disconnect();
-      // this.$router.push('/room/', this.getRoomId);
+    // this.stompClient.send(
+    //   '/pub/speaking/exit',
+    //   {},
+    //   JSON.stringify({
+    //     roomId: this.getRoomId,
+    //     participantId: this.getUser.id,
+    //     participantName: this.getUser.name,
+    //   })
+    // );
+    // this.stompClient.disconnect();
+    // this.$router.push('/room/', this.getRoomId);
     async onAnswerMessageReceived(payload) {
       this.talkFinish = true;
       const data = JSON.parse(payload.body);
@@ -436,7 +451,10 @@ export default {
         speakImg[this.answerIdx].src = this.speakImg[3];
         this.setMic(0);
         this.removeMic();
-        if (this.getUser.name === this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName) {
+        if (
+          this.getUser.name ===
+          this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName
+        ) {
           this.stompClient.send('/pub/speaking/change/player', {}, this.getRoomId);
         }
       } else {
@@ -512,9 +530,11 @@ export default {
       // answerIdx 바꿔주기
       this.answerIdx = 0;
       // span 싹 지워주기
-      const sentences = document.querySelectorAll('.sentence-board > .sentence-board-child > .member-sentence > span');
+      const sentences = document.querySelectorAll(
+        '.sentence-board > .sentence-board-child > .member-sentence > span'
+      );
       console.log(sentences);
-      sentences.forEach(sentence => console.log(sentence));
+      sentences.forEach((sentence) => console.log(sentence));
       // 0번에게 마이크 권한
     },
     onModalMessageReceived(payload) {
@@ -525,6 +545,6 @@ export default {
     sendGameStartTrigger: function() {
       this.stompClient.send(`/pub/ssafymind/close/modal`, {}, this.getRoomId);
     },
-  }
-}
+  },
+};
 </script>
