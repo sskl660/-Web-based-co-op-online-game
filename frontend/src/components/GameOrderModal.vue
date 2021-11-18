@@ -7,9 +7,9 @@
             <div class="modal-body">
               <div class="game-explain-explainbox">
                 <img
-                  v-if="gameType"
+                  v-if="gameType === 'speaking'"
                   img
-                  src="@/assets/images/ssazip-home.png"
+                  src="@/assets/images/speakingModal.png"
                   id="ssafymind-explain-img"
                   alt=""
                 />
