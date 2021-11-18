@@ -35,7 +35,7 @@
           <div style="margin-top:50px">
             <div v-for="(score, idx) in curScore" :key="idx">
               <div v-if="idx >= 3">
-                <span class="rank-list-item-rank">{{ idx+1 }}등</span>
+                <span class="rank-list-item-rank">{{ idx + 1 }}등</span>
                 <span class="rank-list-item-team">{{ score[0] }}팀</span>
               </div>
             </div>

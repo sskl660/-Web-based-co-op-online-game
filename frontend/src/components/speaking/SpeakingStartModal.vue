@@ -13,7 +13,7 @@
 							<img class="ssazip-spacebar2 blinking" src="~@/assets/spacebar.png" alt="" />
 						</div>
 						<button v-if="userId==hostId" class="start-game-btn" @click="startModal">시작</button>
-						<button v-if="userId!=hostId" class="start-game-btn">준비!!</button>
+						<button v-else-if="userId!=hostId" class="start-game-btn">준비!!</button>
 					</div>
 				</div>
 			</div>
