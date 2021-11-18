@@ -10,7 +10,7 @@
             :hostId="hostId"
             @getCloseModal="closeRoundModal"
         />
-        <SSazipjumpRankModal v-if="rankModalOpenFlag == true" :userId="userId" :hostId="hostId" @getCloseModal="closeStartModal" />
+        <SSazipjumpRankModal v-if="rankModalOpenFlag == true" :userId="userId" :hostId="hostId" :finalScore="finalScore" @getCloseModal="closeStartModal" />
         <Header v-bind:gameTitle="'싸집이 점프 게임'" :host="getUser.id" />
         <!-- <button @click="showRound()">dd</button> -->
         <div style="display:flex; justify-content:center">
@@ -156,6 +156,7 @@ import SSazipjumpGuideModal from '@/components/ssazipjump/SSazipjumpGuideModal.v
 import SSazipjumpStartModal from '@/components/ssazipjump/SSazipjumpStartModal.vue';
 import SSazipjumpRoundModal from '@/components/ssazipjump/SSazipjumpRoundModal.vue';
 import SSazipjumpRankModal from '@/components/ssazipjump/SSazipjumpRankModal.vue';
+import swal from 'sweetalert';
 
 export default {
     name: 'SSazipJump',
@@ -951,7 +952,7 @@ export default {
         //1. 게임 방 퇴장 소켓 연결 해제 및 게임 방 유저 정보 삭제
         onDisconnect() {
             this.stompClient.send(
-                '/pub/jump/exit',
+                '/pub/game/jump/exit',
                 {},
                 JSON.stringify({
                     roomId: this.getRoomId,
@@ -979,8 +980,8 @@ export default {
                     }
                 }
             }
-            this.stompClient.disconnect();
-            this.$router.push('/room/' + this.getRoomId);
+            // this.stompClient.disconnect();
+            // this.$router.push('/room/' + this.getRoomId);
         },
         //4. close modal
         closeGuideModalReqSending() {
@@ -1342,6 +1343,12 @@ export default {
         ////////////////////// 메세지 수신 ///////////////////
         ////////////////////// 메세지 수신 ///////////////////
         onMessageReceived(payload) {
+            console.log(payload)
+            if(payload.body=="exit"){
+                console.log("eeeeeeeeeee");
+                this.rankModalOpenFlag = true;
+                return;
+            }
             let info = JSON.parse(payload.body);
             console.log('======got mes=========');
             console.log(info);
@@ -1528,20 +1535,41 @@ export default {
                 this.drawSsazip();
             }
             //1. 방장 종료
-            if (info == null) {
+            if (info == 'exit') {
+                //랭크 표현
+                this.rankModalOpenFlag = true;
                 //방장 퇴장
-                this.onDisconnect();
-                alert('방장이 퇴장하여 게임이 종료됩니다!');
+                
+                // this.onDisconnect();
+                swal({
+                    // className:'alert',
+                    title: '방장이 퇴장하여 게임이 종료됩니다!',
+                    icon: "/img/ssazip-logo.png",
+                    buttons: {
+                    text: '확인',
+                },
+                })
                 // 모든 참가자 내보내기
-                this.$router.push('/');
+                // this.$router.push('/');
+                // this.$router.push('/room/' + this.getRoomId).catch(() => {});
+
                 return;
             }
             if (info.type == 400) {
                 //방장 퇴장
                 this.onDisconnect();
-                alert('알 수 없는 오류로 게임이 종료됩니다!');
+                swal({
+                    // className:'alert',
+                    title: '알 수 없는 오류로 게임이 종료됩니다!',
+                    icon: "/img/ssazip-logo.png",
+                    buttons: {
+                    text: '확인',
+                },
+                })
                 // 모든 참가자 내보내기
-                this.$router.push('/');
+                        this.$router.push('/room/' + this.getRoomId).catch(() => {});
+
+                // this.$router.push('/');
                 return;
             }
 
@@ -1902,8 +1930,15 @@ export default {
         history.pushState(null, null, location.href);
         window.onpopstate = () => {
             history.go(1);
-            alert(`게임 내에서는 '뒤로가기'가 불가능합니다.`);
-        };
+            swal({
+                // className:'alert',
+                title: "게임 내에서는 뒤로가기가 불가합니다.",
+                icon: "/img/ssazip-logo.png",
+                buttons: {
+                text: '확인',
+                },
+            })
+        }
         // // 소켓 연결
         // this.stompClient = socketConnect(this.onConnected, this.onError);
         // 방정보 초기화
