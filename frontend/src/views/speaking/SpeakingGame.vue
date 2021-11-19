@@ -9,6 +9,12 @@
       v-on:sendGameStartTrigger="sendGameStartTrigger"
       :gameType="'speaking'"
     />
+    <SpeakAnswerModal
+      v-if="answermodal == true"
+      @getCloseAnsModal="getCloseAnsModal"
+      v-bind:teamOrder="room.teamOrder"
+      v-bind:host="room.host"
+    />
     <Header v-bind:gameTitle="'또박또박 말해요'" :host="getUser.id" @onDisconnect="onDisconnect" />
     <div class="game-screen">
       <GameStatus
@@ -43,7 +49,8 @@
             </div>
           </div>
         </div>
-        <img src="https://k5a302.p.ssafy.io/img/mic/mic-disabled.png" alt="mic img" class="game-mic-default" id="record" />
+        <img v-if="showMic" :src="micImg[1]" alt="mic img" class="game-mic-default" id="record" />
+        <img v-else :src="micImg[0]" alt="mic img" class="game-mic-default" id="record" />
       </div>
 
       <!-- 아래는 나중에 사용할 아이들 -->
@@ -68,6 +75,7 @@ import { mapGetters } from 'vuex';
 import { socketConnect } from '@/util/socket-common.js';
 import Header from '@/components/common/Header.vue';
 import GameOrderModal from '@/components/GameOrderModal';
+import SpeakAnswerModal from '@/components/speaking/SpeakAnswerModal';
 import GameStatus from '@/components/GameStatus.vue';
 import swal from 'sweetalert';
 
@@ -77,10 +85,12 @@ export default {
     Header,
     GameStatus,
     GameOrderModal,
+    SpeakAnswerModal,
   },
   data: () => {
     return {
       ordermodal: true,
+      answermodal: false,
       record: {},
       stop: {},
       soundClips: {},
@@ -103,11 +113,12 @@ export default {
         '/img/speak/speak-fail.png',
         '/img/speak/speak-success.png',
       ],
-      micImg: ['../../../public/img/mic/mic-disabled.png', '../../../public/img/mic/mic-enabled.png'],
+      micImg: ['/img/mic/mic-di.png', '/img/mic/mic-en.png'],
       talkFinish: false,
       quiz: null,
       lastTeamLen: 0,
       talker: 0,
+      showMic: false,
     };
   },
   created() {
@@ -131,7 +142,7 @@ export default {
     this.translate();
   },
   destroyed() {
-    // this.onDisconnect();
+    this.onDisconnect();
   },
   watch: {},
   computed: {
@@ -312,7 +323,7 @@ export default {
     setMic: function(background) {
       const record = document.querySelector('#record');
       // record.src = require(this.micImg[1]);
-      record.src = 'https://k5a302.p.ssafy.io/img/mic/mic-enabled.png';
+      this.showMic = true;
       if (background === 0) {
         return;
       } else if (background === 1) {
@@ -332,7 +343,8 @@ export default {
     },
     removeMic: function() {
       const record = document.querySelector('#record');
-      record.src = 'https://k5a302.p.ssafy.io/img/mic/mic-disabled.png';
+      // record.src = 'https://k5a302.p.ssafy.io/img/mic/mic-disabled.png';
+      this.showMic = false;
       record.classList.remove('game-mic-on');
       record.classList.remove('game-mic-off');
     },
@@ -385,14 +397,6 @@ export default {
         });
         return;
       }
-      // if (payload.body == 'exit') {
-      //   // 모든 참가자의 연결을 끊고
-      //   this.onDisconnect();
-      //   alert('방장이 퇴장하여 게임이 종료됩니다!');
-      //   // 모든 참가자 내보내기
-      //   this.$router.push('/room/' + this.getRoomId);
-      //   return;
-      // }
       const data = JSON.parse(payload.body);
       this.room = data;
       console.log(this.room);
@@ -412,7 +416,13 @@ export default {
       const sentences = document.querySelectorAll(
         '.sentence-board > .sentence-board-child > .member-sentence > span'
       );
-      sentences.forEach((sentence) => (sentence.innerText = ''));
+      const speakImg = document.querySelectorAll('.member-name > img');
+
+      sentences.forEach((sentence, idx) => {
+        sentence.innerText = '';
+        speakImg[idx].src = this.speakImg[0];
+      });
+
     },
     onDisconnect() {
       let isHost;
@@ -429,17 +439,6 @@ export default {
         })
       );
     },
-    // this.stompClient.send(
-    //   '/pub/speaking/exit',
-    //   {},
-    //   JSON.stringify({
-    //     roomId: this.getRoomId,
-    //     participantId: this.getUser.id,
-    //     participantName: this.getUser.name,
-    //   })
-    // );
-    // this.stompClient.disconnect();
-    // this.$router.push('/room/', this.getRoomId);
     async onAnswerMessageReceived(payload) {
       this.talkFinish = true;
       const data = JSON.parse(payload.body);
@@ -450,12 +449,12 @@ export default {
       sentenceBox.innerText = await data.message;
       if (data.correct) {
         speakImg[this.answerIdx].src = this.speakImg[3];
-        this.setMic(0);
-        this.removeMic();
         if (
           this.getUser.name ===
           this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName
         ) {
+          this.setMic(0);
+          this.removeMic();
           this.stompClient.send('/pub/speaking/change/player', {}, this.getRoomId);
         }
       } else {
@@ -493,6 +492,7 @@ export default {
         data === 0
         // && this.answerIdx + 1 === this.room.teams[this.room.teamOrder[0]].members.length
       ) {
+        this.answermodal = true;
         if (
           this.getUser.name ===
           this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName
@@ -532,9 +532,14 @@ export default {
     onModalMessageReceived(payload) {
       const flag = JSON.parse(payload.body);
       this.ordermodal = flag;
+      this.answermodal = flag;
     },
     onError() {},
     sendGameStartTrigger: function() {
+      this.stompClient.send(`/pub/ssafymind/close/modal`, {}, this.getRoomId);
+    },
+    getCloseAnsModal: function(answermodal) {
+      this.answermodal = answermodal;
       this.stompClient.send(`/pub/ssafymind/close/modal`, {}, this.getRoomId);
     },
   },

@@ -338,12 +338,19 @@
   cursor: pointer;
 }
 
-.waiting-room #game-title {
+.waiting-room > .room-title > #game-title {
+  font-weight: bold;
+  font-size: 2rem;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* .waiting-room > .room-title > #game-title {
   font-weight: bold;
   font-size: 2rem;
   float: left;
   margin-left: 3%;
-}
+} */
 
 .waiting-room #game-code {
   float: right;
