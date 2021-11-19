@@ -15,7 +15,7 @@
       v-bind:teamOrder="room.teamOrder"
       v-bind:host="room.host"
     />
-    <Header v-bind:gameTitle="'또박또박 말해요'" :host="getUser.id" @onDisconnect="onDisconnect" />
+    <Header v-bind:gameTitle="'또박또박 말해요'" :host="room.host" @onDisconnect="onDisconnect" />
     <div class="game-screen">
       <GameStatus
         game="speak"
