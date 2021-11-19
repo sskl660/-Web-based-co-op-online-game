@@ -142,7 +142,7 @@ export default {
     this.translate();
   },
   destroyed() {
-    // this.onDisconnect();
+    this.onDisconnect();
   },
   watch: {},
   computed: {
@@ -397,14 +397,6 @@ export default {
         });
         return;
       }
-      // if (payload.body == 'exit') {
-      //   // 모든 참가자의 연결을 끊고
-      //   this.onDisconnect();
-      //   alert('방장이 퇴장하여 게임이 종료됩니다!');
-      //   // 모든 참가자 내보내기
-      //   this.$router.push('/room/' + this.getRoomId);
-      //   return;
-      // }
       const data = JSON.parse(payload.body);
       this.room = data;
       console.log(this.room);
@@ -447,17 +439,6 @@ export default {
         })
       );
     },
-    // this.stompClient.send(
-    //   '/pub/speaking/exit',
-    //   {},
-    //   JSON.stringify({
-    //     roomId: this.getRoomId,
-    //     participantId: this.getUser.id,
-    //     participantName: this.getUser.name,
-    //   })
-    // );
-    // this.stompClient.disconnect();
-    // this.$router.push('/room/', this.getRoomId);
     async onAnswerMessageReceived(payload) {
       this.talkFinish = true;
       const data = JSON.parse(payload.body);
