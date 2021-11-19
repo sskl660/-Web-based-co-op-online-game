@@ -9,6 +9,12 @@
       v-on:sendGameStartTrigger="sendGameStartTrigger"
       :gameType="'speaking'"
     />
+    <SpeakAnswerModal
+      v-if="answermodal == true"
+      @getCloseAnsModal="getCloseAnsModal"
+      v-bind:teamOrder="room.teamOrder"
+      v-bind:host="room.host"
+    />
     <Header v-bind:gameTitle="'또박또박 말해요'" :host="getUser.id" @onDisconnect="onDisconnect" />
     <div class="game-screen">
       <GameStatus
@@ -69,6 +75,7 @@ import { mapGetters } from 'vuex';
 import { socketConnect } from '@/util/socket-common.js';
 import Header from '@/components/common/Header.vue';
 import GameOrderModal from '@/components/GameOrderModal';
+import SpeakAnswerModal from '@/components/speaking/SpeakAnswerModal';
 import GameStatus from '@/components/GameStatus.vue';
 import swal from 'sweetalert';
 
@@ -78,10 +85,12 @@ export default {
     Header,
     GameStatus,
     GameOrderModal,
+    SpeakAnswerModal,
   },
   data: () => {
     return {
       ordermodal: true,
+      answermodal: false,
       record: {},
       stop: {},
       soundClips: {},
@@ -335,7 +344,7 @@ export default {
     removeMic: function() {
       const record = document.querySelector('#record');
       // record.src = 'https://k5a302.p.ssafy.io/img/mic/mic-disabled.png';
-      this.mic = false;
+      this.showMic = false;
       record.classList.remove('game-mic-on');
       record.classList.remove('game-mic-off');
     },
@@ -415,7 +424,13 @@ export default {
       const sentences = document.querySelectorAll(
         '.sentence-board > .sentence-board-child > .member-sentence > span'
       );
-      sentences.forEach((sentence) => (sentence.innerText = ''));
+      const speakImg = document.querySelectorAll('.member-name > img');
+
+      sentences.forEach((sentence, idx) => {
+        sentence.innerText = '';
+        speakImg[idx].src = this.speakImg[0];
+      });
+
     },
     onDisconnect() {
       let isHost;
@@ -453,12 +468,12 @@ export default {
       sentenceBox.innerText = await data.message;
       if (data.correct) {
         speakImg[this.answerIdx].src = this.speakImg[3];
-        this.setMic(0);
-        this.removeMic();
         if (
           this.getUser.name ===
           this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName
         ) {
+          this.setMic(0);
+          this.removeMic();
           this.stompClient.send('/pub/speaking/change/player', {}, this.getRoomId);
         }
       } else {
@@ -496,6 +511,7 @@ export default {
         data === 0
         // && this.answerIdx + 1 === this.room.teams[this.room.teamOrder[0]].members.length
       ) {
+        this.answermodal = true;
         if (
           this.getUser.name ===
           this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName
@@ -535,9 +551,14 @@ export default {
     onModalMessageReceived(payload) {
       const flag = JSON.parse(payload.body);
       this.ordermodal = flag;
+      this.answermodal = flag;
     },
     onError() {},
     sendGameStartTrigger: function() {
+      this.stompClient.send(`/pub/ssafymind/close/modal`, {}, this.getRoomId);
+    },
+    getCloseAnsModal: function(answermodal) {
+      this.answermodal = answermodal;
       this.stompClient.send(`/pub/ssafymind/close/modal`, {}, this.getRoomId);
     },
   },
