@@ -69,4 +69,11 @@ public class SpeakingController {
         Speaking speaking = speakingService.nextTeam(roomId);
         template.convertAndSend("/speaking/" + roomId, speaking);
     }
+
+    // 7. 게임 종료(점수 누적)
+    @MessageMapping(value = "/speaking/end")
+    public void end(String roomId) {
+        // 게임 종료 로직 수행
+        speakingService.end(roomId);
+    }
 }

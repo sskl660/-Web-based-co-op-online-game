@@ -15,7 +15,19 @@
       v-bind:teamOrder="room.teamOrder"
       v-bind:host="room.host"
     />
-    <Header v-bind:gameTitle="'또박또박 말해요'" :host="room.host" @onDisconnect="onDisconnect" />
+    <SpeakingRankModal
+      v-if="rankmodal == true"
+      @getCloseRankModal="getCloseRankModal"
+      v-bind:host="room.host"
+      v-bind:scores="room.scores"
+      v-bind:curTeam="room.curTeam"
+      v-on:sendGoWaitingRoomTrigger="sendGoWaitingRoomTrigger"
+    />
+    <Header
+      v-bind:gameTitle="'또박또박 말해요'"
+      :host="room.host"
+      @onDisconnect="onDisconnect"
+    />
     <div class="game-screen">
       <GameStatus
         game="speak"
@@ -31,7 +43,12 @@
       />
       <div class="game-board">
         <p class="sentence">"{{ quiz }}"</p>
-        <div v-for="(member, i) in teamMember" :key="i" class="sentence-board" id="sentence-board">
+        <div
+          v-for="(member, i) in teamMember"
+          :key="i"
+          class="sentence-board"
+          id="sentence-board"
+        >
           <div v-if="i % 2 != 1" class="member-left sentence-board-child">
             <div class="member-name">
               <span>{{ member.participantName }}</span>
@@ -51,8 +68,20 @@
             </div>
           </div>
         </div>
-        <img v-if="showMic" :src="micImg[2]" alt="mic img" class="game-mic-default" id="record"/>
-        <img v-else :src="micImg[1]" alt="mic img" class="game-mic-default" id="record" />
+        <img
+          v-if="showMic"
+          :src="micImg[2]"
+          alt="mic img"
+          class="game-mic-default"
+          id="record"
+        />
+        <img
+          v-else
+          :src="micImg[1]"
+          alt="mic img"
+          class="game-mic-default"
+          id="record"
+        />
       </div>
 
       <!-- 아래는 나중에 사용할 아이들 -->
@@ -72,22 +101,24 @@
 </template>
 
 <script>
-import '@/css/speaking-game.css';
-import { mapGetters } from 'vuex';
-import { socketConnect } from '@/util/socket-common.js';
-import Header from '@/components/common/Header.vue';
-import GameOrderModal from '@/components/GameOrderModal';
-import SpeakAnswerModal from '@/components/speaking/SpeakAnswerModal';
-import GameStatus from '@/components/GameStatus.vue';
-import swal from 'sweetalert';
+import "@/css/speaking-game.css";
+import { mapGetters } from "vuex";
+import { socketConnect } from "@/util/socket-common.js";
+import Header from "@/components/common/Header.vue";
+import GameOrderModal from "@/components/GameOrderModal";
+import SpeakAnswerModal from "@/components/speaking/SpeakAnswerModal";
+import SpeakingRankModal from "@/components/speaking/SpeakingRankModal";
+import GameStatus from "@/components/GameStatus.vue";
+import swal from "sweetalert";
 
 export default {
-  name: 'SpeakGame',
+  name: "SpeakGame",
   components: {
     Header,
     GameStatus,
     GameOrderModal,
     SpeakAnswerModal,
+    SpeakingRankModal,
   },
   data: () => {
     return {
@@ -105,23 +136,29 @@ export default {
       // Socket 정보
       stompClient: null,
       room: {},
-      interimTranscript: '',
-      finalTranscript: '',
+      interimTranscript: "",
+      finalTranscript: "",
       teamMember: [],
       answerIdx: 0,
       speakImg: [
-        '/img/speak/speak-wait.png',
-        '/img/speak/speak-loading.png',
-        '/img/speak/speak-fail.png',
-        '/img/speak/speak-success.png',
+        "/img/speak/speak-wait.png",
+        "/img/speak/speak-loading.png",
+        "/img/speak/speak-fail.png",
+        "/img/speak/speak-success.png",
       ],
-      micImg: ['/img/mic/mic-default.png', '/img/mic/mic-enabled.png', '/img/mic/mic-on.png', '/img/mic/mic-off.png'],
+      micImg: [
+        "/img/mic/mic-default.png",
+        "/img/mic/mic-enabled.png",
+        "/img/mic/mic-on.png",
+        "/img/mic/mic-off.png",
+      ],
       talkFinish: false,
       quiz: null,
       lastTeamLen: 0,
       talker: 0,
       showMic: false,
       timer: true,
+      rankmodal: false,
     };
   },
   created() {
@@ -130,10 +167,10 @@ export default {
       history.go(1);
       swal({
         // className:'alert',
-        title: '게임 내에서는 뒤로가기가 불가능합니다.',
-        icon: '/img/ssazip-logo.png',
+        title: "게임 내에서는 뒤로가기가 불가능합니다.",
+        icon: "/img/ssazip-logo.png",
         buttons: {
-          text: '확인',
+          text: "확인",
         },
       });
     };
@@ -149,35 +186,36 @@ export default {
   },
   watch: {},
   computed: {
-    ...mapGetters(['getUser', 'getRoomId']),
+    ...mapGetters(["getUser", "getRoomId"]),
   },
   methods: {
     /*  */
     // 음성을 텍스트로 번역
     /*  */
     translate: function() {
-      if (typeof webkitSpeechRecognition !== 'function') {
+      if (typeof webkitSpeechRecognition !== "function") {
         swal({
           // className:'alert',
-          title: '크롬에서만 동작합니다.',
-          icon: '/img/ssazip-logo.png',
+          title: "크롬에서만 동작합니다.",
+          icon: "/img/ssazip-logo.png",
           buttons: {
-            text: '확인',
+            text: "확인",
           },
         });
         return false;
       }
-      const speech = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      const speech = new (window.SpeechRecognition ||
+        window.webkitSpeechRecognition)();
 
       let isRecognizing = false;
       let ignoreEndProcess = false;
-      let finalTranscript = '';
+      let finalTranscript = "";
 
       // 오류를 막기 위한 console
       console.log(isRecognizing);
       // 원하는 언어를 앞으로 뺴라(해당 언어만 지원)
       // 비어있으면 영어, 한국어 둘 다 지원(한국어 우선)
-      speech.lang = ['ko-KR', 'en-US'];
+      speech.lang = ["ko-KR", "en-US"];
       speech.continuous = true;
       speech.interimResults = true;
 
@@ -199,9 +237,9 @@ export default {
 
       speech.onresult = (event) => {
         const talker = this.answerIdx;
-        let interimTranscript = '';
-        this.interimTranscript = '';
-        if (typeof event.results === 'undefined') {
+        let interimTranscript = "";
+        this.interimTranscript = "";
+        if (typeof event.results === "undefined") {
           speech.onend = null;
           speech.stop();
           return;
@@ -238,23 +276,25 @@ export default {
         }
       };
 
-      const record = document.querySelector('#record');
-      record.addEventListener('click', async () => {
+      const record = document.querySelector("#record");
+      record.addEventListener("click", async () => {
         if (
           this.getUser.name !==
-            this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName &&
+            this.room.teams[this.room.teamOrder[0]].members[this.answerIdx]
+              .participantName &&
           !this.isRecording
         ) {
           this.isRecording = true;
           return;
         } else if (
           this.getUser.name !==
-            this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName &&
+            this.room.teams[this.room.teamOrder[0]].members[this.answerIdx]
+              .participantName &&
           this.isRecording
         ) {
           this.isRecording = false;
         } else {
-          const speakImg = document.querySelectorAll('.member-name > img');
+          const speakImg = document.querySelectorAll(".member-name > img");
           if (this.isRecording) {
             let message = finalTranscript;
             this.setMic(2);
@@ -274,27 +314,27 @@ export default {
                 correct: false,
               })
             );
-            finalTranscript = '';
-            this.finalTranscript = '';
+            finalTranscript = "";
+            this.finalTranscript = "";
             this.isRecording = false;
             this.talkFinish = true;
             speech.stop();
           } else {
             this.setMic(1);
             speakImg[this.answerIdx].src = this.speakImg[1];
-            finalTranscript = '';
-            this.finalTranscript = '';
+            finalTranscript = "";
+            this.finalTranscript = "";
             const sentenceBox = document.querySelectorAll(
-              '.sentence-board > .sentence-board-child > .member-sentence > span'
+              ".sentence-board > .sentence-board-child > .member-sentence > span"
             )[this.answerIdx];
-            sentenceBox.innerText = '';
+            sentenceBox.innerText = "";
             this.isRecording = true;
             this.talkFinish = false;
             this.stompClient.send(
               `/pub/speaking/talk/${this.getRoomId}`,
               {},
               JSON.stringify({
-                sentence: '',
+                sentence: "",
                 talker: this.answerIdx,
               })
             );
@@ -308,8 +348,8 @@ export default {
       // stop.addEventListener("click", () => {
       // })
 
-      speech.addEventListener('result', (event) => {
-        const transcript = event['results'];
+      speech.addEventListener("result", (event) => {
+        const transcript = event["results"];
         // this.mediaRecorder.stop();
         return transcript;
       });
@@ -319,12 +359,12 @@ export default {
       this.teamMember = this.room.teams[this.room.teamOrder[0]].members;
     },
     nextTurn: function() {
-      this.stompClient.send('/pub/speaking/next/team', {}, this.getRoomId);
+      this.stompClient.send("/pub/speaking/next/team", {}, this.getRoomId);
       this.userAnswerIdx++;
       this.answerIdx++;
     },
     setMic: function(background) {
-      const record = document.querySelector('#record');
+      const record = document.querySelector("#record");
       // record.src = require(this.micImg[1]);
       this.showMic = true;
       if (background === 0) {
@@ -348,11 +388,11 @@ export default {
       // 사진 mic[1]로
     },
     removeMic: function() {
-      const record = document.querySelector('#record');
+      const record = document.querySelector("#record");
       // record.src = 'https://k5a302.p.ssafy.io/img/mic/mic-disabled.png';
       this.showMic = false;
-      record.classList.remove('game-mic-on');
-      record.classList.remove('game-mic-off');
+      record.classList.remove("game-mic-on");
+      record.classList.remove("game-mic-off");
     },
     setAudio: function() {},
     /**
@@ -360,27 +400,36 @@ export default {
      */
     async onConnected() {
       // 방 정보 교환 채널
-      this.stompClient.subscribe('/speaking/' + this.getRoomId, this.onMessageReceived);
+      this.stompClient.subscribe(
+        "/speaking/" + this.getRoomId,
+        this.onMessageReceived
+      );
       // 정답 데이터 채널
       this.stompClient.subscribe(
-        '/speaking/answer/' + this.getRoomId,
+        "/speaking/answer/" + this.getRoomId,
         this.onAnswerMessageReceived
       );
       // 현재 진행 중인 사람의 문장 전송
-      this.stompClient.subscribe('/speaking/talk/' + this.getRoomId, this.onTalkingMessageReceived);
+      this.stompClient.subscribe(
+        "/speaking/talk/" + this.getRoomId,
+        this.onTalkingMessageReceived
+      );
       // 플레이어 변경
-      this.stompClient.subscribe(`/speaking/change/player/` + this.getRoomId, this.onChangePlayer);
+      this.stompClient.subscribe(
+        `/speaking/change/player/` + this.getRoomId,
+        this.onChangePlayer
+      );
       // 다음 팀으로
       // this.stompClient.subscribe(`/speaking/next/team/` + this.getRoomId, this.onChangeTeam);
       // 모달 정보 교환
       this.stompClient.subscribe(
-        '/ssafymind/close/modal/' + this.getRoomId,
+        "/ssafymind/close/modal/" + this.getRoomId,
         this.onModalMessageReceived
       );
 
       // 입장 시 데이터 수신
       this.stompClient.send(
-        '/pub/speaking/enter',
+        "/pub/speaking/enter",
         {},
         JSON.stringify({
           roomId: this.getRoomId,
@@ -391,27 +440,34 @@ export default {
       );
     },
     async onMessageReceived(payload) {
-      if (payload.body == 'exit') {
-        this.$router.push('/room/' + this.getRoomId).catch(() => {});
+      const data = JSON.parse(payload.body);
+      this.room = data;
+      
+      if (data.teamOrder[0] == null) {
+        // 랭킹 모달 띄우기
+        this.rankmodal = true;
+        return;
+      }
+      if (payload.body == "exit") {
+        this.$router.push("/room/" + this.getRoomId).catch(() => {});
         this.stompClient.disconnect();
         swal({
-          title: '방장이 퇴장하여 게임이 종료됩니다!',
-          icon: '/img/ssazip-logo.png',
+          title: "방장이 퇴장하여 게임이 종료됩니다!",
+          icon: "/img/ssazip-logo.png",
           buttons: {
-            text: '확인',
+            text: "확인",
           },
         });
         return;
       }
-      const data = JSON.parse(payload.body);
-      this.room = data;
       console.log(this.room);
       this.quiz = data.quizzes[data.quizzes.length - 1].problem;
       this.answerIdx = 0;
       await this.setTeamMembers();
       if (
         data.teams[data.teamOrder[0]].members.length != 0 &&
-        this.getUser.name === data.teams[data.teamOrder[0]].members[0].participantName
+        this.getUser.name ===
+          data.teams[data.teamOrder[0]].members[0].participantName
       ) {
         // 마이크 권한 주기
         this.setAudio(); // 이전 사람과 이번 턴의 index
@@ -420,22 +476,21 @@ export default {
       }
       // span 싹 지워주기
       const sentences = document.querySelectorAll(
-        '.sentence-board > .sentence-board-child > .member-sentence > span'
+        ".sentence-board > .sentence-board-child > .member-sentence > span"
       );
-      const speakImg = document.querySelectorAll('.member-name > img');
+      const speakImg = document.querySelectorAll(".member-name > img");
 
       sentences.forEach((sentence, idx) => {
-        sentence.innerText = '';
+        sentence.innerText = "";
         speakImg[idx].src = this.speakImg[0];
       });
-
     },
     onDisconnect() {
       let isHost;
       if (this.room.host == this.getUser.id) isHost = true;
       else isHost = false;
       this.stompClient.send(
-        '/pub/speaking/exit',
+        "/pub/speaking/exit",
         {},
         JSON.stringify({
           roomId: this.getRoomId,
@@ -448,20 +503,25 @@ export default {
     async onAnswerMessageReceived(payload) {
       this.talkFinish = true;
       const data = JSON.parse(payload.body);
-      const speakImg = document.querySelectorAll('.member-name > img');
+      const speakImg = document.querySelectorAll(".member-name > img");
       const sentenceBox = document.querySelectorAll(
-        '.sentence-board > .sentence-board-child > .member-sentence > span'
+        ".sentence-board > .sentence-board-child > .member-sentence > span"
       )[this.answerIdx];
       sentenceBox.innerText = await data.message;
       if (data.correct) {
         speakImg[this.answerIdx].src = this.speakImg[3];
         if (
           this.getUser.name ===
-          this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName
+          this.room.teams[this.room.teamOrder[0]].members[this.answerIdx]
+            .participantName
         ) {
           this.setMic(0);
           this.removeMic();
-          this.stompClient.send('/pub/speaking/change/player', {}, this.getRoomId);
+          this.stompClient.send(
+            "/pub/speaking/change/player",
+            {},
+            this.getRoomId
+          );
         }
       } else {
         speakImg[this.answerIdx].src = this.speakImg[2];
@@ -477,14 +537,14 @@ export default {
         this.talker = data.talker;
         return;
       }
-      if (data.sentence === '') {
+      if (data.sentence === "") {
         this.talkFinish = false;
       }
-      if (!this.talkFinish || data.sentence === '') {
-        const speakImg = document.querySelectorAll('.member-name > img');
+      if (!this.talkFinish || data.sentence === "") {
+        const speakImg = document.querySelectorAll(".member-name > img");
         speakImg[this.answerIdx].src = this.speakImg[1];
         const sentenceBox = document.querySelectorAll(
-          '.sentence-board > .sentence-board-child > .member-sentence > span'
+          ".sentence-board > .sentence-board-child > .member-sentence > span"
         )[this.answerIdx];
         sentenceBox.innerText = data.sentence;
       }
@@ -502,9 +562,10 @@ export default {
         this.timer = true;
         if (
           this.getUser.name ===
-          this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName
+          this.room.teams[this.room.teamOrder[0]].members[this.answerIdx]
+            .participantName
         ) {
-          this.stompClient.send('/pub/speaking/next/team', {}, this.getRoomId);
+          this.stompClient.send("/pub/speaking/next/team", {}, this.getRoomId);
           this.answerIdx = data;
           this.setMic(0);
           this.removeMic();
@@ -512,7 +573,7 @@ export default {
         // 다른 선수로 넘겨야 하는 경우
       } else {
         this.answerIdx = data;
-        const speakImg = document.querySelectorAll('.member-name > img');
+        const speakImg = document.querySelectorAll(".member-name > img");
         speakImg[data].src = this.speakImg[0];
         if (
           this.getUser.name ===
@@ -549,6 +610,14 @@ export default {
     getCloseAnsModal: function(answermodal) {
       this.answermodal = answermodal;
       this.stompClient.send(`/pub/ssafymind/close/modal`, {}, this.getRoomId);
+    },
+    getCloseRankModal: function(rankmodal) {
+      this.rankmodal = rankmodal;
+    },
+    // 대기실로 돌아가는 트리거
+    sendGoWaitingRoomTrigger() {
+      this.stompClient.send("/pub/speaking/end", {}, this.getRoomId);
+      this.onDisconnect();
     },
   },
 };
