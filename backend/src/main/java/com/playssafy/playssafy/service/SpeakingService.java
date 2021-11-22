@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-// public class SpeakingService {
+public class SpeakingService {
     @Autowired
     private SpeakGameRepository speakGameRepository;
     @Autowired
