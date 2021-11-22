@@ -1,4 +1,4 @@
-<template><d>
+<template>
   <div class="speak-game">
     <GameOrderModal
       v-if="ordermodal == true"
