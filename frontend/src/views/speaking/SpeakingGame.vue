@@ -26,6 +26,8 @@
         v-bind:curTeam="room.curTeam"
         v-bind:curTeamCnt="room.curTeamCnt"
         v-if="room != null"
+        :timer="timer"
+        :gameType="'speaking'"
       />
       <div class="game-board">
         <p class="sentence">"{{ quiz }}"</p>
@@ -49,8 +51,8 @@
             </div>
           </div>
         </div>
-        <img v-if="showMic" :src="micImg[1]" alt="mic img" class="game-mic-default" id="record" />
-        <img v-else :src="micImg[0]" alt="mic img" class="game-mic-default" id="record" />
+        <img v-if="showMic" :src="micImg[2]" alt="mic img" class="game-mic-default" id="record"/>
+        <img v-else :src="micImg[1]" alt="mic img" class="game-mic-default" id="record" />
       </div>
 
       <!-- 아래는 나중에 사용할 아이들 -->
@@ -113,12 +115,13 @@ export default {
         '/img/speak/speak-fail.png',
         '/img/speak/speak-success.png',
       ],
-      micImg: ['/img/mic/mic-di.png', '/img/mic/mic-en.png'],
+      micImg: ['/img/mic/mic-default.png', '/img/mic/mic-enabled.png', '/img/mic/mic-on.png', '/img/mic/mic-off.png'],
       talkFinish: false,
       quiz: null,
       lastTeamLen: 0,
       talker: 0,
       showMic: false,
+      timer: true,
     };
   },
   created() {
@@ -325,12 +328,15 @@ export default {
       // record.src = require(this.micImg[1]);
       this.showMic = true;
       if (background === 0) {
+        record.src = this.micImg[1];
         return;
       } else if (background === 1) {
-        record.className = 'game-mic-default game-mic-off';
+        record.src = this.micImg[3];
+        // record.className = 'game-mic-default game-mic-off';
         return;
       } else if (background === 2) {
-        record.className = 'game-mic-default game-mic-on';
+        record.src = this.micImg[2];
+        // record.className = 'game-mic-default game-mic-on';
         return;
       }
       // before
@@ -493,6 +499,7 @@ export default {
         // && this.answerIdx + 1 === this.room.teams[this.room.teamOrder[0]].members.length
       ) {
         this.answermodal = true;
+        this.timer = true;
         if (
           this.getUser.name ===
           this.room.teams[this.room.teamOrder[0]].members[this.answerIdx].participantName
@@ -533,6 +540,7 @@ export default {
       const flag = JSON.parse(payload.body);
       this.ordermodal = flag;
       this.answermodal = flag;
+      this.timer = false;
     },
     onError() {},
     sendGameStartTrigger: function() {

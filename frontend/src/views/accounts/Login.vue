@@ -57,7 +57,7 @@ export default {
     this.checkLogin();
   },
   mounted: function() {
-    this.initializeNaverLogin();
+    // this.initializeNaverLogin();
   },
   computed: {
     ...mapGetters(['getIsLogin']),
@@ -124,84 +124,84 @@ export default {
         })
         .catch(() => {});
     },
-    kakaoLogin: function() {
-      Kakao.Auth.login({
-        success: function(authObj) {
-          Kakao.API.request({
-            url: '/v2/user/me',
-            success: function(res) {
-              console.log(res);
-              window.location.replace('http://localhost:8080/room');
-            },
-            fail: function(err) {
-              console.log(err);
-            },
-          });
-        },
-        fail: function(err) {
-          alert(JSON.stringify(err));
-        },
-      });
-    },
-    kakaoLogout: function() {
-      console.log(Kakao.Auth.getAccessToken());
-      if (Kakao.Auth.getAccessToken()) {
-        Kakao.Auth.logout(function() {
-          // success: function (response) {
-          //   console.log(response)
-          // },
-          // fail: function (error) {
-          //   console.log(error)
-          // }
-          alert(Kakao.Auth.getAccessToken());
-          window.location.replace('http://localhost:8080/');
-        });
-      }
-    },
+    // kakaoLogin: function() {
+    //   Kakao.Auth.login({
+    //     success: function(authObj) {
+    //       Kakao.API.request({
+    //         url: '/v2/user/me',
+    //         success: function(res) {
+    //           console.log(res);
+    //           window.location.replace('http://localhost:8080/room');
+    //         },
+    //         fail: function(err) {
+    //           console.log(err);
+    //         },
+    //       });
+    //     },
+    //     fail: function(err) {
+    //       alert(JSON.stringify(err));
+    //     },
+    //   });
+    // },
+    // kakaoLogout: function() {
+    //   console.log(Kakao.Auth.getAccessToken());
+    //   if (Kakao.Auth.getAccessToken()) {
+    //     Kakao.Auth.logout(function() {
+    //       // success: function (response) {
+    //       //   console.log(response)
+    //       // },
+    //       // fail: function (error) {
+    //       //   console.log(error)
+    //       // }
+    //       alert(Kakao.Auth.getAccessToken());
+    //       window.location.replace('http://localhost:8080/');
+    //     });
+    //   }
+    // },
     loginCancel: function() {
       this.$router.push('/');
     },
-    initializeNaverLogin: () => {
-      const { naver } = window;
-      const naverLogin = new naver.LoginWithNaverId({
-        clientId: 'J8ASU80_cvgYfiW0WCqD',
-        callbackUrl: 'http://localhost:8080/login',
-        isPopup: false,
-        loginButton: { color: 'white', type: 1, height: 47 },
-        callbackHandle: true,
-      });
-      naverLogin.init();
+    // initializeNaverLogin: () => {
+    //   const { naver } = window;
+    //   const naverLogin = new naver.LoginWithNaverId({
+    //     clientId: 'J8ASU80_cvgYfiW0WCqD',
+    //     callbackUrl: 'http://localhost:8080/login',
+    //     isPopup: false,
+    //     loginButton: { color: 'white', type: 1, height: 47 },
+    //     callbackHandle: true,
+    //   });
+    //   naverLogin.init();
 
-      window.addEventListener('load', function() {
-        naverLogin.getLoginStatus(function(status) {
-          if (status) {
-            const email = naverLogin.user.getEmail();
-            if (email == undefined || email == undefined) {
-              swal({
-                // className:'alert',
-                title: '이메일과 이름을 체크해주세요.',
-                icon: "/img/ssazip-logo.png",
-                buttons: {
-                text: '확인',
-              },
-              })
-              naverLogin.reprompt();
-              return;
-            }
-            // window.location.replace('http://localhost:8080/login');
-          } else {
-            swal({
-                // className:'alert',
-                title: '로그인 실패',
-                icon: "/img/ssazip-logo.png",
-                buttons: {
-                text: '확인',
-              },
-            })
-          }
-        });
-      });
-    },
+    //   window.addEventListener('load', function() {
+    //     naverLogin.getLoginStatus(function(status) {
+    //       if (status) {
+    //         const email = naverLogin.user.getEmail();
+    //         if (email == undefined || email == undefined) {
+    //           swal({
+    //             // className:'alert',
+    //             title: '이메일과 이름을 체크해주세요.',
+    //             icon: "/img/ssazip-logo.png",
+    //             buttons: {
+    //             text: '확인',
+    //           },
+    //           })
+    //           naverLogin.reprompt();
+    //           return;
+    //         }
+    //         // window.location.replace('http://localhost:8080/login');
+    //       } else {
+    //         swal({
+    //             // className:'alert',
+    //             title: '로그인 실패',
+    //             icon: "/img/ssazip-logo.png",
+    //             buttons: {
+    //             text: '확인',
+    //           },
+    //         })
+    //       }
+    //     });
+    //   });
+    // },
   },
 };
 </script>

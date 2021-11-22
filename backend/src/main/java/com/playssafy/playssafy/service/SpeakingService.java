@@ -69,7 +69,7 @@ public class SpeakingService {
             speaking.getQuizzes().add(new Quiz(1, "내가 그린 기린 그림", "내가그린기린그림"));
             speaking.getQuizzes().add(new Quiz(1, "한양 양장점 옆 한영 양장점", "한양양장점옆한영양장점"));
             speaking.getQuizzes().add(new Quiz(1, "내가 그린 기린 그림", "내가그린기린그림"));
-            speaking.getQuizzes().add(new Quiz(1, "철수책상은 철책상", "철수책상은철책상"));
+            speaking.getQuizzes().add(new Quiz(1, "철수 책상은 철 책상", "철수책상은철책상"));
         }
         speakGameRepository.save(speaking);
     }
