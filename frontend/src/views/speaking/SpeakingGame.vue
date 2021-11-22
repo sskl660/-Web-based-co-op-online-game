@@ -10,7 +10,7 @@
       :gameType="'speaking'"
     />
     <SpeakAnswerModal
-      v-if="answermodal == true"
+      v-if="answermodal == true && rankmodal == false"
       @getCloseAnsModal="getCloseAnsModal"
       v-bind:teamOrder="room.teamOrder"
       v-bind:host="room.host"
@@ -440,14 +440,6 @@ export default {
       );
     },
     async onMessageReceived(payload) {
-      const data = JSON.parse(payload.body);
-      this.room = data;
-      
-      if (data.teamOrder[0] == null) {
-        // 랭킹 모달 띄우기
-        this.rankmodal = true;
-        return;
-      }
       if (payload.body == "exit") {
         this.$router.push("/room/" + this.getRoomId).catch(() => {});
         this.stompClient.disconnect();
@@ -460,6 +452,15 @@ export default {
         });
         return;
       }
+      const data = JSON.parse(payload.body);
+      this.room = data;
+      
+      if (data.teamOrder[0] == null) {
+        // 랭킹 모달 띄우기
+        this.rankmodal = true;
+        return;
+      }
+
       console.log(this.room);
       this.quiz = data.quizzes[data.quizzes.length - 1].problem;
       this.answerIdx = 0;
