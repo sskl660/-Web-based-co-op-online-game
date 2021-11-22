@@ -64,10 +64,10 @@ public class SpeakingService {
 
         // 테스트 문제 리스트 ////////
         for(int i = 0; i < 20; i++) {
-            speaking.getQuizzes().add(new Quiz(1, "삼성 청년 소프트웨어 아카데미", "삼성청년소프트웨어아카데미"));
+            // speaking.getQuizzes().add(new Quiz(1, "삼성 청년 소프트웨어 아카데미", "삼성청년소프트웨어아카데미"));
             speaking.getQuizzes().add(new Quiz(1, "간장공장 공장장", "간장공장공장장"));
             speaking.getQuizzes().add(new Quiz(1, "내가 그린 기린 그림", "내가그린기린그림"));
-            speaking.getQuizzes().add(new Quiz(1, "한양 양장점 옆 한영 양장점", "한양양장점옆한영양장점"));
+            // speaking.getQuizzes().add(new Quiz(1, "한양 양장점 옆 한영 양장점", "한양양장점옆한영양장점"));
             speaking.getQuizzes().add(new Quiz(1, "내가 그린 기린 그림", "내가그린기린그림"));
             speaking.getQuizzes().add(new Quiz(1, "철수 책상은 철 책상", "철수책상은철책상"));
         }
