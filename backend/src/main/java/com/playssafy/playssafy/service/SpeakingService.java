@@ -164,7 +164,7 @@ public class SpeakingService {
     public synchronized void end(String roomId) {
         // 기존 방의 점수 갱신
         WaitRoom waitRoom = waitRoomRepository.findById(roomId).get();
-        Speaking speaking = speakingRepository.findById(roomId).get();
+        Speaking speaking = speakGameRepository.findById(roomId).get();
         for(int i = 1; i < speaking.getScores().length; i++) {
             waitRoom.getScores()[i] += speaking.getScores()[i];
         }
