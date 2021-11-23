@@ -508,12 +508,13 @@ export default {
       // }
     },
     makeAudioRoom: function() {
-      this.connection.openOrJoin(this.getRoomId);
+      this.connection.open(this.getRoomId);
       this.isRoomOpened = true;
       this.isRoomJoined = true;
     },
     enterAudioRoom: function() {
       this.connection.join(this.getRoomId);
+      this.isRoomOpened = true;
       this.isRoomJoined = true;
     },
     giveAudio: function() {
@@ -733,11 +734,13 @@ export default {
       this.ordermodal = flag;
       this.answermodal = flag;
       this.timer = false;
+      if (!this.isRoomJoined) {
+        this.enterAudioRoom();
+      }
     },
     onError() {},
     sendGameStartTrigger: function() {
       this.stompClient.send(`/pub/ssafymind/close/modal`, {}, this.getRoomId);
-      this.enterAudioRoom();
     },
     getCloseAnsModal: function(answermodal) {
       this.answermodal = answermodal;
