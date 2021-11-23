@@ -1,6 +1,6 @@
 <template>
   <div class="speak-game">
-    <div style="display:none;" id="audios-container"></div>
+    <!-- <div id="audios-container"></div> -->
     <GameOrderModal
       v-if="ordermodal == true"
       v-bind:teamOrder="room.teamOrder"
@@ -408,6 +408,7 @@ export default {
     },
     setAudio: async function() {
       this.connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+
       this.connection.socketMessageEvent = 'audio-conference-demo';
       this.connection.session = {
         audio: true,
@@ -429,24 +430,24 @@ export default {
           'stun:stun.l.google.com:19302?transport=udp',
         ]
       }];
-      this.connection.audiosContainer = document.getElementById('audios-container');
-      this.connection.onstream = function(event) {
-        var width = parseInt(this.connection.audiosContainer.clientWidth / 2) - 20;
-        var mediaElement = getHTMLMediaElement(event.mediaElement, {
-          title: event.userid,
-          buttons: ['full-screen'],
-          width: width,
-          showOnMouseEnter: false
-        });
+      // this.connection.audiosContainer = document.getElementById('audios-container');
+      // this.connection.onstream = function(event) {
+      //   var width = parseInt(this.connection.audiosContainer.clientWidth / 2) - 20;
+      //   var mediaElement = getHTMLMediaElement(event.mediaElement, {
+      //     title: event.userid,
+      //     buttons: ['full-screen'],
+      //     width: width,
+      //     showOnMouseEnter: false
+      //   });
 
-        this.connection.audiosContainer.appendChild(mediaElement);
+      //   this.connection.audiosContainer.appendChild(mediaElement);
 
-        setTimeout(function() {
-          mediaElement.media.play();
-        }, 5000);
+      //   setTimeout(function() {
+      //     mediaElement.media.play();
+      //   }, 5000);
 
-        mediaElement.id = event.streamid;
-      };
+      //   mediaElement.id = event.streamid;
+      // };
       this.connection.onstreamended = function(event) {
         var mediaElement = document.getElementById(event.streamid);
         if (mediaElement) {
@@ -508,7 +509,7 @@ export default {
       // }
     },
     makeAudioRoom: function() {
-      this.connection.open(this.getRoomId);
+      this.connection.openOrJoin(this.getRoomId);
       this.isRoomOpened = true;
       this.isRoomJoined = true;
     },
