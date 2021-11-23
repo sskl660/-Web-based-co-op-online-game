@@ -164,6 +164,7 @@ export default {
       showMic: false,
       timer: true,
       rankmodal: false,
+      connection: new RTCMultiConnection(),
     };
   },
   created() {
@@ -400,23 +401,21 @@ export default {
       record.classList.remove("game-mic-off");
     },
     setAudio: async function() {
-      const connection = new RTCMultiConnection();
-
-      connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
-      connection.socketMessageEvent = 'audio-conference-demo';
-      connection.session = {
+      this.connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+      this.connection.socketMessageEvent = 'audio-conference-demo';
+      this.connection.session = {
         audio: true,
         video: false
       };
-      connection.mediaConstraints = {
+      this.connection.mediaConstraints = {
         audio: true,
         video: false
       };
-      connection.sdpConstraints.mandatory = {
+      this.connection.sdpConstraints.mandatory = {
         OfferToReceiveAudio: true,
         OfferToReceiveVideo: false
       };
-      connection.iceServers = [{
+      this.connection.iceServers = [{
         'urls': [
           'stun:stun.l.google.com:19302',
           'stun:stun1.l.google.com:19302',
@@ -424,9 +423,9 @@ export default {
           'stun:stun.l.google.com:19302?transport=udp',
         ]
       }];
-      connection.audiosContainer = document.getElementById('audios-container');
-      connection.onstream = function(event) {
-        var width = parseInt(connection.audiosContainer.clientWidth / 2) - 20;
+      this.connection.audiosContainer = document.getElementById('audios-container');
+      this.connection.onstream = function(event) {
+        var width = parseInt(this.connection.audiosContainer.clientWidth / 2) - 20;
         var mediaElement = getHTMLMediaElement(event.mediaElement, {
           title: event.userid,
           buttons: ['full-screen'],
@@ -434,7 +433,7 @@ export default {
           showOnMouseEnter: false
         });
 
-        connection.audiosContainer.appendChild(mediaElement);
+        this.connection.audiosContainer.appendChild(mediaElement);
 
         setTimeout(function() {
           mediaElement.media.play();
@@ -442,12 +441,13 @@ export default {
 
         mediaElement.id = event.streamid;
       };
-      connection.onstreamended = function(event) {
+      this.connection.onstreamended = function(event) {
         var mediaElement = document.getElementById(event.streamid);
         if (mediaElement) {
           mediaElement.parentNode.removeChild(mediaElement);
         }
       };
+
       (function() {
         var params = {},
           r = /([^&=]+)=?([^&]*)/g;
@@ -460,45 +460,45 @@ export default {
           params[d(match[1])] = d(match[2]);
         window.params = params;
       })();
-      var roomid = '';
-      if (localStorage.getItem(connection.socketMessageEvent)) {
-          roomid = localStorage.getItem(connection.socketMessageEvent);
-      } else {
-          roomid = connection.token();
-      }
-      var hashString = location.hash.replace('#', '');
-      if (hashString.length && hashString.indexOf('comment-') == 0) {
-        hashString = '';
-      }
 
-    var roomid = params.roomid;
-    if (!roomid && hashString.length) {
-      roomid = hashString;
-    }
-    if (roomid && roomid.length) {
-      document.getElementById('room-id').value = roomid;
-      localStorage.setItem(connection.socketMessageEvent, roomid);
+      // var roomid = '';
+      // if (localStorage.getItem(this.connection.socketMessageEvent)) {
+      //     roomid = localStorage.getItem(this.connection.socketMessageEvent);
+      // } else {
+      //     roomid = this.connection.token();
+      // }
 
-      // auto-join-room
-      (function reCheckRoomPresence() {
-        connection.checkPresence(roomid, function(isRoomExist) {
-          if (isRoomExist) {
-            connection.join(roomid);
-            return;
-          }
+      // var hashString = location.hash.replace('#', '');
+      // if (hashString.length && hashString.indexOf('comment-') == 0) {
+      //   hashString = '';
+      // }
 
-          setTimeout(reCheckRoomPresence, 5000);
-        });
-      })();
+      // var roomid = params.roomid;
+      // if (!roomid && hashString.length) {
+      //   roomid = hashString;
+      // }
+      // if (roomid && roomid.length) {
+      //   document.getElementById('room-id').value = roomid;
+      //   localStorage.setItem(this.connection.socketMessageEvent, roomid);
 
-        }
+      //   // auto-join-room
+      //   (function reCheckRoomPresence() {
+      //     this.connection.checkPresence(roomid, function(isRoomExist) {
+      //       if (isRoomExist) {
+      //         this.connection.join(roomid);
+      //         return;
+      //       }
+
+      //       setTimeout(reCheckRoomPresence, 5000);
+      //     });
+      //   })();
+      // }
               // 방장인 경우 소켓통신 방 만들기
       // if (this.room.host === this.getUser.id) {
-      //   connection.open('b1', function() {
+      //   this.connection.open('b1', function() {
       //   });
       // // 참여자는 방에 참여하기
       // } else {
-        connection.join('asd2dc342');
       // }
     },
     
@@ -550,7 +550,9 @@ export default {
       );
 
       await this.setAudio();
-
+      console.log(this.room.host);
+      console.log(this.getUser.isHost);
+      // await this.connection.join('asd2dc342');
     },
     async onMessageReceived(payload) {
       if (payload.body == "exit") {
