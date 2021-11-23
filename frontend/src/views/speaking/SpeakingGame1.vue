@@ -1,5 +1,6 @@
 <template>
   <div class="speak-game">
+    <div style="display:none;" id="audios-container"></div>
     <GameOrderModal
       v-if="ordermodal == true"
       v-bind:teamOrder="room.teamOrder"
@@ -100,6 +101,10 @@
   </div>
 </template>
 
+
+<script src="/node_modules/webrtc-adapter/out/adapter.js"></script>
+<script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
+<script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
 <script>
 import "@/css/speaking-game.css";
 import { mapGetters } from "vuex";
@@ -159,6 +164,7 @@ export default {
       showMic: false,
       timer: true,
       rankmodal: false,
+      connection: new RTCMultiConnection(),
     };
   },
   created() {
@@ -192,7 +198,7 @@ export default {
     /*  */
     // 음성을 텍스트로 번역
     /*  */
-    translate: function() {
+    translate: async function() {
       if (typeof webkitSpeechRecognition !== "function") {
         swal({
           // className:'alert',
@@ -394,13 +400,117 @@ export default {
       record.classList.remove("game-mic-on");
       record.classList.remove("game-mic-off");
     },
-    setAudio: function() {},
+    setAudio: async function() {
+      this.connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+      this.connection.socketMessageEvent = 'audio-conference-demo';
+      this.connection.session = {
+        audio: true,
+        video: false
+      };
+      this.connection.mediaConstraints = {
+        audio: true,
+        video: false
+      };
+      this.connection.sdpConstraints.mandatory = {
+        OfferToReceiveAudio: true,
+        OfferToReceiveVideo: false
+      };
+      this.connection.iceServers = [{
+        'urls': [
+          'stun:stun.l.google.com:19302',
+          'stun:stun1.l.google.com:19302',
+          'stun:stun2.l.google.com:19302',
+          'stun:stun.l.google.com:19302?transport=udp',
+        ]
+      }];
+      this.connection.audiosContainer = document.getElementById('audios-container');
+      this.connection.onstream = function(event) {
+        var width = parseInt(this.connection.audiosContainer.clientWidth / 2) - 20;
+        var mediaElement = getHTMLMediaElement(event.mediaElement, {
+          title: event.userid,
+          buttons: ['full-screen'],
+          width: width,
+          showOnMouseEnter: false
+        });
+
+        this.connection.audiosContainer.appendChild(mediaElement);
+
+        setTimeout(function() {
+          mediaElement.media.play();
+        }, 5000);
+
+        mediaElement.id = event.streamid;
+      };
+      this.connection.onstreamended = function(event) {
+        var mediaElement = document.getElementById(event.streamid);
+        if (mediaElement) {
+          mediaElement.parentNode.removeChild(mediaElement);
+        }
+      };
+
+      (function() {
+        var params = {},
+          r = /([^&=]+)=?([^&]*)/g;
+
+        function d(s) {
+          return decodeURIComponent(s.replace(/\+/g, ' '));
+        }
+        var match, search = window.location.search;
+        while (match = r.exec(search.substring(1)))
+          params[d(match[1])] = d(match[2]);
+        window.params = params;
+      })();
+
+      // var roomid = '';
+      // if (localStorage.getItem(this.connection.socketMessageEvent)) {
+      //     roomid = localStorage.getItem(this.connection.socketMessageEvent);
+      // } else {
+      //     roomid = this.connection.token();
+      // }
+
+      // var hashString = location.hash.replace('#', '');
+      // if (hashString.length && hashString.indexOf('comment-') == 0) {
+      //   hashString = '';
+      // }
+
+      // var roomid = params.roomid;
+      // if (!roomid && hashString.length) {
+      //   roomid = hashString;
+      // }
+      // if (roomid && roomid.length) {
+      //   document.getElementById('room-id').value = roomid;
+      //   localStorage.setItem(this.connection.socketMessageEvent, roomid);
+
+      //   // auto-join-room
+      //   (function reCheckRoomPresence() {
+      //     this.connection.checkPresence(roomid, function(isRoomExist) {
+      //       if (isRoomExist) {
+      //         this.connection.join(roomid);
+      //         return;
+      //       }
+
+      //       setTimeout(reCheckRoomPresence, 5000);
+      //     });
+      //   })();
+      // }
+              // 방장인 경우 소켓통신 방 만들기
+      // if (this.room.host === this.getUser.id) {
+      //   this.connection.open('b1', function() {
+      //   });
+      // // 참여자는 방에 참여하기
+      // } else {
+      // }
+    },
+    
+    giveAudio: function() {
+      // 마이크 주고 뻇기
+    },
     /**
      * 소켓 통신
      */
     async onConnected() {
       // 방 정보 교환 채널
-      this.stompClient.subscribe(
+      await this.stompClient.subscribe(
         "/speaking/" + this.getRoomId,
         this.onMessageReceived
       );
@@ -428,7 +538,7 @@ export default {
       );
 
       // 입장 시 데이터 수신
-      this.stompClient.send(
+      await this.stompClient.send(
         "/pub/speaking/enter",
         {},
         JSON.stringify({
@@ -438,6 +548,11 @@ export default {
           teamNo: this.getUser.teamNo,
         })
       );
+
+      await this.setAudio();
+      console.log(this.room.host);
+      console.log(this.getUser.isHost);
+      // await this.connection.join('asd2dc342');
     },
     async onMessageReceived(payload) {
       if (payload.body == "exit") {
@@ -471,7 +586,7 @@ export default {
           data.teams[data.teamOrder[0]].members[0].participantName
       ) {
         // 마이크 권한 주기
-        this.setAudio(); // 이전 사람과 이번 턴의 index
+        this.giveAudio(); // 이전 사람과 이번 턴의 index
         // 마이크 아이콘 변경
         this.setMic(2);
       }
@@ -581,7 +696,7 @@ export default {
           this.room.teams[this.room.teamOrder[0]].members[data].participantName
         ) {
           // 마이크 권한 주기
-          this.setAudio(); // 이전 사람과 이번 턴의 index
+          this.giveAudio(); // 이전 사람과 이번 턴의 index
           // 마이크 아이콘 변경
           this.setMic(2);
         }
