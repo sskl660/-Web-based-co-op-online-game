@@ -1,6 +1,6 @@
 <template>
   <div class="speak-game">
-    <div style="display:none;" id="audios-container"></div>
+    <!-- <div id="audios-container"></div> -->
     <GameOrderModal
       v-if="ordermodal == true"
       v-bind:teamOrder="room.teamOrder"
@@ -83,6 +83,7 @@
           class="game-mic-default"
           id="record"
         />
+        <button @click="enterAudioRoom">마이크</button>
       </div>
 
       <!-- 아래는 나중에 사용할 아이들 -->
@@ -165,6 +166,8 @@ export default {
       timer: true,
       rankmodal: false,
       connection: new RTCMultiConnection(),
+      isRoomOpened: false,
+      isRoomJoined: false,
     };
   },
   created() {
@@ -182,12 +185,15 @@ export default {
     };
     this.stompClient = socketConnect(this.onConnected, this.onError);
   },
-  mounted() {
+  async mounted() {
     // this.stompClient.debug = function() {};
     // this.getAudio();
-    this.translate();
+    await this.translate();
+    await this.setAudio();
   },
   destroyed() {
+    // 나갈 때 음성 닫아주기
+    this.connection.close();
     this.onDisconnect();
   },
   watch: {},
@@ -402,6 +408,7 @@ export default {
     },
     setAudio: async function() {
       this.connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+
       this.connection.socketMessageEvent = 'audio-conference-demo';
       this.connection.session = {
         audio: true,
@@ -423,24 +430,24 @@ export default {
           'stun:stun.l.google.com:19302?transport=udp',
         ]
       }];
-      this.connection.audiosContainer = document.getElementById('audios-container');
-      this.connection.onstream = function(event) {
-        var width = parseInt(this.connection.audiosContainer.clientWidth / 2) - 20;
-        var mediaElement = getHTMLMediaElement(event.mediaElement, {
-          title: event.userid,
-          buttons: ['full-screen'],
-          width: width,
-          showOnMouseEnter: false
-        });
+      // this.connection.audiosContainer = document.getElementById('audios-container');
+      // this.connection.onstream = function(event) {
+      //   var width = parseInt(this.connection.audiosContainer.clientWidth / 2) - 20;
+      //   var mediaElement = getHTMLMediaElement(event.mediaElement, {
+      //     title: event.userid,
+      //     buttons: ['full-screen'],
+      //     width: width,
+      //     showOnMouseEnter: false
+      //   });
 
-        this.connection.audiosContainer.appendChild(mediaElement);
+      //   this.connection.audiosContainer.appendChild(mediaElement);
 
-        setTimeout(function() {
-          mediaElement.media.play();
-        }, 5000);
+      //   setTimeout(function() {
+      //     mediaElement.media.play();
+      //   }, 5000);
 
-        mediaElement.id = event.streamid;
-      };
+      //   mediaElement.id = event.streamid;
+      // };
       this.connection.onstreamended = function(event) {
         var mediaElement = document.getElementById(event.streamid);
         if (mediaElement) {
@@ -448,18 +455,18 @@ export default {
         }
       };
 
-      (function() {
-        var params = {},
-          r = /([^&=]+)=?([^&]*)/g;
+      // (function() {
+      //   var params = {},
+      //     r = /([^&=]+)=?([^&]*)/g;
 
-        function d(s) {
-          return decodeURIComponent(s.replace(/\+/g, ' '));
-        }
-        var match, search = window.location.search;
-        while (match = r.exec(search.substring(1)))
-          params[d(match[1])] = d(match[2]);
-        window.params = params;
-      })();
+      //   function d(s) {
+      //     return decodeURIComponent(s.replace(/\+/g, ' '));
+      //   }
+      //   var match, search = window.location.search;
+      //   while (match = r.exec(search.substring(1)))
+      //     params[d(match[1])] = d(match[2]);
+      //   window.params = params;
+      // })();
 
       // var roomid = '';
       // if (localStorage.getItem(this.connection.socketMessageEvent)) {
@@ -501,7 +508,16 @@ export default {
       // } else {
       // }
     },
-    
+    makeAudioRoom: function() {
+      this.connection.openOrJoin(this.getRoomId);
+      this.isRoomOpened = true;
+      this.isRoomJoined = true;
+    },
+    enterAudioRoom: function() {
+      this.connection.join(this.getRoomId);
+      this.isRoomOpened = true;
+      this.isRoomJoined = true;
+    },
     giveAudio: function() {
       // 마이크 주고 뻇기
     },
@@ -525,7 +541,7 @@ export default {
         this.onTalkingMessageReceived
       );
       // 플레이어 변경
-      this.stompClient.subscribe(
+      await this.stompClient.subscribe(
         `/speaking/change/player/` + this.getRoomId,
         this.onChangePlayer
       );
@@ -549,10 +565,6 @@ export default {
         })
       );
 
-      await this.setAudio();
-      console.log(this.room.host);
-      console.log(this.getUser.isHost);
-      // await this.connection.join('asd2dc342');
     },
     async onMessageReceived(payload) {
       if (payload.body == "exit") {
@@ -570,6 +582,11 @@ export default {
       const data = JSON.parse(payload.body);
       this.room = data;
       
+      if (!this.isRoomOpened && data.host === this.getUser.id) {
+        this.makeAudioRoom();
+      }
+
+      // 나가는 로직
       if (data.teamOrder[0] == null) {
         // 랭킹 모달 띄우기
         this.rankmodal = true;
@@ -718,6 +735,9 @@ export default {
       this.ordermodal = flag;
       this.answermodal = flag;
       this.timer = false;
+      if (!this.isRoomJoined) {
+        this.enterAudioRoom();
+      }
     },
     onError() {},
     sendGameStartTrigger: function() {
