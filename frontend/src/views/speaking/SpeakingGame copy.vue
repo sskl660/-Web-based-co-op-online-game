@@ -1,6 +1,5 @@
 <template>
   <div class="speak-game">
-    <div style="display:none;" id="audios-container"></div>
     <GameOrderModal
       v-if="ordermodal == true"
       v-bind:teamOrder="room.teamOrder"
@@ -101,10 +100,6 @@
   </div>
 </template>
 
-
-<script src="/node_modules/webrtc-adapter/out/adapter.js"></script>
-<script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
-<script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
 <script>
 import "@/css/speaking-game.css";
 import { mapGetters } from "vuex";
@@ -197,7 +192,7 @@ export default {
     /*  */
     // 음성을 텍스트로 번역
     /*  */
-    translate: async function() {
+    translate: function() {
       if (typeof webkitSpeechRecognition !== "function") {
         swal({
           // className:'alert',
@@ -399,118 +394,13 @@ export default {
       record.classList.remove("game-mic-on");
       record.classList.remove("game-mic-off");
     },
-    setAudio: async function() {
-      const connection = new RTCMultiConnection();
-
-      connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
-      connection.socketMessageEvent = 'audio-conference-demo';
-      connection.session = {
-        audio: true,
-        video: false
-      };
-      connection.mediaConstraints = {
-        audio: true,
-        video: false
-      };
-      connection.sdpConstraints.mandatory = {
-        OfferToReceiveAudio: true,
-        OfferToReceiveVideo: false
-      };
-      connection.iceServers = [{
-        'urls': [
-          'stun:stun.l.google.com:19302',
-          'stun:stun1.l.google.com:19302',
-          'stun:stun2.l.google.com:19302',
-          'stun:stun.l.google.com:19302?transport=udp',
-        ]
-      }];
-      connection.audiosContainer = document.getElementById('audios-container');
-      connection.onstream = function(event) {
-        var width = parseInt(connection.audiosContainer.clientWidth / 2) - 20;
-        var mediaElement = getHTMLMediaElement(event.mediaElement, {
-          title: event.userid,
-          buttons: ['full-screen'],
-          width: width,
-          showOnMouseEnter: false
-        });
-
-        connection.audiosContainer.appendChild(mediaElement);
-
-        setTimeout(function() {
-          mediaElement.media.play();
-        }, 5000);
-
-        mediaElement.id = event.streamid;
-      };
-      connection.onstreamended = function(event) {
-        var mediaElement = document.getElementById(event.streamid);
-        if (mediaElement) {
-          mediaElement.parentNode.removeChild(mediaElement);
-        }
-      };
-      (function() {
-        var params = {},
-          r = /([^&=]+)=?([^&]*)/g;
-
-        function d(s) {
-          return decodeURIComponent(s.replace(/\+/g, ' '));
-        }
-        var match, search = window.location.search;
-        while (match = r.exec(search.substring(1)))
-          params[d(match[1])] = d(match[2]);
-        window.params = params;
-      })();
-      var roomid = '';
-      if (localStorage.getItem(connection.socketMessageEvent)) {
-          roomid = localStorage.getItem(connection.socketMessageEvent);
-      } else {
-          roomid = connection.token();
-      }
-      var hashString = location.hash.replace('#', '');
-      if (hashString.length && hashString.indexOf('comment-') == 0) {
-        hashString = '';
-      }
-
-    var roomid = params.roomid;
-    if (!roomid && hashString.length) {
-      roomid = hashString;
-    }
-    if (roomid && roomid.length) {
-      document.getElementById('room-id').value = roomid;
-      localStorage.setItem(connection.socketMessageEvent, roomid);
-
-      // auto-join-room
-      (function reCheckRoomPresence() {
-        connection.checkPresence(roomid, function(isRoomExist) {
-          if (isRoomExist) {
-            connection.join(roomid);
-            return;
-          }
-
-          setTimeout(reCheckRoomPresence, 5000);
-        });
-      })();
-
-        }
-              // 방장인 경우 소켓통신 방 만들기
-      // if (this.room.host === this.getUser.id) {
-      //   connection.open('b1', function() {
-      //   });
-      // // 참여자는 방에 참여하기
-      // } else {
-        connection.join('asd2dc342');
-      // }
-    },
-    
-    giveAudio: function() {
-      // 마이크 주고 뻇기
-    },
+    setAudio: function() {},
     /**
      * 소켓 통신
      */
     async onConnected() {
       // 방 정보 교환 채널
-      await this.stompClient.subscribe(
+      this.stompClient.subscribe(
         "/speaking/" + this.getRoomId,
         this.onMessageReceived
       );
@@ -538,7 +428,7 @@ export default {
       );
 
       // 입장 시 데이터 수신
-      await this.stompClient.send(
+      this.stompClient.send(
         "/pub/speaking/enter",
         {},
         JSON.stringify({
@@ -548,9 +438,6 @@ export default {
           teamNo: this.getUser.teamNo,
         })
       );
-
-      await this.setAudio();
-
     },
     async onMessageReceived(payload) {
       if (payload.body == "exit") {
@@ -584,7 +471,7 @@ export default {
           data.teams[data.teamOrder[0]].members[0].participantName
       ) {
         // 마이크 권한 주기
-        this.giveAudio(); // 이전 사람과 이번 턴의 index
+        this.setAudio(); // 이전 사람과 이번 턴의 index
         // 마이크 아이콘 변경
         this.setMic(2);
       }
@@ -694,7 +581,7 @@ export default {
           this.room.teams[this.room.teamOrder[0]].members[data].participantName
         ) {
           // 마이크 권한 주기
-          this.giveAudio(); // 이전 사람과 이번 턴의 index
+          this.setAudio(); // 이전 사람과 이번 턴의 index
           // 마이크 아이콘 변경
           this.setMic(2);
         }
