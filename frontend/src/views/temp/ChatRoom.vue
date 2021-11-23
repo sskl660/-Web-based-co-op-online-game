@@ -185,8 +185,6 @@ export default {
           setTimeout(reCheckRoomPresence, 5000);
         });
       })();
-
-      disableInputButtons();
     }
     },
     

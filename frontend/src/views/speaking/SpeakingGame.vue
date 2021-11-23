@@ -1,6 +1,6 @@
 <template>
   <div class="speak-game">
-    <div style="display:none;" id="audios-container"></div>
+    <!-- <div id="audios-container"></div> -->
     <GameOrderModal
       v-if="ordermodal == true"
       v-bind:teamOrder="room.teamOrder"
@@ -83,21 +83,21 @@
           class="game-mic-default"
           id="record"
         />
-        <button @click="enterAudioRoom">마이크</button>
+        <!-- <button @click="enterAudioRoom">마이크</button> -->
       </div>
 
       <!-- 아래는 나중에 사용할 아이들 -->
-      <div style="display:none;">
+      <!-- <div style="display:none;">
         <p>녹음하기</p>
         <input type="checkbox" id="chk-hear-mic" /><label for="chk-hear-mic"
           >마이크 소리 듣기</label
-        >
+        > -->
         <!-- <button id="record">녹음</button> -->
         <!-- <button id="stop">녹음 정지</button> -->
-        <span id="final_span"></span>
+        <!-- <span id="final_span"></span>
         <span id="interim_span"></span>
         <div id="sound-clips"></div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -166,8 +166,8 @@ export default {
       timer: true,
       rankmodal: false,
       connection: new RTCMultiConnection(),
-      isRoomOpened: false,
-      isRoomJoined: false,
+      // isRoomOpened: false,
+      // isRoomJoined: false,
     };
   },
   created() {
@@ -189,11 +189,11 @@ export default {
     // this.stompClient.debug = function() {};
     // this.getAudio();
     await this.translate();
-    await this.setAudio();
+    // await this.setAudio();
   },
   destroyed() {
     // 나갈 때 음성 닫아주기
-    this.connection.close();
+    // this.connection.close();
     this.onDisconnect();
   },
   watch: {},
@@ -408,6 +408,7 @@ export default {
     },
     setAudio: async function() {
       this.connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+
       this.connection.socketMessageEvent = 'audio-conference-demo';
       this.connection.session = {
         audio: true,
@@ -429,24 +430,24 @@ export default {
           'stun:stun.l.google.com:19302?transport=udp',
         ]
       }];
-      this.connection.audiosContainer = document.getElementById('audios-container');
-      this.connection.onstream = function(event) {
-        var width = parseInt(this.connection.audiosContainer.clientWidth / 2) - 20;
-        var mediaElement = getHTMLMediaElement(event.mediaElement, {
-          title: event.userid,
-          buttons: ['full-screen'],
-          width: width,
-          showOnMouseEnter: false
-        });
+      // this.connection.audiosContainer = document.getElementById('audios-container');
+      // this.connection.onstream = function(event) {
+      //   var width = parseInt(this.connection.audiosContainer.clientWidth / 2) - 20;
+      //   var mediaElement = getHTMLMediaElement(event.mediaElement, {
+      //     title: event.userid,
+      //     buttons: ['full-screen'],
+      //     width: width,
+      //     showOnMouseEnter: false
+      //   });
 
-        this.connection.audiosContainer.appendChild(mediaElement);
+      //   this.connection.audiosContainer.appendChild(mediaElement);
 
-        setTimeout(function() {
-          mediaElement.media.play();
-        }, 5000);
+      //   setTimeout(function() {
+      //     mediaElement.media.play();
+      //   }, 5000);
 
-        mediaElement.id = event.streamid;
-      };
+      //   mediaElement.id = event.streamid;
+      // };
       this.connection.onstreamended = function(event) {
         var mediaElement = document.getElementById(event.streamid);
         if (mediaElement) {
@@ -514,10 +515,11 @@ export default {
     },
     enterAudioRoom: function() {
       this.connection.join(this.getRoomId);
+      this.isRoomOpened = true;
       this.isRoomJoined = true;
     },
     giveAudio: function() {
-      // 마이크 주고 뻇기
+      // 마이크 기능 주고 뻇기
     },
     /**
      * 소켓 통신
@@ -580,9 +582,9 @@ export default {
       const data = JSON.parse(payload.body);
       this.room = data;
       
-      if (!this.isRoomOpened && data.host === this.getUser.id) {
-        this.makeAudioRoom();
-      }
+      // if (!this.isRoomOpened && data.host === this.getUser.id) {
+      //   this.makeAudioRoom();
+      // }
 
       // 나가는 로직
       if (data.teamOrder[0] == null) {
@@ -601,7 +603,7 @@ export default {
           data.teams[data.teamOrder[0]].members[0].participantName
       ) {
         // 마이크 권한 주기
-        this.giveAudio(); // 이전 사람과 이번 턴의 index
+        // this.giveAudio(); // 이전 사람과 이번 턴의 index
         // 마이크 아이콘 변경
         this.setMic(2);
       }
@@ -711,7 +713,7 @@ export default {
           this.room.teams[this.room.teamOrder[0]].members[data].participantName
         ) {
           // 마이크 권한 주기
-          this.giveAudio(); // 이전 사람과 이번 턴의 index
+          // this.giveAudio(); // 이전 사람과 이번 턴의 index
           // 마이크 아이콘 변경
           this.setMic(2);
         }
@@ -733,11 +735,13 @@ export default {
       this.ordermodal = flag;
       this.answermodal = flag;
       this.timer = false;
+      // if (!this.isRoomJoined) {
+      //   this.enterAudioRoom();
+      // }
     },
     onError() {},
     sendGameStartTrigger: function() {
       this.stompClient.send(`/pub/ssafymind/close/modal`, {}, this.getRoomId);
-      this.enterAudioRoom();
     },
     getCloseAnsModal: function(answermodal) {
       this.answermodal = answermodal;
