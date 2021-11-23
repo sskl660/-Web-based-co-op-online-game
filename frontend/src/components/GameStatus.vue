@@ -1,6 +1,7 @@
 <template>
   <div class="ssafymind-left">
-    <div id="questionTeam-title">문제 내는 팀</div>
+    <div v-if="gameType === 'speaking'" id="questionTeam-title">진행 중인 팀</div>
+    <div v-else id="questionTeam-title">문제 내는 팀</div>
     <img
       class="team-img"
       id=""
@@ -20,7 +21,7 @@
         <span class="team-members" v-else>{{ member.participantName }}</span>
       </span>
     </div>
-    <SpeakingTimer v-if="game === 'speak'" />
+    <SpeakingTimer v-if="game === 'speak'" :timer="timer" />
     <div v-else>
       <div id="progress" v-if="getProgressBar == false">
         <div id="progress-bar"></div>
@@ -90,7 +91,7 @@ export default {
   components: {
     SpeakingTimer,
   },
-  props: ['game', 'teamOrder', 'teams', 'curPlayer', 'scores', 'curTeam', 'curTeamCnt'],
+  props: ['game', 'teamOrder', 'teams', 'curPlayer', 'scores', 'curTeam', 'curTeamCnt', 'timer', 'gameType'],
   watch: {
     // scores가 갱신되면 점수 정보도 갱신
     scores() {
