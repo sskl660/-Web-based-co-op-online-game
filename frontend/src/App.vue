@@ -35,6 +35,10 @@ body {
   width:50px;
   display: inline;
 }
+
+body > audio {
+  display: none;
+}
 </style>
 <script>
 import { mapState } from 'vuex';
