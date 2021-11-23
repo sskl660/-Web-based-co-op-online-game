@@ -104,43 +104,38 @@
 
 .game-board > .game-mic-default {
   border-radius: 10px;
-  width: 8%;
-  height: 15%;
+  width: 10%;
+  height: 20%;
   position: absolute;
-  bottom: 3%;
+  bottom: 0%;
   left: 50%;
   transform: translate(-50%, 0);
-  opacity: 50%;
 }
 
 .game-board > .game-mic-on {
   background: rgb(170, 223, 90);
   box-shadow: 1px 1px 1px black, 1px 1px 1px white inset;
-  width: 8%;
-  height: 15%;
-  opacity: 100%;
+  width: 10%;
+  height: 20%;
 }
 
 .game-board > .game-mic-on:active {
   background: rgb(157, 206, 84);
   box-shadow: 1px 1px 1px black inset, 1px 1px 1px white;
-  width: 8%;
-  height: 15%;
-  opacity: 100%;
+  width: 10%;
+  height: 20%;
 }
 
 .game-board > .game-mic-off {
   background: rgb(184, 79, 65);
   box-shadow: 1px 1px 1px black, 1px 1px 1px white inset;
-  width: 8%;
-  height: 15%;
-  opacity: 100%;
+  width: 10%;
+  height: 20%;
 }
 
 .game-board > .game-mic-off:active {
   background: rgb(167, 71, 59);
   box-shadow: 1px 1px 1px black inset, 1px 1px 1px white;
-  width: 8%;
-  height: 15%;
-  opacity: 100%;
+  width: 10%;
+  height: 20%;
 }

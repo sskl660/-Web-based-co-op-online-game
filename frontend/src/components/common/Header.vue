@@ -36,7 +36,7 @@ export default {
   padding-top: 8px;
   font-family: 'Poor Story', cursive;
 }
-#game-title {
+.room-title > #game-title {
   position: absolute;
   left: 50%;
   font-weight: bold;

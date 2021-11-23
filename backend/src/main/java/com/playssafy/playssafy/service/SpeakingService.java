@@ -64,21 +64,13 @@ public class SpeakingService {
 
         // 테스트 문제 리스트 ////////
         for(int i = 0; i < 20; i++) {
-            speaking.getQuizzes().add(new Quiz(1, "삼성 청년 소프트웨어 아카데미", "삼성청년소프트웨어아카데미"));
+            // speaking.getQuizzes().add(new Quiz(1, "삼성 청년 소프트웨어 아카데미", "삼성청년소프트웨어아카데미"));
             speaking.getQuizzes().add(new Quiz(1, "간장공장 공장장", "간장공장공장장"));
             speaking.getQuizzes().add(new Quiz(1, "내가 그린 기린 그림", "내가그린기린그림"));
+            // speaking.getQuizzes().add(new Quiz(1, "한양 양장점 옆 한영 양장점", "한양양장점옆한영양장점"));
+            speaking.getQuizzes().add(new Quiz(1, "내가 그린 기린 그림", "내가그린기린그림"));
+            speaking.getQuizzes().add(new Quiz(1, "철수 책상은 철 책상", "철수책상은철책상"));
         }
-        System.out.println(speaking);
-        // 팀 초기화////////
-//        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "1", "김태현1", 1));
-//        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "2", "김태현2", 1));
-//        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "3", "김태현3", 1));
-//        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "4", "김태현4", 1));
-//        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "1", "이장섭1", 2));
-//        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "2", "이장섭2", 2));
-//        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "3", "이장섭3", 2));
-//        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "4", "이장섭4", 2));
-
         speakGameRepository.save(speaking);
     }
 
@@ -168,5 +160,15 @@ public class SpeakingService {
         return speakGameRepository.save(speaking);
     }
 
-    // 5.
+    // 6. 게임 종료
+    public synchronized void end(String roomId) {
+        // 기존 방의 점수 갱신
+        WaitRoom waitRoom = waitRoomRepository.findById(roomId).get();
+        Speaking speaking = speakGameRepository.findById(roomId).get();
+        for(int i = 1; i < speaking.getScores().length; i++) {
+            waitRoom.getScores()[i] += speaking.getScores()[i];
+        }
+        // 저장
+        waitRoomRepository.save(waitRoom);
+    }
 }

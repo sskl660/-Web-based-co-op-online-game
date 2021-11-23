@@ -9,7 +9,7 @@
                 <img
                   v-if="gameType === 'speaking'"
                   img
-                  src="@/assets/images/speaking-modal.png"
+                  src="~@/assets/images/speaking-modal.png"
                   id="ssafymind-explain-img"
                   alt=""
                 />

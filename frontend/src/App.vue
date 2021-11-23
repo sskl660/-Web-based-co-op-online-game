@@ -1,5 +1,12 @@
 <template>
   <div id="app">
+    <div class="sound" style="display:inline-block">
+      <img v-if="!bgm" style="width:50px;" src="@/assets/mute.png" @click="onBgm" alt="">
+      <img v-if="bgm" style="width:50px;" src="@/assets/sound.png" @click="onBgm" alt="">
+    </div>
+    <audio id="bgm" autoplay controls loop class="bgm">
+      <source src="@/assets/bgm.mp3">
+    </audio>
     <router-view/>
   </div>
 </template>
@@ -17,6 +24,21 @@ body{
 body {
   margin: 0;
 }
+
+.bgm{
+  display: none;
+}
+.sound{
+  position: absolute;
+  left:20px;
+  margin-top:10px;
+  width:50px;
+  display: inline;
+}
+
+body > audio {
+  display: none;
+}
 </style>
 <script>
 import { mapState } from 'vuex';
@@ -25,14 +47,33 @@ export default {
   data: function() {
     return {
       path: '',
+      bgm: false,
+    }
+  },
+  methods:{
+    onBgm(){
+      let bgm = document.getElementById('bgm')
+      if (this.bgm == false) {
+        bgm.play()
+        this.bgm = true
+        console.log(this.bgm)
+      } else {
+        bgm.pause()
+        this.bgm = false
+      }
     }
   },
   created() {
     this.path = this.$route.path
-    // window.addEventListener('beforeunload', (event) => {
-    //   event.preventDefault();
-    //   event.returnValue = '';
-    // })
+    window.addEventListener('beforeunload', (event) => {
+      event.preventDefault();
+      event.returnValue = '';
+    })
+    // const myAudio = new Audio(); 
+    // myAudio.src = "@/assets/bgm.mp3"; 
+    // myAudio.play(); // 음원 재생 myAudio.pause(); // 일시 정지
+
+
   },
   mounted() {
   },
