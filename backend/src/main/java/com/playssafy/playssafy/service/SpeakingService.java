@@ -2,11 +2,13 @@ package com.playssafy.playssafy.service;
 
 import com.playssafy.playssafy.dto.speaking.SpeakMessage;
 import com.playssafy.playssafy.dto.speaking.Speaking;
-import com.playssafy.playssafy.dto.ssafymind.Quiz;
+import com.playssafy.playssafy.dto.waitroom.Quiz;
 import com.playssafy.playssafy.dto.ssafymind.Team;
 import com.playssafy.playssafy.dto.waitroom.InitGame;
 import com.playssafy.playssafy.dto.waitroom.Participant;
+import com.playssafy.playssafy.dto.waitroom.WaitRoom;
 import com.playssafy.playssafy.repository.SpeakGameRepository;
+import com.playssafy.playssafy.repository.WaitRoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ import java.util.List;
 public class SpeakingService {
     @Autowired
     private SpeakGameRepository speakGameRepository;
+    @Autowired
+    private WaitRoomRepository waitRoomRepository;
 
     // 0. 게임방 생성 메서드
     public void createSpeaking(InitGame initGame) {
@@ -30,6 +34,7 @@ public class SpeakingService {
         speaking.setHost(initGame.getHost());
 
         // 팀 진행 순서 초기화
+        speaking.setCurTeam(initGame.getExist());
         boolean[] exist = initGame.getExist();
         // 현재 팀이 존재한다면, 팀 넣기
         List<Integer> teams = new ArrayList<>();
@@ -59,21 +64,13 @@ public class SpeakingService {
 
         // 테스트 문제 리스트 ////////
         for(int i = 0; i < 20; i++) {
-            speaking.getQuizzes().add(new Quiz(1, "삼성 청년 소프트웨어 아카데미", "삼성청년소프트웨어아카데미"));
+            // speaking.getQuizzes().add(new Quiz(1, "삼성 청년 소프트웨어 아카데미", "삼성청년소프트웨어아카데미"));
             speaking.getQuizzes().add(new Quiz(1, "간장공장 공장장", "간장공장공장장"));
             speaking.getQuizzes().add(new Quiz(1, "내가 그린 기린 그림", "내가그린기린그림"));
+            // speaking.getQuizzes().add(new Quiz(1, "한양 양장점 옆 한영 양장점", "한양양장점옆한영양장점"));
+            speaking.getQuizzes().add(new Quiz(1, "내가 그린 기린 그림", "내가그린기린그림"));
+            speaking.getQuizzes().add(new Quiz(1, "철수 책상은 철 책상", "철수책상은철책상"));
         }
-        // 팀 초기화////////
-        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "1", "김태현1", 1));
-        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "2", "김태현2", 1));
-        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "3", "김태현3", 1));
-        speaking.getTeams().get(1).getMembers().add(new Participant(initGame.getRoomId(), "4", "김태현4", 1));
-        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "1", "이장섭1", 2));
-        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "2", "이장섭2", 2));
-        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "3", "이장섭3", 2));
-        speaking.getTeams().get(2).getMembers().add(new Participant(initGame.getRoomId(), "4", "이장섭4", 2));
-
-
         speakGameRepository.save(speaking);
     }
 
@@ -90,11 +87,18 @@ public class SpeakingService {
 
     // 2. 게임방 퇴장 메서드
     public synchronized Speaking exit(Participant participant) {
+        if(speakGameRepository.findById(participant.getRoomId()).isEmpty())
+            return null;
         Speaking speaking = speakGameRepository.findById(participant.getRoomId()).get();
 
         // 방장이라면 방 자체를 삭제 후 종료
         if (speaking.getHost().equals(participant.getParticipantId())) {
             speakGameRepository.deleteById(participant.getRoomId());
+            WaitRoom waitRoom = waitRoomRepository.findById(participant.getRoomId()).get();
+            if(waitRoom.isProgress()) {
+                waitRoom.setProgress(false);
+                waitRoomRepository.save(waitRoom);
+            }
             return null;
         }
         // 방장이 아니라면 유저 정보만 삭제
@@ -113,9 +117,10 @@ public class SpeakingService {
 
         int lastIndex = speaking.getQuizzes().size() - 1;
         if(speaking.getQuizzes().get(lastIndex).getAnswer().equals(speakMessage.getMessage().replaceAll(" ",""))) {
-            System.out.println("here");
             // 정답으로 상태를 바꿔주고
             speakMessage.setCorrect(true);
+            // 문제를 맞출 때 마다 20점씩 상승
+            speaking.getScores()[speakMessage.getTeamNo()] += 20;
             speakGameRepository.save(speaking);
             return speakMessage;
         }
@@ -141,8 +146,8 @@ public class SpeakingService {
         return curPlayer;
     }
 
-    // 5. 다음 문제로 이동
-    public synchronized Speaking nextProblem(String roomId) {
+    // 5. 다음 팀으로 이동
+    public synchronized Speaking nextTeam(String roomId) {
         Speaking speaking = speakGameRepository.findById(roomId).get();
         int lastIndex = speaking.getQuizzes().size() - 1;
         // 마지막 문제를 제거하고
@@ -155,5 +160,15 @@ public class SpeakingService {
         return speakGameRepository.save(speaking);
     }
 
-    // 5.
+    // 6. 게임 종료
+    public synchronized void end(String roomId) {
+        // 기존 방의 점수 갱신
+        WaitRoom waitRoom = waitRoomRepository.findById(roomId).get();
+        Speaking speaking = speakGameRepository.findById(roomId).get();
+        for(int i = 1; i < speaking.getScores().length; i++) {
+            waitRoom.getScores()[i] += speaking.getScores()[i];
+        }
+        // 저장
+        waitRoomRepository.save(waitRoom);
+    }
 }

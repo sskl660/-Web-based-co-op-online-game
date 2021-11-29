@@ -43,7 +43,7 @@ public class WaitRoomRestController {
     @PostMapping(value = "/create/ssafymind")
     public void createSsafyMind(@RequestBody InitGame initGame) {
         // 현재 게임 방 정보 갱신 로직 추가
-        waitRoomService.changeGame(initGame);
+        waitRoomService.setGame(initGame);
         // ssafymind 게임방 생성
         ssafyMindService.createSsafyMind(initGame);
     }
@@ -55,7 +55,7 @@ public class WaitRoomRestController {
     @PostMapping(value = "/create/speaking")
     public void createSpeaking(@RequestBody InitGame initGame) {
         // 현재 게임 방 정보 갱신 로직 추가
-        waitRoomService.changeGame(initGame);
+        waitRoomService.setGame(initGame);
         // 또박또박말해요 게임방 생성
         speakingService.createSpeaking(initGame);
     }
@@ -65,10 +65,10 @@ public class WaitRoomRestController {
      */
     @PostMapping(value = "/create/ssazipjump")
     public void createSsazipJump(@RequestBody InitGame initGame) {
-        System.out.println("checker111111111111111111111111111");
         // 현재 게임 방 게임 타입 정보 갱신 로직 추가
-        waitRoomService.changeGame(initGame);
+        waitRoomService.setGame(initGame);
         // ssafymind 게임방 생성
         ssazipJumpService.createSsazipJump(initGame);
+
     }
 }

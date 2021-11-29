@@ -20,6 +20,11 @@ public class WaitRoom {
     private List<Participant> members; // 유저 정보
     private int gameType; // 진행중인 게임 정보
     private int[] scores; // 총 점수 정보
+    private boolean ssafymindExplain;
+    private boolean speakgameExplain;
+    private boolean jumpgameExplain;
+    private boolean progress; // 현재 게임이 진행중인지 여부
+    private int sign; // 게임 진행 여부 통신
 
     // 테스트용 멤버 초기화
     public WaitRoom() {

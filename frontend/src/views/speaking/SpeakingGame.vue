@@ -1,64 +1,135 @@
 <template>
-  <div>
-    <div class="speak-game">
-      <Header v-bind:gameTitle="'또박또박 말해요'" />
-      <div class="game-screen">
-        <GameStatus game="speak" />
-        <div class="game-board">
-          <p class="sentence">"삼성 청년 소프트웨어 아카데미"</p>
-          <div v-for="(member, i) in teamMember" :key="i" class="sentence-board">
-            <div v-if="i % 2 != 1" class="member-left">
-              <div class="member-name">
-                <span>{{ member }}</span>
-                <img src="@/assets/images/speak-success.png" alt="" />
-              </div>
-              <div class="member-sentence member-sentence-left">
-                <span id="doin"></span>
-              </div>
+  <div class="speak-game">
+    <!-- <div id="audios-container"></div> -->
+    <GameOrderModal
+      v-if="ordermodal == true"
+      v-bind:teamOrder="room.teamOrder"
+      v-bind:teamCnt="room.curTeamCnt"
+      v-bind:host="room.host"
+      v-bind:user="getUser.id"
+      v-on:sendGameStartTrigger="sendGameStartTrigger"
+      :gameType="'speaking'"
+    />
+    <SpeakAnswerModal
+      v-if="answermodal == true && rankmodal == false"
+      @getCloseAnsModal="getCloseAnsModal"
+      v-bind:teamOrder="room.teamOrder"
+      v-bind:host="room.host"
+    />
+    <SpeakingRankModal
+      v-if="rankmodal == true"
+      @getCloseRankModal="getCloseRankModal"
+      v-bind:host="room.host"
+      v-bind:scores="room.scores"
+      v-bind:curTeam="room.curTeam"
+      v-on:sendGoWaitingRoomTrigger="sendGoWaitingRoomTrigger"
+    />
+    <Header
+      v-bind:gameTitle="'또박또박 말해요'"
+      :host="room.host"
+      @onDisconnect="onDisconnect"
+    />
+    <div class="game-screen">
+      <GameStatus
+        game="speak"
+        v-bind:teamOrder="room.teamOrder"
+        v-bind:teams="room.teams"
+        v-bind:curPlayer="room.curPlayer"
+        v-bind:scores="room.scores"
+        v-bind:curTeam="room.curTeam"
+        v-bind:curTeamCnt="room.curTeamCnt"
+        v-if="room != null"
+        :timer="timer"
+        :gameType="'speaking'"
+      />
+      <div class="game-board">
+        <p class="sentence">"{{ quiz }}"</p>
+        <div
+          v-for="(member, i) in teamMember"
+          :key="i"
+          class="sentence-board"
+          id="sentence-board"
+        >
+          <div v-if="i % 2 != 1" class="member-left sentence-board-child">
+            <div class="member-name">
+              <span>{{ member.participantName }}</span>
+              <img :src="speakImg[0]" alt="speaking progress image" />
             </div>
-            <div v-else class="member-right">
-              <div class="member-sentence member-sentence-right">
-                <span>삼성 청년 소프트웨어 아카데미</span>
-              </div>
-              <div class="member-name">
-                <span>{{ member }}</span>
-                <img src="@/assets/images/speak-fail.png" alt="" />
-              </div>
+            <div class="member-sentence member-sentence-left">
+              <span></span>
             </div>
           </div>
-          <img src="@/assets/images/mike-off.png" alt="" class="game-mike" id="record" />
+          <div v-else class="member-right sentence-board-child">
+            <div class="member-sentence member-sentence-right">
+              <span></span>
+            </div>
+            <div class="member-name">
+              <span>{{ member.participantName }}</span>
+              <img :src="speakImg[0]" alt="speaking progress image" />
+            </div>
+          </div>
         </div>
+        <img
+          v-if="showMic"
+          :src="micImg[2]"
+          alt="mic img"
+          class="game-mic-default"
+          id="record"
+        />
+        <img
+          v-else
+          :src="micImg[1]"
+          alt="mic img"
+          class="game-mic-default"
+          id="record"
+        />
+        <!-- <button @click="enterAudioRoom">마이크</button> -->
       </div>
-    </div>
 
-    <!-- 아래는 나중에 사용할 아이들 -->
-    <div style="display:none;">
-      <p>녹음하기</p>
-      <input type="checkbox" id="chk-hear-mic" /><label for="chk-hear-mic">마이크 소리 듣기</label>
-      <!-- <button id="record">녹음</button> -->
-      <!-- <button id="stop">녹음 정지</button> -->
-      <span id="final_span"></span>
-      <span id="interim_span"></span>
-      <div id="sound-clips"></div>
+      <!-- 아래는 나중에 사용할 아이들 -->
+      <!-- <div style="display:none;">
+        <p>녹음하기</p>
+        <input type="checkbox" id="chk-hear-mic" /><label for="chk-hear-mic"
+          >마이크 소리 듣기</label
+        > -->
+        <!-- <button id="record">녹음</button> -->
+        <!-- <button id="stop">녹음 정지</button> -->
+        <!-- <span id="final_span"></span>
+        <span id="interim_span"></span>
+        <div id="sound-clips"></div>
+      </div> -->
     </div>
   </div>
 </template>
 
+
+<script src="/node_modules/webrtc-adapter/out/adapter.js"></script>
+<script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
+<script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
 <script>
-import '@/css/speaking-game.css';
-import { mapGetters } from 'vuex';
-import { socketConnect } from '@/util/socket-common.js';
-import Header from '@/components/common/Header.vue';
-import GameStatus from '@/components/GameStatus.vue';
+import "@/css/speaking-game.css";
+import { mapGetters } from "vuex";
+import { socketConnect } from "@/util/socket-common.js";
+import Header from "@/components/common/Header.vue";
+import GameOrderModal from "@/components/GameOrderModal";
+import SpeakAnswerModal from "@/components/speaking/SpeakAnswerModal";
+import SpeakingRankModal from "@/components/speaking/SpeakingRankModal";
+import GameStatus from "@/components/GameStatus.vue";
+import swal from "sweetalert";
 
 export default {
-  name: 'SpeakGame',
+  name: "SpeakGame",
   components: {
     Header,
     GameStatus,
+    GameOrderModal,
+    SpeakAnswerModal,
+    SpeakingRankModal,
   },
   data: () => {
     return {
+      ordermodal: true,
+      answermodal: false,
       record: {},
       stop: {},
       soundClips: {},
@@ -67,61 +138,105 @@ export default {
       analyser: {},
       chunks: [],
       mediaRecorder: {},
-      teamMember: ['김태현', '권희은', '차은채', '안기훈', '이장섭', '오일남'],
-      answerIdx: 0,
-      userAnswer: [],
-      userAnswerIdx: 0,
       isRecording: false,
-      // Socket 정보들
+      // Socket 정보
       stompClient: null,
       room: {},
-      interimTranscript: '',
-      finalTranscript: '',
+      interimTranscript: "",
+      finalTranscript: "",
+      teamMember: [],
+      answerIdx: 0,
+      speakImg: [
+        "/img/speak/speak-wait.png",
+        "/img/speak/speak-loading.png",
+        "/img/speak/speak-fail.png",
+        "/img/speak/speak-success.png",
+      ],
+      micImg: [
+        "/img/mic/mic-default.png",
+        "/img/mic/mic-enabled.png",
+        "/img/mic/mic-on.png",
+        "/img/mic/mic-off.png",
+      ],
+      talkFinish: false,
+      quiz: null,
+      lastTeamLen: 0,
+      talker: 0,
+      showMic: false,
+      timer: true,
+      rankmodal: false,
+      connection: new RTCMultiConnection(),
+      // isRoomOpened: false,
+      // isRoomJoined: false,
     };
   },
   created() {
+    history.pushState(null, null, location.href);
+    window.onpopstate = () => {
+      history.go(1);
+      swal({
+        // className:'alert',
+        title: "게임 내에서는 뒤로가기가 불가능합니다.",
+        icon: "/img/ssazip-logo.png",
+        buttons: {
+          text: "확인",
+        },
+      });
+    };
     this.stompClient = socketConnect(this.onConnected, this.onError);
   },
-  mounted() {
+  async mounted() {
+    // this.stompClient.debug = function() {};
     // this.getAudio();
-    this.translate();
+    await this.translate();
+    // await this.setAudio();
   },
   destroyed() {
+    // 나갈 때 음성 닫아주기
+    // this.connection.close();
     this.onDisconnect();
   },
   watch: {},
   computed: {
-    ...mapGetters(['getUser', 'getRoomId']),
+    ...mapGetters(["getUser", "getRoomId"]),
   },
   methods: {
     /*  */
     // 음성을 텍스트로 번역
     /*  */
-    translate: function() {
-      if (typeof webkitSpeechRecognition !== 'function') {
-        alert('크롬에서만 동작합니다');
+    translate: async function() {
+      if (typeof webkitSpeechRecognition !== "function") {
+        swal({
+          // className:'alert',
+          title: "크롬에서만 동작합니다.",
+          icon: "/img/ssazip-logo.png",
+          buttons: {
+            text: "확인",
+          },
+        });
         return false;
       }
+      const speech = new (window.SpeechRecognition ||
+        window.webkitSpeechRecognition)();
 
-      const speech = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       let isRecognizing = false;
       let ignoreEndProcess = false;
-      let finalTranscript = '';
+      let finalTranscript = "";
 
+      // 오류를 막기 위한 console
+      console.log(isRecognizing);
       // 원하는 언어를 앞으로 뺴라(해당 언어만 지원)
       // 비어있으면 영어, 한국어 둘 다 지원(한국어 우선)
-      speech.lang = ['ko-KR', 'en-US'];
+      speech.lang = ["ko-KR", "en-US"];
       speech.continuous = true;
       speech.interimResults = true;
 
       speech.onstart = function() {
         isRecognizing = true;
-        console.log(isRecognizing);
       };
 
       speech.onend = function() {
         isRecognizing = false;
-        console.log(isRecognizing);
 
         if (ignoreEndProcess) {
           return false;
@@ -133,9 +248,10 @@ export default {
       };
 
       speech.onresult = (event) => {
-        let interimTranscript = '';
-        this.interimTranscript = '';
-        if (typeof event.results === 'undefined') {
+        const talker = this.answerIdx;
+        let interimTranscript = "";
+        this.interimTranscript = "";
+        if (typeof event.results === "undefined") {
           speech.onend = null;
           speech.stop();
           return;
@@ -147,22 +263,23 @@ export default {
           if (event.results[i].isFinal) {
             finalTranscript += transcript;
             this.finalTranscript += transcript;
-            console.log('파이널', finalTranscript);
-            console.log('파이널', transcript);
+            // console.log('파이널', finalTranscript);
+            // console.log('파이널', transcript);
           } else {
             interimTranscript += transcript;
             this.interimTranscript += transcript;
           }
         }
-        console.log('파이널', finalTranscript);
-        console.log('파이널', interimTranscript);
-        this.stompClient.send(
-          `/pub/speaking/talk/${this.getRoomId}`,
-          {},
-          JSON.stringify({
-            sentence: finalTranscript + interimTranscript,
-          })
-        );
+        if (this.isRecording) {
+          this.stompClient.send(
+            `/pub/speaking/talk/${this.getRoomId}`,
+            {},
+            JSON.stringify({
+              sentence: finalTranscript + interimTranscript,
+              talker: talker,
+            })
+          );
+        }
       };
 
       speech.onerror = function(event) {
@@ -171,94 +288,274 @@ export default {
         }
       };
 
-      const record = document.querySelector('#record');
-      record.addEventListener('click', async () => {
-        if (this.isRecording) {
-          let message = finalTranscript;
-          record.src = '/img/mike-off.10e24890.png';
-
-          // 마이크 버튼을 눌서 finalTranscript가 없을 때
-          if (finalTranscript === this.finalTranscript) {
-            message = this.finalTranscript + this.interimTranscript;
-          }
-          console.log('-----------------');
-          console.log(message);
-          console.log('-----------------');
-
-          await this.stompClient.send(
-            `/pub/speaking/answer/${this.getRoomId}`,
-            {},
-            JSON.stringify({
-              name: '안기훈',
-              teamNo: 1,
-              message: message,
-              correct: false,
-            })
-          );
-          finalTranscript = '';
-          this.finalTranscript = '';
-          this.isRecording = false;
-          speech.stop();
-        } else {
-          record.src = '/img/mike-on.d4e34f6f.png';
-          finalTranscript = '';
-          this.finalTranscript = '';
-          const doin = document.querySelector('#doin');
-          doin.innerText = '';
+      const record = document.querySelector("#record");
+      record.addEventListener("click", async () => {
+        if (
+          this.getUser.name !==
+            this.room.teams[this.room.teamOrder[0]].members[this.answerIdx]
+              .participantName &&
+          !this.isRecording
+        ) {
           this.isRecording = true;
-          speech.start();
+          return;
+        } else if (
+          this.getUser.name !==
+            this.room.teams[this.room.teamOrder[0]].members[this.answerIdx]
+              .participantName &&
+          this.isRecording
+        ) {
+          this.isRecording = false;
+        } else {
+          const speakImg = document.querySelectorAll(".member-name > img");
+          if (this.isRecording) {
+            let message = finalTranscript;
+            this.setMic(2);
+
+            // 마이크 버튼을 눌서 finalTranscript가 없을 때
+            if (finalTranscript === this.finalTranscript) {
+              message = this.finalTranscript + this.interimTranscript;
+            }
+
+            this.stompClient.send(
+              `/pub/speaking/answer/${this.getRoomId}`,
+              {},
+              JSON.stringify({
+                name: this.getUser.name,
+                teamNo: this.getUser.teamNo,
+                message: message,
+                correct: false,
+              })
+            );
+            finalTranscript = "";
+            this.finalTranscript = "";
+            this.isRecording = false;
+            this.talkFinish = true;
+            speech.stop();
+          } else {
+            this.setMic(1);
+            speakImg[this.answerIdx].src = this.speakImg[1];
+            finalTranscript = "";
+            this.finalTranscript = "";
+            const sentenceBox = document.querySelectorAll(
+              ".sentence-board > .sentence-board-child > .member-sentence > span"
+            )[this.answerIdx];
+            sentenceBox.innerText = "";
+            this.isRecording = true;
+            this.talkFinish = false;
+            this.stompClient.send(
+              `/pub/speaking/talk/${this.getRoomId}`,
+              {},
+              JSON.stringify({
+                sentence: "",
+                talker: this.answerIdx,
+              })
+            );
+            speech.start();
+          }
         }
       });
 
-      const stop = document.querySelector('#stop');
-      console.log(stop.src);
+      // const stop = document.querySelector('#stop');
+      // console.log(stop.src);
       // stop.addEventListener("click", () => {
-
       // })
 
-      speech.addEventListener('result', (event) => {
-        const transcript = event['results'];
+      speech.addEventListener("result", (event) => {
+        const transcript = event["results"];
         // this.mediaRecorder.stop();
-        console.log(transcript);
+        return transcript;
       });
     },
+    // 멤버 설정
+    setTeamMembers: async function() {
+      this.teamMember = this.room.teams[this.room.teamOrder[0]].members;
+    },
     nextTurn: function() {
+      this.stompClient.send("/pub/speaking/next/team", {}, this.getRoomId);
       this.userAnswerIdx++;
       this.answerIdx++;
+    },
+    setMic: function(background) {
+      const record = document.querySelector("#record");
+      // record.src = require(this.micImg[1]);
+      this.showMic = true;
+      if (background === 0) {
+        record.src = this.micImg[1];
+        return;
+      } else if (background === 1) {
+        record.src = this.micImg[3];
+        // record.className = 'game-mic-default game-mic-off';
+        return;
+      } else if (background === 2) {
+        record.src = this.micImg[2];
+        // record.className = 'game-mic-default game-mic-on';
+        return;
+      }
+      // before
+      // game-mic 클래스 없애주기
+      // 사진 mic[0]으로
+
+      // after
+      // game-mic 클래스 넣어주기
+      // 사진 mic[1]로
+    },
+    removeMic: function() {
+      const record = document.querySelector("#record");
+      // record.src = 'https://k5a302.p.ssafy.io/img/mic/mic-disabled.png';
+      this.showMic = false;
+      record.classList.remove("game-mic-on");
+      record.classList.remove("game-mic-off");
+    },
+    setAudio: async function() {
+      this.connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+
+      this.connection.socketMessageEvent = 'audio-conference-demo';
+      this.connection.session = {
+        audio: true,
+        video: false
+      };
+      this.connection.mediaConstraints = {
+        audio: true,
+        video: false
+      };
+      this.connection.sdpConstraints.mandatory = {
+        OfferToReceiveAudio: true,
+        OfferToReceiveVideo: false
+      };
+      this.connection.iceServers = [{
+        'urls': [
+          'stun:stun.l.google.com:19302',
+          'stun:stun1.l.google.com:19302',
+          'stun:stun2.l.google.com:19302',
+          'stun:stun.l.google.com:19302?transport=udp',
+        ]
+      }];
+      // this.connection.audiosContainer = document.getElementById('audios-container');
+      // this.connection.onstream = function(event) {
+      //   var width = parseInt(this.connection.audiosContainer.clientWidth / 2) - 20;
+      //   var mediaElement = getHTMLMediaElement(event.mediaElement, {
+      //     title: event.userid,
+      //     buttons: ['full-screen'],
+      //     width: width,
+      //     showOnMouseEnter: false
+      //   });
+
+      //   this.connection.audiosContainer.appendChild(mediaElement);
+
+      //   setTimeout(function() {
+      //     mediaElement.media.play();
+      //   }, 5000);
+
+      //   mediaElement.id = event.streamid;
+      // };
+      this.connection.onstreamended = function(event) {
+        var mediaElement = document.getElementById(event.streamid);
+        if (mediaElement) {
+          mediaElement.parentNode.removeChild(mediaElement);
+        }
+      };
+
+      // (function() {
+      //   var params = {},
+      //     r = /([^&=]+)=?([^&]*)/g;
+
+      //   function d(s) {
+      //     return decodeURIComponent(s.replace(/\+/g, ' '));
+      //   }
+      //   var match, search = window.location.search;
+      //   while (match = r.exec(search.substring(1)))
+      //     params[d(match[1])] = d(match[2]);
+      //   window.params = params;
+      // })();
+
+      // var roomid = '';
+      // if (localStorage.getItem(this.connection.socketMessageEvent)) {
+      //     roomid = localStorage.getItem(this.connection.socketMessageEvent);
+      // } else {
+      //     roomid = this.connection.token();
+      // }
+
+      // var hashString = location.hash.replace('#', '');
+      // if (hashString.length && hashString.indexOf('comment-') == 0) {
+      //   hashString = '';
+      // }
+
+      // var roomid = params.roomid;
+      // if (!roomid && hashString.length) {
+      //   roomid = hashString;
+      // }
+      // if (roomid && roomid.length) {
+      //   document.getElementById('room-id').value = roomid;
+      //   localStorage.setItem(this.connection.socketMessageEvent, roomid);
+
+      //   // auto-join-room
+      //   (function reCheckRoomPresence() {
+      //     this.connection.checkPresence(roomid, function(isRoomExist) {
+      //       if (isRoomExist) {
+      //         this.connection.join(roomid);
+      //         return;
+      //       }
+
+      //       setTimeout(reCheckRoomPresence, 5000);
+      //     });
+      //   })();
+      // }
+              // 방장인 경우 소켓통신 방 만들기
+      // if (this.room.host === this.getUser.id) {
+      //   this.connection.open('b1', function() {
+      //   });
+      // // 참여자는 방에 참여하기
+      // } else {
+      // }
+    },
+    makeAudioRoom: function() {
+      this.connection.openOrJoin(this.getRoomId);
+      this.isRoomOpened = true;
+      this.isRoomJoined = true;
+    },
+    enterAudioRoom: function() {
+      this.connection.join(this.getRoomId);
+      this.isRoomOpened = true;
+      this.isRoomJoined = true;
+    },
+    giveAudio: function() {
+      // 마이크 기능 주고 뻇기
     },
     /**
      * 소켓 통신
      */
-    onMesseageReceived(payload) {
-      if (payload.body == 'exit') {
-        // 모든 참가자의 연결을 끊고
-        this.onDisconnect();
-        alert('방장이 퇴장하여 게임이 종료됩니다!');
-        // 모든 참가자 내보내기
-        this.$router.push('/room/' + this.getRoomId);
-        return;
-      }
-      const data = JSON.parse(payload.body);
-      this.room = data;
-    },
-    onConnected() {
+    async onConnected() {
       // 방 정보 교환 채널
-      this.stompClient.subscribe('/speaking/' + this.getRoomId, this.onMessageReceived);
+      await this.stompClient.subscribe(
+        "/speaking/" + this.getRoomId,
+        this.onMessageReceived
+      );
       // 정답 데이터 채널
       this.stompClient.subscribe(
-        '/speaking/answer/' + this.getRoomId,
+        "/speaking/answer/" + this.getRoomId,
         this.onAnswerMessageReceived
       );
       // 현재 진행 중인 사람의 문장 전송
-      this.stompClient.subscribe('/speaking/talk/' + this.getRoomId, this.onTalkingMessageReceived);
-      // 플레이어 변경
       this.stompClient.subscribe(
-        '/speaking/change/player/' + this.getRoomId,
-        this.onChangePlayerMessageReceived
+        "/speaking/talk/" + this.getRoomId,
+        this.onTalkingMessageReceived
       );
+      // 플레이어 변경
+      await this.stompClient.subscribe(
+        `/speaking/change/player/` + this.getRoomId,
+        this.onChangePlayer
+      );
+      // 다음 팀으로
+      // this.stompClient.subscribe(`/speaking/next/team/` + this.getRoomId, this.onChangeTeam);
+      // 모달 정보 교환
+      this.stompClient.subscribe(
+        "/ssafymind/close/modal/" + this.getRoomId,
+        this.onModalMessageReceived
+      );
+
       // 입장 시 데이터 수신
-      this.stompClient.send(
-        '/speaking/enter',
+      await this.stompClient.send(
+        "/pub/speaking/enter",
         {},
         JSON.stringify({
           roomId: this.getRoomId,
@@ -267,159 +564,197 @@ export default {
           teamNo: this.getUser.teamNo,
         })
       );
+
     },
-    onMessageReceived(payload) {
-      if (payload.body === 'exit') {
-        // 모든 참가자의 연결을 끊고
-        this.onDisconnect();
-        alert('방장이 퇴장하여 게임이 종료됩니다!');
-        // 모든 참가자 내보내기
-        this.$router.push('/room/' + this.getRoomId);
+    async onMessageReceived(payload) {
+      if (payload.body == "exit") {
+        this.$router.push("/room/" + this.getRoomId).catch(() => {});
+        this.stompClient.disconnect();
+        swal({
+          title: "방장이 퇴장하여 게임이 종료됩니다!",
+          icon: "/img/ssazip-logo.png",
+          buttons: {
+            text: "확인",
+          },
+        });
         return;
       }
       const data = JSON.parse(payload.body);
       this.room = data;
-      console.log(data);
+      
+      // if (!this.isRoomOpened && data.host === this.getUser.id) {
+      //   this.makeAudioRoom();
+      // }
+
+      // 나가는 로직
+      if (data.teamOrder[0] == null) {
+        // 랭킹 모달 띄우기
+        this.rankmodal = true;
+        return;
+      }
+
+      console.log(this.room);
+      this.quiz = data.quizzes[data.quizzes.length - 1].problem;
+      this.answerIdx = 0;
+      await this.setTeamMembers();
+      if (
+        data.teams[data.teamOrder[0]].members.length != 0 &&
+        this.getUser.name ===
+          data.teams[data.teamOrder[0]].members[0].participantName
+      ) {
+        // 마이크 권한 주기
+        // this.giveAudio(); // 이전 사람과 이번 턴의 index
+        // 마이크 아이콘 변경
+        this.setMic(2);
+      }
+      // span 싹 지워주기
+      const sentences = document.querySelectorAll(
+        ".sentence-board > .sentence-board-child > .member-sentence > span"
+      );
+      const speakImg = document.querySelectorAll(".member-name > img");
+
+      sentences.forEach((sentence, idx) => {
+        sentence.innerText = "";
+        speakImg[idx].src = this.speakImg[0];
+      });
     },
     onDisconnect() {
+      let isHost;
+      if (this.room.host == this.getUser.id) isHost = true;
+      else isHost = false;
       this.stompClient.send(
-        '/pub/speaking/exit',
+        "/pub/speaking/exit",
         {},
         JSON.stringify({
           roomId: this.getRoomId,
           participantId: this.getUser.id,
           participantName: this.getUser.name,
+          host: isHost,
         })
       );
-      this.stompClient.disconnect();
-      this.$router.push('/room/', this.getRoomId);
     },
-    onAnswerMessageReceived(payload) {
+    async onAnswerMessageReceived(payload) {
+      this.talkFinish = true;
       const data = JSON.parse(payload.body);
-      const doin = document.querySelector('#doin');
-      doin.innerText = data.message;
-      console.log(data)
+      const speakImg = document.querySelectorAll(".member-name > img");
+      const sentenceBox = document.querySelectorAll(
+        ".sentence-board > .sentence-board-child > .member-sentence > span"
+      )[this.answerIdx];
+      sentenceBox.innerText = await data.message;
       if (data.correct) {
-        console.log(data)
-        this.stompClient.send('/pub/speaking/change/player', {}, this.getRoomId);
+        speakImg[this.answerIdx].src = this.speakImg[3];
+        if (
+          this.getUser.name ===
+          this.room.teams[this.room.teamOrder[0]].members[this.answerIdx]
+            .participantName
+        ) {
+          this.setMic(0);
+          this.removeMic();
+          this.stompClient.send(
+            "/pub/speaking/change/player",
+            {},
+            this.getRoomId
+          );
+        }
+      } else {
+        speakImg[this.answerIdx].src = this.speakImg[2];
       }
     },
     onTalkingMessageReceived(payload) {
-      console.log(this.isRecording);
-      if (this.isRecording) {
-        const data = JSON.parse(payload.body);
-        const doin = document.querySelector('#doin');
-        doin.innerText = data.sentence;
-        console.log(data.sentence);
+      const data = JSON.parse(payload.body);
+      if (
+        this.talker !== this.answerIdx &&
+        data.talker !== this.answerIdx &&
+        this.talker !== data.talker
+      ) {
+        this.talker = data.talker;
+        return;
+      }
+      if (data.sentence === "") {
+        this.talkFinish = false;
+      }
+      if (!this.talkFinish || data.sentence === "") {
+        const speakImg = document.querySelectorAll(".member-name > img");
+        speakImg[this.answerIdx].src = this.speakImg[1];
+        const sentenceBox = document.querySelectorAll(
+          ".sentence-board > .sentence-board-child > .member-sentence > span"
+        )[this.answerIdx];
+        sentenceBox.innerText = data.sentence;
       }
     },
-    onChangePlayerMessageReceived(payload) {
-      console.log(payload)
-      console.log(payload)
-      console.log(payload)
-      console.log(payload)
-      console.log(payload)
+    onChangePlayer(payload) {
       const data = JSON.parse(payload.body);
-      console.log(data);
-      console.log(data);
-      console.log(data);
+      this.isRecording = false;
+      this.talkFinish = false;
+      // 다음 팀으로 넘겨야 하는 경우
+      if (
+        data === 0
+        // && this.answerIdx + 1 === this.room.teams[this.room.teamOrder[0]].members.length
+      ) {
+        this.answermodal = true;
+        this.timer = true;
+        if (
+          this.getUser.name ===
+          this.room.teams[this.room.teamOrder[0]].members[this.answerIdx]
+            .participantName
+        ) {
+          this.stompClient.send("/pub/speaking/next/team", {}, this.getRoomId);
+          this.answerIdx = data;
+          this.setMic(0);
+          this.removeMic();
+        }
+        // 다른 선수로 넘겨야 하는 경우
+      } else {
+        this.answerIdx = data;
+        const speakImg = document.querySelectorAll(".member-name > img");
+        speakImg[data].src = this.speakImg[0];
+        if (
+          this.getUser.name ===
+          this.room.teams[this.room.teamOrder[0]].members[data].participantName
+        ) {
+          // 마이크 권한 주기
+          // this.giveAudio(); // 이전 사람과 이번 턴의 index
+          // 마이크 아이콘 변경
+          this.setMic(2);
+        }
+      }
+    },
+    // onChangeTeam(payload) {
+    //   const data = JSON.parse(payload.body);
+    //   // 팀원들 싹 다시 뿌려주기
+    //   this.room = data;
+    //   this.setMic(2); // 이전 사람과 이번 팀의 index
+    //   // answerIdx 바꿔주기
+    //   this.answerIdx = 0;
+    //   // span 싹 지워주기
+    //   const sentences = document.querySelectorAll('.sentence-board > .sentence-board-child > .member-sentence > span');
+    //   // 0번에게 마이크 권한
+    // },
+    onModalMessageReceived(payload) {
+      const flag = JSON.parse(payload.body);
+      this.ordermodal = flag;
+      this.answermodal = flag;
+      this.timer = false;
+      // if (!this.isRoomJoined) {
+      //   this.enterAudioRoom();
+      // }
     },
     onError() {},
-    /*  */
-    // 음성 녹음해 blob 파일로 만들기
-    /*  */
-    getAudio: function() {
-      this.record = document.getElementById('record');
-      this.stop = document.getElementById('stop');
-      this.soundClips = document.getElementById('sound-clips');
-      this.chkHearMic = document.getElementById('chk-hear-mic');
-
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      this.audioCtx = audioCtx;
-
-      const analyser = audioCtx.createAnalyser();
-      this.analyser = analyser;
-
-      function makeSound(stream) {
-        const source = this.audioCtx.createMediaStreamSource(stream);
-        source.connect(this.analyser);
-        this.analyser.connect(this.audioCtx.destination);
-      }
-
-      if (navigator.mediaDevices) {
-        console.log('getUserMedia supported.');
-
-        navigator.mediaDevices
-          .getUserMedia({ audio: true })
-          .then((stream) => {
-            const mediaRecorder = new MediaRecorder(stream);
-            this.mediaRecorder = mediaRecorder;
-            this.chkHearMic.onchange = (e) => {
-              if (e.target.checked == true) {
-                audioCtx.resume();
-                makeSound(stream);
-              } else {
-                audioCtx.suspend();
-              }
-            };
-            this.record.onclick = () => {
-              this.mediaRecorder.start();
-              console.log(this.mediaRecorder.state);
-            };
-            this.stop.onclick = () => {
-              this.mediaRecorder.stop();
-              console.log(this.mediaRecorder.state);
-            };
-
-            this.mediaRecorder.onstop = () => {
-              console.log('data available after MediaRecorder.stop() called.');
-
-              const clipName = prompt('오디오 파일 제목을 입력하세요.', new Date());
-
-              const clipContainer = document.createElement('article');
-              const clipLabel = document.createElement('p');
-              const audio = document.createElement('audio');
-              const deleteButton = document.createElement('button');
-
-              clipContainer.classList.add('clip');
-              audio.setAttribute('controls', '');
-              deleteButton.innerHTML = '삭제';
-              clipLabel.innerHTML = clipName;
-
-              clipContainer.appendChild(audio);
-              clipContainer.appendChild(clipLabel);
-              clipContainer.appendChild(deleteButton);
-              this.soundClips.appendChild(clipContainer);
-              audio.controls = true;
-              const blob = new Blob(this.chunks, {
-                type: 'audio/ogg codecs=opus',
-                // type: 'audio/wav; codecs=0'
-              });
-              console.log(blob);
-              this.chunks = [];
-              const audioURL = URL.createObjectURL(blob);
-              audio.src = audioURL;
-              console.log(audio);
-              console.log('recorder stopped');
-
-              deleteButton.onclick = (e) => {
-                const evtTgt = e.target;
-                evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);
-              };
-            };
-
-            this.mediaRecorder.ondataavailable = (e) => {
-              this.chunks.push(e.data);
-              console.log(this.chunks);
-            };
-          })
-          .catch((err) => {
-            console.log('The following error occurred: ' + err);
-          });
-      }
+    sendGameStartTrigger: function() {
+      this.stompClient.send(`/pub/ssafymind/close/modal`, {}, this.getRoomId);
+    },
+    getCloseAnsModal: function(answermodal) {
+      this.answermodal = answermodal;
+      this.stompClient.send(`/pub/ssafymind/close/modal`, {}, this.getRoomId);
+    },
+    getCloseRankModal: function(rankmodal) {
+      this.rankmodal = rankmodal;
+    },
+    // 대기실로 돌아가는 트리거
+    sendGoWaitingRoomTrigger() {
+      this.stompClient.send("/pub/speaking/end", {}, this.getRoomId);
+      this.onDisconnect();
     },
   },
 };
 </script>
-
-<style></style>

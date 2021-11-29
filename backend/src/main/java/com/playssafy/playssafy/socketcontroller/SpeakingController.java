@@ -22,6 +22,7 @@ public class SpeakingController {
     public void enter(Participant participant) {
         // 유저 입장 후 해당 게임 방 정보 얻기
         Speaking speaking = speakingService.enter(participant);
+        System.out.println(speaking);
         // 게임 방 정보 소켓으로 반환
         template.convertAndSend("/speaking/" + participant.getRoomId(), speaking);
     }
@@ -32,7 +33,7 @@ public class SpeakingController {
         // 유저 입장 후 해당 게임 방 정보 얻기
         Speaking speaking = speakingService.exit(participant);
         // 방장이 퇴장한 경우 종료 메세지 뿌려주기
-        if (speaking == null) {
+        if (speaking == null && participant.isHost()) {
             template.convertAndSend("/speaking/" + participant.getRoomId(), "exit");
             return;
         }
@@ -63,9 +64,16 @@ public class SpeakingController {
     }
 
     // 6. 다음 문제
-    @MessageMapping(value = "/speaking/next/problem")
-    public void nextProblem(String roomId) {
-        Speaking speaking = speakingService.nextProblem(roomId);
+    @MessageMapping(value = "/speaking/next/team")
+    public void nextTeam(String roomId) {
+        Speaking speaking = speakingService.nextTeam(roomId);
         template.convertAndSend("/speaking/" + roomId, speaking);
+    }
+
+    // 7. 게임 종료(점수 누적)
+    @MessageMapping(value = "/speaking/end")
+    public void end(String roomId) {
+        // 게임 종료 로직 수행
+        speakingService.end(roomId);
     }
 }

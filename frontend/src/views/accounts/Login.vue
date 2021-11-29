@@ -19,12 +19,12 @@
       <router-link to="/signup">
         <button class="button-signup">회원가입하기</button>
       </router-link>
-      <p>소설 로그인</p>
+      <!-- <p>소설 로그인</p>
       <div>
         <div id="naverIdLogin" />
         <button @click="kakaoLogin">카카오 로그인</button>
         <button>구글 로그인</button>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -38,6 +38,7 @@
 import '@/css/accounts/login.css';
 import axios from '@/util/http-common.js';
 import { mapActions, mapGetters } from 'vuex';
+import swal from 'sweetalert';
 
 export default {
   name: 'Login',
@@ -56,7 +57,7 @@ export default {
     this.checkLogin();
   },
   mounted: function() {
-    this.initializeNaverLogin();
+    // this.initializeNaverLogin();
   },
   computed: {
     ...mapGetters(['getIsLogin']),
@@ -73,12 +74,26 @@ export default {
     baseLogin() {
       // 아이디를 입력하지 않은 경우
       if (this.user.id.length == 0) {
-        alert('아이디를 입력하세요!');
+        swal({
+          // className:'alert',
+          title: '아이디를 입력하세요!',
+          icon: "/img/ssazip-logo.png",
+          buttons: {
+          text: '확인',
+        },
+        })
         return;
       }
       // 비밀번호를 입력하지 않은 경우
       if (this.user.pass.length == 0) {
-        alert('비밀번호를 입력하세요!');
+        swal({
+          // className:'alert',
+          title: '비밀번호를 입력하세요!',
+          icon: "/img/ssazip-logo.png",
+          buttons: {
+          text: '확인',
+        },
+        })
         return;
       }
       axios({
@@ -90,7 +105,14 @@ export default {
           let user = res.data;
           // 유저가 존재하지 않는 경우
           if (user == '') {
-            alert('아이디나 비밀번호를 확인하세요.');
+            swal({
+              // className:'alert',
+              title: '아이디나 비밀번호를 확인하세요.',
+              icon: "/img/ssazip-logo.png",
+              buttons: {
+              text: '확인',
+            },
+            })
             return;
           }
           // 존재하는 경우
@@ -102,70 +124,84 @@ export default {
         })
         .catch(() => {});
     },
-    kakaoLogin: function() {
-      Kakao.Auth.login({
-        success: function(authObj) {
-          Kakao.API.request({
-            url: '/v2/user/me',
-            success: function(res) {
-              console.log(res);
-              window.location.replace('http://localhost:8080/room');
-            },
-            fail: function(err) {
-              console.log(err);
-            },
-          });
-        },
-        fail: function(err) {
-          alert(JSON.stringify(err));
-        },
-      });
-    },
-    kakaoLogout: function() {
-      console.log(Kakao.Auth.getAccessToken());
-      if (Kakao.Auth.getAccessToken()) {
-        Kakao.Auth.logout(function() {
-          // success: function (response) {
-          //   console.log(response)
-          // },
-          // fail: function (error) {
-          //   console.log(error)
-          // }
-          alert(Kakao.Auth.getAccessToken());
-          window.location.replace('http://localhost:8080/');
-        });
-      }
-    },
+    // kakaoLogin: function() {
+    //   Kakao.Auth.login({
+    //     success: function(authObj) {
+    //       Kakao.API.request({
+    //         url: '/v2/user/me',
+    //         success: function(res) {
+    //           console.log(res);
+    //           window.location.replace('http://localhost:8080/room');
+    //         },
+    //         fail: function(err) {
+    //           console.log(err);
+    //         },
+    //       });
+    //     },
+    //     fail: function(err) {
+    //       alert(JSON.stringify(err));
+    //     },
+    //   });
+    // },
+    // kakaoLogout: function() {
+    //   console.log(Kakao.Auth.getAccessToken());
+    //   if (Kakao.Auth.getAccessToken()) {
+    //     Kakao.Auth.logout(function() {
+    //       // success: function (response) {
+    //       //   console.log(response)
+    //       // },
+    //       // fail: function (error) {
+    //       //   console.log(error)
+    //       // }
+    //       alert(Kakao.Auth.getAccessToken());
+    //       window.location.replace('http://localhost:8080/');
+    //     });
+    //   }
+    // },
     loginCancel: function() {
       this.$router.push('/');
     },
-    initializeNaverLogin: () => {
-      const { naver } = window;
-      const naverLogin = new naver.LoginWithNaverId({
-        clientId: 'J8ASU80_cvgYfiW0WCqD',
-        callbackUrl: 'http://localhost:8080/login',
-        isPopup: false,
-        loginButton: { color: 'white', type: 1, height: 47 },
-        callbackHandle: true,
-      });
-      naverLogin.init();
+    // initializeNaverLogin: () => {
+    //   const { naver } = window;
+    //   const naverLogin = new naver.LoginWithNaverId({
+    //     clientId: 'J8ASU80_cvgYfiW0WCqD',
+    //     callbackUrl: 'http://localhost:8080/login',
+    //     isPopup: false,
+    //     loginButton: { color: 'white', type: 1, height: 47 },
+    //     callbackHandle: true,
+    //   });
+    //   naverLogin.init();
 
-      window.addEventListener('load', function() {
-        naverLogin.getLoginStatus(function(status) {
-          if (status) {
-            const email = naverLogin.user.getEmail();
-            if (email == undefined || email == undefined) {
-              alert('이메일과 이름을 체크해주세요.');
-              naverLogin.reprompt();
-              return;
-            }
-            // window.location.replace('http://localhost:8080/login');
-          } else {
-            alert('로그인 실패');
-          }
-        });
-      });
-    },
+    //   window.addEventListener('load', function() {
+    //     naverLogin.getLoginStatus(function(status) {
+    //       if (status) {
+    //         const email = naverLogin.user.getEmail();
+    //         if (email == undefined || email == undefined) {
+    //           swal({
+    //             // className:'alert',
+    //             title: '이메일과 이름을 체크해주세요.',
+    //             icon: "/img/ssazip-logo.png",
+    //             buttons: {
+    //             text: '확인',
+    //           },
+    //           })
+    //           naverLogin.reprompt();
+    //           return;
+    //         }
+    //         // window.location.replace('http://localhost:8080/login');
+    //       } else {
+    //         swal({
+    //             // className:'alert',
+    //             title: '로그인 실패',
+    //             icon: "/img/ssazip-logo.png",
+    //             buttons: {
+    //             text: '확인',
+    //           },
+    //         })
+    //       }
+    //     });
+    //   });
+    // },
   },
 };
 </script>

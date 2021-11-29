@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div>{{ this.curScore }}</div>
+    <!-- <div>{{ this.curScore }}</div> -->
     <!-- 상단 타이틀 리본 -->
     <div>
       <img class="rank-title" src="../assets/rank-title.png" alt="" />
@@ -12,31 +12,37 @@
     <div class="rank-container">
       <div class="rank-container-background">
         <!-- 1등 -->
-        <div class="ssazip-container">
+        <div class="ssazip-container" v-if="curScore.length >= 1">
           <img class="gold-place" src="../assets/gold-place2.png" alt="" />
           <img class="gold-ssazip" src="../assets/gold-ssazip.png" alt="" />
           <!-- <img class="gold-crown" src="../assets/gold-crown.png" alt=""> -->
           <div class="gold-team">{{ curScore[0][0] }}팀</div>
+          <div class="gold-team-score">{{ curScore[0][1] }}점</div>
         </div>
         <!-- 2등 -->
-        <div class="ssazip-container">
+        <div class="ssazip-container" v-if="curScore.length >= 2">
           <img class="silver-place" src="../assets/silver-place2.png" alt="" />
           <img class="silver-ssazip" src="../assets/silver-ssazip.png" alt="" />
           <div class="silver-team">{{ curScore[1][0] }}팀</div>
+          <div class="silver-team-score">{{ curScore[1][1] }}점</div>
+
         </div>
         <!-- 3등 -->
-        <div class="ssazip-container">
+        <div v-if="curScore.length >= 3 && parseInt(curScore[2][0])" class="ssazip-container">
           <img class="bronze-place" src="../assets/bronze-place2.png" alt="" />
           <img class="bronze-ssazip" src="../assets/bronze-ssazip.png" alt="" />
           <div class="bronze-team">{{ curScore[2][0] }}팀</div>
+          <div class="bronze-team-score">{{ curScore[2][1] }}점</div>
+
         </div>
         <!-- 우측 나머지팀 결과 -->
-        <div class="rank-list">
+        <div class="rank-list" v-if="curScore.length >= 4">
           <div style="margin-top:50px">
             <div v-for="(score, idx) in curScore" :key="idx">
-              <div v-if="idx >= 4">
-                <span class="rank-list-item-rank">{{ idx }}등</span>
+              <div class="rank-list-item" v-if="idx >= 3">
+                <span class="rank-list-item-rank">{{ idx + 1 }}등</span>
                 <span class="rank-list-item-team">{{ score[0] }}팀</span>
+                <span class="rank-list-item-score">{{ score[1] }}점</span>
               </div>
             </div>
           </div>
@@ -51,6 +57,7 @@ import Vue from 'vue';
 import VueConfetti from 'vue-confetti';
 import '../css/rank.css';
 import { mapGetters } from 'vuex';
+import { homeURL, roomURL } from '@/util/socket-common.js';
 
 Vue.use(VueConfetti);
 
@@ -59,6 +66,9 @@ export default {
   data() {
     return {
       curScore: [],
+      first: [],
+      second: [],
+      third: [],
     };
   },
   computed: {
@@ -92,7 +102,8 @@ export default {
       this.curScore = [];
       for (let i = 1; i < this.$route.query.rank.length; i++) {
         // 팀 순서에 없으면 스킵
-        if (this.$route.query.curTeam[i]) {
+        let flag = JSON.parse(this.$route.query.curTeam[i]);
+        if (flag) {
           // i팀이 몇점인지 배열화 시켜 저장
           this.curScore.push([i, this.$route.query.rank[i]]);
         }
@@ -114,13 +125,16 @@ export default {
     },
     // 첫 화면으로 이동
     goHome() {
-      if (this.getIsLogin) this.$router.push('/room');
-      else this.$router.push('/');
+      if (this.getIsLogin) {
+        window.location.href = roomURL;
+      } else {
+        window.location.href = homeURL;
+      }
     },
   },
-  beforeRouteLeave(){
+  beforeRouteLeave() {
     this.$confetti.stop();
-  }
+  },
 };
 </script>
 
