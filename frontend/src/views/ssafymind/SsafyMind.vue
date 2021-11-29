@@ -624,6 +624,7 @@ export default {
      * 메세지 보내기, 받기
      */
     sendAnswerMessage() {
+      if (this.message.length == 0) return;
       this.stompClient.send(
         `/pub/ssafymind/message/${this.getRoomId}`,
         {},
@@ -634,6 +635,14 @@ export default {
         })
       );
       this.message = '';
+    },
+    // 공백 문자 막기
+    checkSpace(str) {
+      if (str.replace(/\s/g, '').length == 0) {
+        return true; // 스페이스가 있는 경우
+      } else {
+        return false; // 스페이스 없는 경우
+      }
     },
     onAnswerMessageReceived(payload) {
       const data = JSON.parse(payload.body);
