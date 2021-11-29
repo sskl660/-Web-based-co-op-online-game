@@ -1,0 +1,224 @@
+.ssazip-game-outer-container{
+  /* position: absolute; */
+  /* top: 110px;
+  left: 30px; */
+  width:1350px;
+  height: 800px;
+  display: inline-block;
+  /* justify-content: center; */
+}
+.ssazip-round-outer-container{
+  /* position: absolute; */
+  /* top: 110px; */
+  /* right: 30px; */
+  /* width:1350px; */
+  height: 800px;
+  display: inline-block;
+  /* justify-content: center; */
+}
+
+/* 좌측 게임컨테이너 */
+.ssazip-game-container {
+  /* position: absolute; */
+  /* top: 110px; */
+  width:1300px;
+  height:780px;
+  /* left: 30px; */
+  background-color: #F0E9CC ;
+  border-radius: 15px;
+  /* display: flex; */
+  text-align: center;
+}
+
+/* .t{
+
+} */
+.t{
+  position: absolute;
+}
+.ssazip-game-background{
+  /* position: relative;
+  top:2vh; */
+  /* left:2.6vh; */
+  background: url('../assets/ssazipjump-game-bg2.png') 0 center / 1200px repeat-x;
+  animation: movebg 5.9s linear infinite;
+  animation-play-state: paused;
+  background-size: 1200px 350px;
+  width: 1200px;
+  height: 350px;
+  margin-top: 30px;
+  display: inline-block;
+
+}
+@keyframes movebg {
+  0% {background-position: 0 center;}
+  100% {background-position:-1200px center;}
+}
+
+.ssazip-game-background2{
+  /* position: relative;
+  bottom:2vh;
+  left:2.6vh; */
+  background: url('../assets/ssazipjump-game-bg2.png') 0 center / 1200px repeat-x;
+  animation: movebg 5.9s linear infinite;
+  animation-play-state: paused;
+  background-size: 1200px 350px;
+  width: 1200px;
+  height: 350px;
+  margin-top: 10px;
+  display: inline-block;
+
+
+}
+@keyframes movebg2 {
+  0% {background-position: 0 center;}
+  100% {background-position:-1200px center;}
+}
+
+/* 게임결과표시 */
+.lose1{
+  position: absolute;
+  top: 100px;
+  left: 350px;
+  font-size: 280px;
+  color: red;
+  font-weight: bold;
+}
+.win1{
+  position: absolute;
+  top: 100px;
+  left: 450px;
+  font-size: 280px;
+  color: rgb(38, 0, 255);
+  font-weight: bold;
+}
+.lose2{
+  position: absolute;
+  top: 470px;
+  left: 350px;
+  font-size: 280px;
+  color: red;
+  font-weight: bold;
+}
+.win2{
+  position: absolute;
+  top: 470px;
+  left: 450px;
+  font-size: 280px;
+  color: rgb(38, 0, 255);
+  font-weight: bold;
+}
+
+.loser1 {
+  position: absolute;
+  top: 400px;
+  left: 130px;
+  width: 1200px;
+  font-size: 40px;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+.loser2 {
+  position: absolute;
+  top: 775px;
+  left: 130px;
+  width: 1200px;
+  font-size: 40px;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.wrap {text-align: center; margin-top: 20px;}
+.chatbox {animation: motion 0.3s linear 0s infinite alternate; margin-top: 0;}
+        
+@keyframes motion {
+	0% {margin-top: 0px;}
+	100% {margin-top: 10px;}
+}
+
+/* Round 표시 */
+.round1{
+  position: absolute;
+  top: 130px;
+  left: 130px;
+  width:1200px;
+  font-size: 200px;
+  color: red;
+  font-weight: bold;
+  opacity: 0;
+  -webkit-transition: all 0.5s ease-in-out;
+  -moz-transition: all 0.5s ease-in-out;
+  -ms-transition: all 0.5s ease-in-out;
+  -o-transition: all 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
+}
+.round2{
+  position: absolute;
+  top: 470px;
+  left: 130px;
+  width:1200px;
+  font-size: 200px;
+  color: red;
+  font-weight: bold;
+  opacity: 0;
+  -webkit-transition: all 0.5s ease-in-out;
+  -moz-transition: all 0.5s ease-in-out;
+  -ms-transition: all 0.5s ease-in-out;
+  -o-transition: all 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
+}
+
+
+
+/* 우측 라운드표시 컨테이너 */
+.ssazip-round-container {
+  /* position: absolute; */
+  /* top: 110px; */
+  width:21vw;
+  height:780px;
+  margin-left: 10px;
+  /* right: 1.5vw; */
+  background-color: #F0E9CC ;
+  border-radius: 15px;
+  display: inline-block;
+}
+/* 우측 라운드표시의 이너 컨테이너(간격) */
+.ssazip-round-inner-container {
+  width:19vw; 
+  height: 82vh;  
+  display:inline-block; 
+  margin-top:20px;
+
+}
+/* 개별 라운드표지판 */
+.ssazip-round-item {
+  width:18vw; 
+  height: 220px;    
+  display:inline-block; 
+  border-radius:10px;
+}
+/* 개별 라운드표지판 이너 테두리 */
+.ssazip-round-item-inner{
+  width:16vw; 
+  height:180px; 
+  border: 2px solid #FFFFFF; 
+  display:inline-block; 
+  margin-top:1.8vh; 
+  border-radius:10px;
+}
+.ssazip-round-item-title{
+  color:#FFFFFF;
+  margin-top: 1vh;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+
+
+
+.temp {
+  background-color: #fcc861;
+  height: 6vh;
+  margin-bottom: 1.5%;
+  padding-top: 8px;
+}
